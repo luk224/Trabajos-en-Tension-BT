@@ -295,7 +295,10 @@
     c.fov = pose.fov || 28; c.aspect = w / hh; c.near = 0.05; c.updateProjectionMatrix();
     c.position.fromArray(pose.p); c.lookAt(new THREE.Vector3().fromArray(pose.t)); c.updateMatrixWorld();
     var r = me.renderer; r.setScissorTest(true); r.setViewport(x, y, w, hh); r.setScissor(x, y, w, hh);
-    r.render(me.scene, c); r.setScissorTest(false); r.setViewport(0, 0, sr.width, sr.height);
+    if (me.escena.detVista) me.escena.detVista(true);
+    r.render(me.scene, c);
+    if (me.escena.detVista) me.escena.detVista(false);
+    r.setScissorTest(false); r.setViewport(0, 0, sr.width, sr.height);
   };
 
   P.pintaAuto = function () { this.bAuto.setAttribute('aria-pressed', this.auto ? 'true' : 'false'); };

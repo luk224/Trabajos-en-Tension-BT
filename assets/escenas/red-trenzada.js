@@ -159,7 +159,7 @@
       (AO.labAc || []).forEach(hide);   // las etiquetas de la acometida de A se sustituyen por las propias (más pequeñas)
       if (b2) { AO.cond.forEach(hide); hide(AO.halo); AO.ais.forEach(hide); hide(AO.ret); hide(AO.cota); AO.lab.forEach(hide); }
       if (b3) {
-        AO.cond.forEach(hide); hide(AO.halo); hide(AO.ret);
+        AO.cond.forEach(hide); hide(AO.halo); hide(AO.ret); AO.lab.forEach(hide);
         var aG = scene.children[scene.children.indexOf(G2) - 1];
         if (aG) aG.children.forEach(function (o) { if (o.isMesh && o.geometry && o.geometry.type === 'CylinderGeometry' && Math.abs(o.position.x - 20) < 0.01) hide(o); });
         var pl = mk(geo('polo', function () { return new T.CylinderGeometry(0.13, 0.22, 8.6, 12); }), M('poste'), XF, 4.3, 0, G2);
@@ -185,7 +185,7 @@
         e.cfg = cfg; X.ends.push(e); return e;
       }
       X.brush = grp(G2, 0, 0, 0); X.brush.visible = false; mk(box(0.3, 0.06, 0.12), MB('cota'), 0, 0, 0, X.brush); mk(cylU(0.02, 6), M('metal'), 0.3, 0.05, 0, X.brush).rotation.z = PI / 2;
-      X.pings = [0, 1].map(function () { var p = mk(sph(0.5, 12, 8), Mt('marca', 0.35), 0, 0, 0, G2); p.visible = false; return p; });
+      X.pings = [0, 1].map(function () { var p = mk(geo('anillo', function () { return new T.TorusGeometry(0.4, 0.035, 8, 28); }), MB('marca'), 0, 0, 0, G2); p.visible = false; return p; });
 
       if (b1 || b2) {
         /* acometida de cable trenzado: haz de 4 conductores desde la CGP hasta el punto de trabajo */
@@ -206,7 +206,7 @@
         for (i = 0; i < 4; i++) { var tm = conHalo(tubo(X.xs.length, 0.03, M(FA[i], { side: T.DoubleSide })), i); G2.add(tm); X.main.push(tm); }
         [-20, 0, 20].forEach(function (xx) { mk(box(0.16, 0.22, 0.3), M('cgp'), xx, 6.95 + (xx === 0 ? 0 : 0.0), 0.28, G2); });
         X.cunas = [0.68, 2.05].map(function (xx, q) { var c = mk(box(0.11, 0.36, 0.14), M('marca'), xx, 6.9, ZM, G2); c.rotation.z = q ? -0.2 : 0.2; c.visible = false; return c; });
-        X.tela = mk(geo('tela2', function () { return new T.PlaneGeometry(2.6, 1.0); }), Mt('tela', 0.55), 1.4, 6.85, 0.27, G2); X.tela.visible = false;
+        X.tela = mk(geo('tela2', function () { return new T.PlaneGeometry(1.5, 0.9); }), Mt('tela', 0.6), 1.37, 6.5, 0.3, G2); X.tela.visible = false;
         X.labM = FA.map(function (f, q) { var s = etq(f, f, 0.3, 0.15); s.visible = false; G2.add(s); return s; });
         X.labA2 = FA.map(function (f, q) { var s = etq(f, f, 0.3, 0.15); s.visible = false; G2.add(s); return s; });
       }
@@ -219,7 +219,11 @@
           for (var q = 0; q < 4; q++) {
             var tb = conHalo(tubo(xs.length, 0.03, M(FA[q], { side: T.DoubleSide })), q); G2.add(tb); X.conv[d[2]].push(tb);
             tuboSet(tb, xs.map(function (x2) { return V(x2, yB(q, x2), ZC); }));
-            if (d[2] === 'S') { var gh = tubo(xs.length, 0.03, Mt(FA[q], 0.28)); G2.add(gh); gh.visible = false; X.conv.G.push(gh); tuboSet(gh, xs.map(function (x2) { return V(x2, yB(q, x2), ZC); })); }
+            if (d[2] === 'S') {   // tramo retirado: trazo discontinuo (segmentos) + puntas cortadas colgando, como en la p. 64
+              var gh = grp(G2, 0, 0, 0); gh.visible = false; X.conv.G.push(gh);
+              for (var xd = XC1 + 0.15; xd < XC2 - 0.5; xd += 0.8) { var dm = mk(cylU(0.03, 6), Mt(FA[q], 0.7), 0, 0, 0, gh); place(dm, V(xd, yB(q, xd), ZC), V(xd + 0.5, yB(q, xd + 0.5), ZC)); }
+              [[XC1, 1], [XC2, -1]].forEach(function (c) { var tp = mk(cylU(0.03, 6), M(FA[q]), 0, 0, 0, gh); place(tp, V(c[0], yB(q, c[0]), ZC), V(c[0] + 0.06 * c[1], yB(q, c[0]) - 0.32, ZC + 0.04)); });
+            }
           }
         });
         /* apoyo derecho: aisladores */
@@ -283,11 +287,11 @@
           tuboSet(e.tubes[i], P);
         }
         e.tubes[i].visible = vis;
-        _d.subVectors(P[9], P[8]).normalize(); var dir = _d.clone();
+        var dir = P[9].clone().sub(P[7]).normalize();   // tangente local del cable en su punta
         var dv = e.ded[i], en = ss(d); dv.visible = vis && d > 0.01;
-        if (dv.visible) { place(dv, E.clone().addScaledVector(dir, 0.02), E.clone().addScaledVector(dir, 0.02 + 0.16 * en)); dv.scale.x = dv.scale.z = Math.max(0.001, en); }
+        if (dv.visible) { place(dv, E.clone().addScaledVector(dir, -0.15 * en), E.clone().addScaledVector(dir, 0.03)); dv.scale.x = dv.scale.z = Math.max(0.001, en); }   // capuchón coaxial: cubre la punta, abertura hacia el cable
         var bv = e.bare[i]; bv.visible = vis && d < 0.9 && s < 0.65;
-        if (bv.visible) place(bv, E, E.clone().addScaledVector(dir, 0.11));
+        if (bv.visible) place(bv, E.clone().addScaledVector(dir, -0.02), E.clone().addScaledVector(dir, 0.09));
         var cv = e.con[i], cs = ss(seg(s, 0.62, 0.75)); cv.visible = vis && cs > 0.01; cv.position.copy(J); cv.scale.setScalar(Math.max(0.001, cs));
         var pv = e.pro[i], ps = ss(seg(s, 0.75, 1)); pv.visible = vis && ps > 0.01; pv.position.copy(J); pv.scale.set(Math.max(0.001, ps * 1.5), Math.max(0.001, ps), Math.max(0.001, ps));
         var lb = e.labA[i]; lb.visible = X.b1 && st.lm > 0.5 && s < 0.1; lb.position.set(J.x + 0.55, J.y - 0.06, 0.9);
@@ -306,7 +310,7 @@
         X.tela.visible = s.tela2 > 0.01; X.tela.scale.setScalar(Math.max(0.001, ss(s.tela2)));
         for (i = 0; i < 4; i++) {
           X.labM[i].visible = s.lm > 0.5; X.labM[i].position.set(XB2[i], ym(XB2[i]) + 0.75, 0.82);
-          X.labA2[i].visible = s.la > 0.5; X.labA2[i].position.set(XB2[i] - 0.05, 5.85, 1.02);
+          X.labA2[i].visible = s.la > 0.5; X.labA2[i].position.set(XB2[i] + 0.9, 5.7, 1.02);
         }
       }
       if (X.b3) {
@@ -340,8 +344,8 @@
       if (a === 'cepilla') {
         var J = X.ends[tr.e].J[tr.i]; X.brush.visible = true; X.brush.position.set(J.x + 0.15 * Math.sin(t * PI * 6), J.y + 0.07, J.z + 0.08);
       } else if (a === 'ping') {
-        var pts = tr.k === 'ext' ? [V(1.3, 6.9, 0.7), V(XF - 1.3, 6.9, 0.7)] : [V(XF / 2, 6.0, 0.9)], r = 0.55 + 0.45 * Math.abs(Math.sin(t * PI * 3));
-        pts.forEach(function (p, q) { var m = X.pings[q]; m.visible = true; m.position.copy(p); m.scale.setScalar(r * (tr.k === 'ext' ? 1 : 2)); });
+        var pts = tr.k === 'ext' ? [V(1.3, 7.7, 0.9), V(XF - 1.3, 7.7, 0.9)] : [V(XF / 2, 7.3, 0.9)], r = 0.55 + 0.45 * Math.abs(Math.sin(t * PI * 3));
+        pts.forEach(function (p, q) { var m = X.pings[q]; m.visible = true; m.position.copy(p); m.scale.setScalar(r * (tr.k === 'ext' ? 1 : 1.3)); });
       } else if (a === 'dedP') {
         X.ends.forEach(function (e) { e.ded.forEach(function (d, q) { if (d.visible) { var f = 1 + 0.6 * Math.abs(Math.sin(t * PI * 3)); d.scale.x = d.scale.z = f; } }); });
       } else if (a === 'rN' && X.b2) {
@@ -360,6 +364,7 @@
     var A = {
       conectaT: function (t, p) {
         var S = st.ends[p.e || 0], fs = p.fases, n = fs.length; armReq = true;
+        if (X.b2) st.lm = st.la = 0;   // las etiquetas se retiran al empezar a conectar
         fs.forEach(function (f, k) { var w = seg(t, k / n, (k + 1) / n), i = fi(f); if (p.inv) desconecta(S, i, w); else conecta(S, i, w); if (X.b1) ventana(0, i, w, p.inv); });
       },
       ciclo: function (t, p, act) {
@@ -373,15 +378,15 @@
           else if (m === 'ext2') { S.chk[i] = w > 0.2 ? 1 : 0; S.d[i] = 1 - ss(seg(w, 0.1, 0.3)); S.s[i] = ss(seg(w, 0.3, 1)); }
         });
       },
-      dedales: function (t, p, act) { st.bun = ss(seg(t, 0, 0.4)); if (act && t > 0.4) st.tr = { a: 'dedP', t: seg(t, 0.4, 1) }; },
+      dedales: function (t, p, act) { st.bun = 1; if (act && t > 0.2) st.tr = { a: 'dedP', t: seg(t, 0.2, 1) }; },
       posiciona: function (t) { st.bun = 1; st.hB = lerp(HB0, 0, ss(t)); },
       cunas: function (t) { st.zs = ss(seg(t, 0.1, 0.6)); st.ci = ss(seg(t, 0, 0.5)); st.tela2 = ss(seg(t, 0.5, 1)); armReq = true; },
       quitaCunas: function (t) { st.tela2 = 1 - ss(seg(t, 0, 0.4)); st.ci = st.zs = 1 - ss(seg(t, 0.3, 1)); armReq = true; },
       etiq2: function (t, p, act) { st.lm = st.la = t > 0.05 ? 1 : 0; if (act) st.tr = { a: 'rN', t: t }; },
-      resaltaN2: function (t, p, act) { st.lm = st.la = 1; if (act) st.tr = { a: 'rN', t: t }; },
+      resaltaN2: function (t, p, act) { if (act) { st.lm = st.la = 1; st.tr = { a: 'rN', t: t }; } },
       aislarFar: function (t) { [3, 2, 1, 0].forEach(function (i, k) { st.pF[i] = ss(seg(t, k * 0.2, k * 0.2 + 0.3)); }); st.telaF = ss(seg(t, 0.85, 1)); },
       quitarFar: function (t) { for (var k = 0; k < 4; k++) st.pF[k] = 1 - ss(seg(t, 0.2 + k * 0.17, 0.2 + k * 0.17 + 0.29)); st.telaF = 1 - ss(seg(t, 0, 0.22)); },
-      corta: function (t) { st.ret3 = ss(seg(t, 0, 0.4)); st.cut = t > 0.55 ? 1 : 0; armReq = true; },
+      corta: function (t) { st.labF = 0; st.ret3 = ss(seg(t, 0, 0.4)); st.cut = t > 0.55 ? 1 : 0; armReq = true; },
       etiquetas: function (t) { st.lm = t > 0.05 ? 1 : 0; fwd.push({ a: 'etiquetas' }); },
       ping: function (t, p, act) { if (act) st.tr = { a: 'ping', k: p.k, t: t }; }
     };
@@ -403,18 +408,18 @@
 
     /* ---------- cámaras ---------- */
     var camaras = Object.assign({}, base.camaras, {
-      zona2: { p: [3.9, 7.5, 5.4], t: [1.4, 6.75, 0.5] },
+      zona2: { p: [2.6, 6.7, 6.4], t: [1.45, 6.55, 0.5] },
       ext1: { p: [3.8, 6.8, 6.0], t: [1.3, 6.4, 0.6] },
-      vano: { p: [XF / 2, 7.4, 25], t: [XF / 2, 6.4, 0.6] },
+      vano: { p: [XF / 2, 7.0, 19], t: [XF / 2, 6.6, 0.6] },
       ext2: { p: [XF - 3.4, 8.0, 6.0], t: [XF - 1.3, 6.9, 0.6] },
       /* cámaras de primer plano para los planos de detalle (campo `det` de los pasos) */
       'det-cruceta': { p: [1.9, 8.1, 2.3], t: [0.3, 7.6, 0.3] },
       'det-dedal': { p: [0.3, 6.9, 2.0], t: [1.3, 6.95, 0.7] },
       'det-conexion': { p: [1.7, 8.2, 1.4], t: [1.1, 7.95, 0.5] },
-      'det-cunas': { p: [2.4, 7.3, 1.9], t: [1.4, 6.9, 0.45] },
-      'det-dedal2': { p: [2.5, 6.6, 1.9], t: [1.5, 6.5, 0.8] },
-      'det-conexion2': { p: [1.8, 7.2, 1.3], t: [1.15, 6.9, 0.5] },
-      'det-dedal3': { p: [2.5, 6.6, 2.0], t: [1.2, 6.5, 0.7] },
+      'det-cunas': { p: [3.0, 7.6, 1.7], t: [1.5, 6.9, 0.45] },
+      'det-dedal2': { p: [1.5, 6.0, 2.3], t: [1.45, 6.6, 0.65] },
+      'det-conexion2': { p: [2.5, 7.3, 1.1], t: [1.3, 6.9, 0.5] },
+      'det-dedal3': { p: [1.7, 6.4, 3.2], t: [1.35, 6.5, 0.8] },
       'det-corte': { p: [3.2, 7.8, 1.8], t: [2.0, 7.4, 0.42] },
       'det-ext2': { p: [XF - 2.3, 8.2, 1.4], t: [XF - 1.3, 7.8, 0.45] }
     });

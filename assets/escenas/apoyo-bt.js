@@ -31,18 +31,18 @@
     function kern(x) { var k = Math.max(0, 1 - Math.abs(x) / 3.5); return k * k; }
     function yC(i, x, hh) { var u = Math.min(1, Math.abs(x) / LTOT); return YF[i] - 4 * SAG * u * (1 - u) + (hh || 0) * kern(x); }
     function ladX(y) { return LB.x + (LT.x - LB.x) * (y / LT.y); }
-    var SIDE = 1, AY0 = -1.3, XW = 0.7, YFEET = 0;
+    var SIDE = 1, AY0 = -1.3, XW = 0.7, YFEET = 0, FOOT = [2.55, 0.8];
 
     /* ---------- estado ---------- */
     var opt = { fin: false, acometida: true, desconexion: false, sust: false, izq: false };
     /* opt.izq: escalera a la izquierda y derivación pegada al apoyo, como en el esquema de la p. 44 (A.1) */
     function lado() {
       SIDE = opt.izq ? -1 : 1; AY0 = opt.izq ? 1.3 : -1.3; XJ = opt.izq ? 0.8 : 1.3;
-      LB.set(2.0 * SIDE, 0, 0.22); LT.set(0.18 * SIDE, 6.9, 0.22); XW = 0.7 * SIDE;
+      LB.set(2.0 * SIDE, 0, 0.22); FOOT = [LB.x + 0.7 * SIDE, 1.1]; LT.set(0.18 * SIDE, 6.9, 0.22); XW = 0.7 * SIDE;
       for (var k = 0; k < 6; k++) { YFEET = yC(3, XW, 0) - HCOT - HEAD; XW = ladX(YFEET); }
       var cs = camaras, wx = 2.9 * SIDE; if (!cs) return;
       cs.dDedal.t = [XJ, YF[0], ZC]; cs.dDedal.p = [XJ + 0.6, YF[0] - 0.05, 1.2]; cs.dDedal2.t = [XJ, YF[1], ZC]; cs.dDedal2.p = [XJ + 0.6, YF[1] - 0.05, 1.2];
-      cs.dSujecion.t = [LT.x, 6.8, 0.2]; cs.dSujecion.p = [LT.x + 0.9 * SIDE, 6.9, 1.5];
+      cs.dSujecion.t = [LT.x * 0.5, 6.78, 0.15]; cs.dSujecion.p = [LT.x * 0.5 + 0.75 * SIDE, 6.95, 0.95];
       cs.dObjetos.t = [wx, 1.28, 0.9]; cs.dObjetos.p = [wx - SIDE * 1.5, 1.45, 1.45]; cs.objetos.t = [(wx + AY0) * 0.5, 1.0, 1.3]; cs.objetos.p = [(wx + AY0) * 0.5 + 1.5, 4.8, 6.6];
       cs.dObjetosAy.t = [AY0, 1.3, 1.3]; cs.dObjetosAy.p = [AY0 + 0.3, 1.45, -0.3];
     }
@@ -163,6 +163,16 @@
       mk(geo('dedalRim', function () { var q = new T.TorusGeometry(0.055, 0.009, 6, 14); q.rotateX(PI / 2); return q; }), M('aisl'), 0, -0.13, 0, g);
       return g;
     }
+    /* manguito aislante ajustado (A.2: sobre el conductor expuesto): cilindro corto coaxial con el conductor */
+    function manguito() {
+      var g = new T.Group();
+      mk(geo('mangCil', function () { return new T.CylinderGeometry(0.05, 0.05, 0.24, 14, 1, true); }), Mt('aisl', 0.75), 0, 0, 0, g);
+      var rim = geo('mangRim', function () { var q = new T.TorusGeometry(0.05, 0.01, 6, 14); q.rotateX(PI / 2); return q; });
+      mk(rim, M('aisl'), 0, 0.12, 0, g); mk(rim, M('aisl'), 0, -0.12, 0, g);
+      return g;
+    }
+    var _qd = V(0, 0, 0);
+    function alinea(g, pos, dir) { g.position.copy(pos); g.quaternion.setFromUnitVectors(UP, _qd.copy(dir).normalize()); } // eje local +y del grupo → dir
     /* polea: garganta, placas laterales, eje y gancho */
     function polea(par) {
       mk(geo('polRueda', function () { var q = new T.TorusGeometry(0.06, 0.016, 8, 18); q.rotateY(PI / 2); return q; }), MM('halo'), 0, 0, 0, par);
@@ -325,6 +335,7 @@
         O.condPts.push(xs.map(function () { return V(0, 0, 0); }));
       }
       O.condH = [null, null, null, null];
+      O.tip = []; if (opt.fin) for (i = 0; i < 4; i++) { var tp = dedal(); tp.visible = false; G.add(tp); O.tip.push(tp); }
       O.halo = tubo(xs.length, 0.042, new T.MeshBasicMaterial({ color: pal('halo'), side: T.BackSide })); O.halo.material.userData.k = 'halo'; mats['Kh'] = O.halo.material; G.add(O.halo);
       /* postes lejanos */
       [-LTOT, LTOT].forEach(function (x) { if (opt.fin && x < 0) return; mk(cylU(0.13, 8), M('poste'), x, POLE_H / 2, 0, G).scale.set(1, POLE_H, 1); });
@@ -352,7 +363,9 @@
       O.tela = mk(box(0.5, 1.9, 0.45), Mt('tela', 0.38), 0, 7.6, -0.02, G); O.tela.visible = false;
       /* retención, polea, cuerda, rana y aparejo */
       O.ret = mk(box(0.1, 0.1, 0.07), M('metal'), 0, YF[IS], ZC, G);
-      O.dedS = dedal(); O.dedS.position.set(0.3, YF[IS], ZC); G.add(O.dedS); O.dedS.visible = false;
+      O.dedS = manguito(); G.add(O.dedS); O.dedS.visible = false;
+      O.rods = [mk(cylU(0.035, 8), M('esc'), 0, 0, 0, G), mk(cylU(0.035, 8), M('esc'), 0, 0, 0, G)]; O.rods.forEach(function (r) { r.visible = false; });
+      if (!opt.acometida) { var bj = mk(cylU(0.022, 6), M('texto'), -0.1, 3.6, 0.15, G); bj.scale.set(1, 6.8, 1); }
       O.pul = grp(G, 0, 0, 0); O.pul.visible = false;
       polea(O.pul);
       O.rope = tubo(24, 0.02, M('texto', { side: T.DoubleSide })); O.rope.visible = false; G.add(O.rope);
@@ -367,7 +380,14 @@
       var top = V(LT.x - LB.x, LT.y, 0), base = V(0, 0, 0), L = top.length();
       [-0.2, 0.2].forEach(function (dz) { var r = mk(cylU(0.035, 6), M('esc'), 0, 0, 0, O.esc); place(r, V(0, 0, dz), V(top.x, top.y, dz)); });
       var nr = Math.floor(L / 0.45); for (k = 1; k <= nr; k++) { var f = k / (nr + 1); mk(cylZ(0.022, 0.4, 6), M('esc'), top.x * f, top.y * f, 0, O.esc); }
-      O.sujeta = mk(cylU(0.16, 12), M('marca'), LT.x, LT.y - 0.15, 0, G); O.sujeta.scale.set(1, 0.07, 1); O.sujeta.visible = false;
+      [-0.2, 0.2].forEach(function (dz) { mk(box(0.2, 0.1, 0.12), M('ropa2'), 0.22 * SIDE, 0.05, dz, O.esc); var rc = mk(cylU(0.016, 6), M('guante'), 0, 0, 0, O.esc); place(rc, V(0, 0.3, dz), V(0.6 * SIDE, 0.03, 0)); });
+      mk(cylU(0.03, 8), M('ropa2'), 0.6 * SIDE, 0.06, 0, O.esc).scale.set(1, 0.12, 1);
+      O.amarre = mk(cylU(0.016, 6), M('marca'), 0, 0, 0, G); O.amarre.visible = false;
+      O.amAro = mk(geo('amAro', function () { var q = new T.TorusGeometry(0.17, 0.02, 6, 20); q.rotateX(PI / 2); return q; }), M('marca'), 0, 0, 0, G); O.amAro.visible = false;
+      O.sujeta = grp(G, 0, LT.y - 0.12, 0); O.sujeta.visible = false;
+      mk(geo('sujAro', function () { var q = new T.TorusGeometry(0.17, 0.03, 8, 22); q.rotateX(PI / 2); return q; }), M('guante'), 0, 0, 0, O.sujeta);
+      mk(box(0.1, 0.09, 0.06), MM('metal'), 0.1 * SIDE, 0, 0.14, O.sujeta);
+      (function () { var a = mk(cylU(0.022, 6), M('guante'), 0, 0, 0, O.sujeta); place(a, V(0.1 * SIDE, 0, 0.14), V(LT.x, 0, 0.22)); })();
       /* trabajadores */
       O.w = persona('casco'); G.add(O.w.g); O.mItems = llevaMetal(O.w); O.w.g.rotation.y = -SIDE * PI / 2;
       O.ay = persona('casco2'); G.add(O.ay.g); O.mItems = O.mItems.concat(llevaMetal(O.ay));
@@ -388,7 +408,7 @@
         mk(box(0.9, 2.0, 0.04), M('ropa2'), 7.2, 1.0, 2.02, G);
         for (i = 0; i < 4; i++) {
           var cb = tubo(14, 0.016, M(FA[i], { side: T.DoubleSide })); G.add(cb); O.cab.push(cb); O.cabPts.push(Array.apply(null, Array(14)).map(function () { return V(0, 0, 0); }));
-          var dd = dedal(); dd.position.set(O.J[i].x, O.J[i].y - 0.02, O.J[i].z); G.add(dd); dd.visible = false; O.dedal.push(dd);
+          var dd = dedal(); G.add(dd); dd.visible = false; O.dedal.push(dd);
           var cn = mk(box(0.075, 0.05, 0.06), MM('metal'), O.J[i].x, O.J[i].y, O.J[i].z, G); cn.visible = false; (O.conn = O.conn || []).push(cn);
           var dv = mk(cylU(0.045, 8), Mt('aisl', 0.45), 0, 0, 0, G); dv.visible = false; O.der.push(dv);
         }
@@ -474,7 +494,7 @@
     function defaults() {
       var d = opt.desconexion ? 1 : 0;
       return { tr: null, vial: 0, valla: 0, verif: 0, guardar: 0, metal: 0, epi: 0, bolsa: 0,
-        ay: { x: AY0, z: 1.3, ry: PI, w: 0, tira: 0 }, cl: 0, sujeta: 0, climb: 0, arm: 0, cota: 0,
+        ay: { x: AY0, z: 1.3, ry: PI, w: 0, tira: 0 }, ayK: {}, cl: 0, sujeta: 0, climb: 0, arm: 0, cota: 0,
         p: [0, 0, 0, 0], open: [0, 0, 0, 0], tela: 0, cgp: { door: 0, fus: 1, seal: 0, plE: 0, plI: 0 },
         s: [d, d, d, d], ded: [d, d, d, d], labAc: 0, labP: opt.acometida ? 0 : 1, dobl: 0, doblP: 0,
         h: 0, ret: 1, pul: 0, rope: 0, ten: 0, rana: 0, pull: 0, sust: 0, bolsaT: 0 };
@@ -488,9 +508,16 @@
       /* conductores: solo se reconstruye el que cambia */
       for (i = 0; i < 4; i++) {
         var hh = (i === IS) ? s.h : 0;
-        if (chg('c' + i, hh)) { var P = O.condPts[i]; for (k = 0; k < O.xs.length; k++) P[k].set(O.xs[k], yC(i, O.xs[k], hh), ZC); tuboSet(O.cond[i], P); if (i === 2) tuboSet(O.halo, P); }
+        if (chg('c' + i, hh)) { var P = O.condPts[i]; for (k = 0; k < O.xs.length; k++) P[k].set(O.xs[k], yC(i, O.xs[k], hh), ZC); tuboSet(O.cond[i], P); if (i === 2) tuboSet(O.halo, P);
+          if (O.tip[i]) alinea(O.tip[i], V(P[0].x, P[0].y, P[0].z).addScaledVector(V(P[0].x - P[1].x, P[0].y - P[1].y, P[0].z - P[1].z).normalize(), 0.07), V(P[0].x - P[1].x, P[0].y - P[1].y, P[0].z - P[1].z)); }
+        if (O.tip[i]) { O.tip[i].visible = s.p[i] > 0.5; O.tip[i].scale.setScalar(Math.max(0.001, ss(seg(s.p[i], 0.5, 1)))); }
       }
-      O.dedS.visible = !opt.acometida && s.p[3] > 0.9 && s.p[IS] < 0.5; O.dedS.position.set(0.3, yC(IS, 0.3, s.h) - 0.02, ZC);
+      var expu = !opt.acometida && s.p[3] > 0.9 && s.p[IS] < 0.5;
+      O.dedS.visible = expu; if (expu) { var xm = opt.fin ? -0.15 : 0.45, dy = (yC(IS, xm + 0.02, s.h) - yC(IS, xm - 0.02, s.h)) / 0.04; alinea(O.dedS, V(xm, yC(IS, xm, s.h), ZC), V(1, dy, 0).normalize().applyAxisAngle(V(0, 0, 1), 0)); O.dedS.quaternion.setFromUnitVectors(UP, V(1, dy, 0).normalize()); }
+      O.rods.forEach(function (r, q) {
+        var xa = q ? -2.0 : 0.75, xb = q ? -0.55 : 2.2; if (opt.fin && q) { r.visible = false; return; }
+        r.visible = expu; if (expu) place(r, V(xa, yC(IS, xa, s.h), ZC), V(xb, yC(IS, xb, s.h), ZC));
+      });
       O.ret.visible = s.ret > 0.5; O.ret.position.set(0, YF[IS], ZC);
       /* aislador viejo/nuevo */
       var ov = O.ais[IS], a0 = ss(seg(s.sust, 0, 0.5)), a1 = ss(seg(s.sust, 0.5, 1));
@@ -526,8 +553,9 @@
             var E = V(lerp(J2.x, C2.x, f0) + 0.25 * (1 - sv), lerp(J2.y, C2.y, f0) - 0.75 * (1 - sv), lerp(J2.z, C2.z, f0) + 0.15 * (1 - sv)), pp = O.cabPts[i];
             for (k = 0; k < pp.length; k++) { var u = k / (pp.length - 1); pp[k].set(lerp(E.x, C2.x, u), lerp(E.y, C2.y, u) - 0.3 * 4 * u * (1 - u), lerp(E.z, C2.z, u)); }
             tuboSet(O.cab[i], pp);
+            var dv0 = V(pp[0].x - pp[1].x, pp[0].y - pp[1].y, pp[0].z - pp[1].z).normalize(); alinea(O.dedal[i], V(pp[0].x, pp[0].y, pp[0].z).addScaledVector(dv0, 0.07), dv0);
           }
-          if (O.conn) O.conn[i].visible = s.s[i] > 0.5; O.dedal[i].visible = s.ded[i] > 0.01; O.dedal[i].scale.setScalar(Math.max(0.001, ss(s.ded[i])));
+          if (O.conn) O.conn[i].visible = s.s[i] > 0.95; O.dedal[i].visible = s.ded[i] > 0.01; O.dedal[i].scale.setScalar(Math.max(0.001, ss(s.ded[i])));
           O.labAc[i].visible = s.labAc > 0.01; O.labAc[i].scale.set(0.5 * ss(s.labAc), 0.25 * ss(s.labAc), 1);
         }
         var c = s.cgp; O.door.rotation.y = -c.door * 1.9;
@@ -561,6 +589,8 @@
       var ay = O.ay, ax = s.ay;
       ay.g.position.set(ax.x, 0, ax.z); ay.g.rotation.y = ax.ry;
       ay.pose({ visor: lerp(-1.6, 0, epi), guantes: epi > 0.4, cinto: false, w: ax.w, armL: -0.95 * s.ten - 0.9 * ax.tira, armR: -0.95 * s.ten - 0.9 * ax.tira });
+      var amOn = s.climb >= 0.999 && s.cl > 0.5 && s.epi > 0.7; O.amarre.visible = O.amAro.visible = amOn;
+      if (amOn) { var wy = w.g.position.y + 0.93, an = V(0.15 * SIDE, wy + 0.3, 0.1); place(O.amarre, V(w.g.position.x, wy, w.g.position.z), an); O.amAro.position.set(0, an.y, 0); }
       /* escalera y cota */
       O.esc.visible = s.cl > 0.01; O.esc.scale.setScalar(Math.max(0.001, ss(s.cl))); O.sujeta.visible = s.sujeta > 0.5 && s.cl > 0.5;
       var sc0 = Math.max(0.001, ss(s.cota)); O.cota.visible = s.cota > 0.01; O.cota.scale.set(1, sc0, 1); O.cota.position.y = (YFEET + HEAD) * (1 - sc0);
@@ -590,7 +620,7 @@
       pedir();
     }
     function drawMetal() {
-      var m = st.metal; O.bandeja.visible = m > 0.03; G.updateMatrixWorld(true);
+      var m = st.metal; O.bandeja.visible = m > 0.03 && st.guardar < 0.5; G.updateMatrixWorld(true);
       O.mItems.forEach(function (r, k) {
         var e = ss(seg(m, k * 0.028, k * 0.028 + 0.55)), o = r.o, sl = V(-0.24 + (k % 6) * 0.095, 0.075, -0.1 + Math.floor(k / 6) * 0.1);
         if (e <= 0.0005) { if (o.parent !== r.home) r.home.add(o); o.position.copy(r.lp); o.rotation.set(r.lr.x, r.lr.y, r.lr.z); }
@@ -638,6 +668,11 @@
     var U = function (t, p) { return p && p.inv ? 1 - t : t; };
     /* ventana de trabajo: solo la fase que se trata (k de n, de N a T) abre un hueco en su protección; las demás siguen cubiertas */
     function ventanas(t, n) { for (var k = 0; k < 4; k++) { var w = k < n ? seg(t, k / n, (k + 1) / n) : 0; st.open[k] = (w > 0 && w < 1) ? ss(seg(w, 0, 0.12)) * (1 - ss(seg(w, 0.88, 1))) : 0; } }
+    function ayTo(key, u, b, ry) { // el ayudante se desplaza desde donde estaba al empezar el paso (determinista)
+      var K = st.ayK; if (!K[key]) K[key] = { x: st.ay.x, z: st.ay.z };
+      var a = K[key], q = ss(u); st.ay.x = lerp(a.x, b[0], q); st.ay.z = lerp(a.z, b[1], q);
+      st.ay.ry = u >= 1 ? ry : (Math.abs(b[0] - a.x) + Math.abs(b[1] - a.z) > 0.01 ? Math.atan2(b[0] - a.x, b[1] - a.z) : st.ay.ry); st.ay.w = u < 1 && u > 0 ? u * 14 : 0;
+    }
     var A = {
       identificar: function (t, p, act) { if (act) st.tr = { a: 'identificar', t: t }; },
       clima: function (t, p, act) { if (act) st.tr = { a: 'clima', t: t }; },
@@ -653,7 +688,7 @@
       metal: function (t) { st.metal = t; },
       epi: function (t) { st.epi = t; },
       desecho: function (t) { st.bolsaT = t; },
-      guardar: function (t) { st.arm = 0; st.guardar = t; st.cl = 1 - ss(t); st.sujeta = t < 0.2 ? 1 : 0; },
+      guardar: function (t) { ayTo('gua', seg(t, 0, 0.5), [AY0 < 0 ? -0.2 : 0.4, 2.6], PI); st.ay.tira = 0; st.arm = 0; st.guardar = t; st.cl = 1 - ss(t); st.sujeta = t < 0.2 ? 1 : 0; },
       ayVa: function (t, p) {
         var q = ss(t), dx = p.b[0] - p.a[0], dz = p.b[1] - p.a[1];
         st.ay.x = lerp(p.a[0], p.b[0], q); st.ay.z = lerp(p.a[1], p.b[1], q);
@@ -661,7 +696,7 @@
       },
       polea: function (t, p) {
         st.pul = ss(seg(t, 0, 0.5)); if (p.cuerda) st.rope = t > 0.4 ? 1 : 0;
-        if (p.ayuda) A.ayVa(t, { a: [AY0, 1.3], b: [0.55, 1.5], ry: PI });
+        if (p.ayuda) ayTo('pol', t, [0.55, 1.5], PI);
         st.arm = 0.0;
       },
       tensar: function (t) { st.ten = ss(t); },
@@ -671,20 +706,20 @@
       quitaEquipo: function (t, p) { st.rope = t < 0.6 ? 1 : 0; st.ten = 1 - ss(seg(t, 0, 0.6)); st.pul = 1 - ss(seg(t, 0.5, 1)); st.rana = 1 - ss(seg(t, 0.2, 0.7)); st.pull = st.rana > 0.01 ? 1 : 0; if (t >= 1) { st.pull = 0; } },
       destensar: function (t) {
         st.rope = t > 0.1 ? 1 : 0; st.rana = ss(seg(t, 0, 0.2));
-        A.ayVa(seg(t, 0, 0.3), { a: [AY0, 1.3], b: [0.55, 1.5], ry: PI });
+        ayTo('des2', seg(t, 0, 0.3), [0.55, 1.5], PI);
         st.ten = ss(seg(t, 0.3, 0.6)); st.pull = ss(seg(t, 0.4, 0.8)); st.ret = t < 0.35 ? 1 : 0;
         st.h = HFIN * ss(seg(t, 0.7, 1)); st.arm = 0.5;
       },
       cgpAbre: function (t) { st.cgp.door = ss(seg(t, 0.55, 1)); A.ayVa(seg(t, 0, 0.6), { a: [AY0, 1.3], b: [CG.x, 2.85], ry: PI }); },
-      cgpFus: function (t, p) { st.cgp.fus = p.inv ? ss(seg(t, 0.3, 1)) : 1 - ss(t); if (p.inv) { st.cgp.door = ss(seg(t, 0, 0.3)); st.cgp.seal = 0; } st.ay.tira = 0.5 * Math.sin(t * PI); },
+      cgpFus: function (t, p) { if (p.inv) ayTo('cgpF', seg(t, 0, 0.35), [CG.x, 2.85], PI); st.cgp.fus = p.inv ? ss(seg(t, 0.3, 1)) : 1 - ss(t); if (p.inv) { st.cgp.door = ss(seg(t, 0, 0.3)); st.cgp.seal = 0; } if (!p.inv) st.ay.tira = 0.5 * Math.sin(t * PI); else st.ay.tira = 0.5 * Math.sin(seg(t, 0.35, 1) * PI); },
       cgpCierra: function (t) { st.cgp.door = 1 - ss(seg(t, 0, 0.5)); st.cgp.seal = t > 0.6 ? 1 : 0; },
       senalCgp: function (t) {
         st.cgp.door = ss(seg(t, 0, 0.2)) * 0.65 * (1 - ss(seg(t, 0.5, 0.7)));
         st.cgp.plI = t > 0.2 ? 1 : 0; st.cgp.plE = ss(seg(t, 0.7, 1));
       },
       quitaSenal: function (t) { st.cgp.plE = 1 - ss(t); st.cgp.plI = 0; },
-      asciende: function (t) { st.cl = ss(seg(t, 0, 0.12)); st.climb = seg(t, 0.12, 1); st.sujeta = t > 0.9 ? 1 : 0; st.cota = ss(seg(t, 0.9, 1)); },
-      descenso: function (t) { st.arm = 0; st.cl = 1; st.sujeta = 1; st.climb = 1 - ss(t); st.cota = 0; },
+      asciende: function (t) { ayTo('asc', seg(t, 0, 0.25), FOOT, -SIDE * PI / 2); st.ay.tira = 0.9 * ss(seg(t, 0.25, 0.4)); st.cl = ss(seg(t, 0, 0.12)); st.climb = seg(t, 0.12, 1); st.sujeta = t > 0.9 ? 1 : 0; st.cota = ss(seg(t, 0.9, 1)); },
+      descenso: function (t) { ayTo('desc', seg(t, 0, 0.3), FOOT, -SIDE * PI / 2); st.ay.tira = 0.9; st.arm = 0; st.cl = 1; st.sujeta = 1; st.climb = 1 - ss(t); st.cota = 0; },
       aislar: function (t, p) {
         var ord = [3, 2, 1, 0], skip = p.skip || [];
         st.cl = 1; st.climb = 1; st.sujeta = 1; st.cota = 1 - ss(seg(t, 0, 0.08)); st.arm = 0.8 * ss(seg(t, 0, 0.1));
@@ -696,7 +731,7 @@
       quitarProt: function (t) {
         st.arm = 0.8; for (var k = 0; k < 4; k++) st.p[k] = 1 - ss(seg(t, 0.2 + k * 0.17, 0.2 + k * 0.17 + 0.29)); st.tela = 1 - ss(seg(t, 0, 0.22));
       },
-      etiquetas: function (t, p, act) { st.labAc = ss(t); st.labP = 1; if (act) st.tr = { a: 'resaltaN', t: t }; },
+      etiquetas: function (t, p, act) { st.labAc = act ? ss(t) : 0; st.labP = 1; if (act) st.tr = { a: 'resaltaN', t: t }; },
       conecta: function (t, p) {
         var fs = p.fases, n = fs.length; st.arm = 0.8;
         fs.forEach(function (f, k) {
@@ -717,21 +752,21 @@
       general: { p: [6, 5.8, 17], t: [1.5, 3.9, 1.5] },
       cielo: { p: [2, 6, 18], t: [-6, 9, -4] },
       vial: { p: [-2, 3.5, 17], t: [-9, 0.8, 5.5] },
-      poste: { p: [4, 5.2, 12], t: [0.6, 4.2, 0.6] },
+      poste: { p: [8.9, 5.2, 9.2], t: [0.6, 4.2, 0.6] },
       suelo: { p: [-3, 2.8, 8.5], t: [0, 1.8, 1.5] },
       cgp: { p: [7.9, 4.5, 6.6], t: [5.3, 3.1, 2.1] },
       ascenso: { p: [5.8, 5.6, 11.5], t: [0.9, 4.5, 0.4] },
       cabeza: { p: [3.4, 7.8, 6.8], t: [0.7, 6.9, 0.4] },
       cabeza2: { p: [3.2, 7.2, 6.6], t: [0.6, 6.7, 0.5] },
-      atras: { p: [-3.2, 7.6, -6.2], t: [0, 7.4, -0.2] },
+      atras: { p: [-5.2, 8.4, -9.5], t: [0, 7.2, -0.2] },
       suelo2: { p: [4.5, 5.6, 9.8], t: [1.0, 1.1, 1.3] },
-      sust: { p: [2.2, 7.9, 3.6], t: [0.3, 7.35, 0.4] },
+      sust: { p: [3.3, 8.4, 5.4], t: [0.3, 7.3, 0.4] },
       objetos: { p: [1.5, 4.8, 6.6], t: [0.0, 1.0, 1.2] },
       dObjetos: { p: [-1.2, 1.5, 1.6], t: [-2.9, 1.3, 0.9], fov: 30 },
       dBandeja: { p: [-0.2, 1.3, 3.0], t: [-0.9, 0.08, 2.4], fov: 30 },
       dObjetosAy: { p: [-1.3, 1.45, -0.3], t: [-1.3, 1.3, 1.3], fov: 32 },
       dCapuchon: { p: [0.5, 8.0, 1.2], t: [0, 7.75, 0.44], fov: 26 },
-      dPerfil: { p: [2.3, 7.95, 1.4], t: [1.8, 7.75, 0.42], fov: 30 },
+      dPerfil: { p: [2.4, 8.5, 3.0], t: [1.0, 7.85, 0.42], fov: 32 },
       dTela: { p: [1.5, 8.2, 1.8], t: [0, 7.6, 0.05], fov: 38 },
       dDedal: { p: [1.4, 8.05, 1.2], t: [0.8, 8.1, 0.42], fov: 26 },
       dDedalS: { p: [0.9, 7.5, 1.1], t: [0.15, 7.4, 0.42], fov: 28 },
@@ -739,10 +774,11 @@
       dPolea: { p: [0.9, 8.8, 1.5], t: [0, 8.5, 0.62], fov: 28 },
       dPoleaFin: { p: [1.0, 7.5, 1.5], t: [0.2, 7.22, 0.62], fov: 28 },
       dAislador: { p: [0.8, 7.65, 1.1], t: [0, 7.4, 0.3], fov: 28 },
-      dSujecion: { p: [1.0, 6.9, 1.5], t: [0.18, 6.8, 0.2], fov: 36 },
+      dSujecion: { p: [1.0, 6.9, 1.5], t: [0.18, 6.8, 0.2], fov: 30 },
       lona: { p: [0.5, 5.6, 8.2], t: [-1.4, 0.4, 1.7] }
     };
 
+    var hid = [];
     var api = {
       camaras: camaras,
       configurar: function (o) { opt = Object.assign({ fin: false, acometida: true, desconexion: false, sust: false, izq: false }, o || {}); lado(); cache = {}; construir(); api.reset(); },
@@ -752,6 +788,7 @@
         norm(anim).forEach(function (a) { var f = A[a.a]; if (f) f(t, a, activo); else if (window.console) console.warn('acción desconocida', a.a); });
         draw();
       },
+      detVista: function (on) { if (on) { hid = []; sprites.forEach(function (o) { if (o.s.visible) { o.s.visible = false; hid.push(o.s); } }); } else { hid.forEach(function (x) { x.visible = true; }); hid = []; } },
       tema: function () { aplicaTema(); draw(); },
       _dbg: function () { return { O: O, GL: GL }; },
       dispose: function () { own.forEach(function (g) { g.dispose(); }); }
