@@ -3,3 +3,4 @@ paginas/
 fuentes/ocr/
 *.pdf
 __pycache__/
+procedimientos/_*.html
