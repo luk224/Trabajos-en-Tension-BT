@@ -235,11 +235,11 @@
       }
       O.c2tela = mk(box(0.5, 1.9, 0.45), Mt('tela', 0.38), 0, 7.6, -0.02, O.c2);
       /* protecciones del circuito 1 */
-      O.pr = []; var segsD = opt.acometida ? [[0.3, 0.95], [1.65, 3.0]] : [[0.3, 3.0]];
+      O.pr = []; var segsD = opt.acometida ? [[0.3, 1.0], [1.0, 1.6, 'w'], [1.6, 3.0]] : [[0.3, 3.0]];
       for (i = 0; i < 4; i++) {
         var pr = { pieces: [], cap: null, ded: null, der: null };
         var lista = opt.fin ? segsD : [[-0.3, -3.0]].concat(segsD);
-        lista.forEach(function (s) { var m = mk(cylU(0.05, 8), Mt('aisl', 0.45), 0, 0, 0, G); m.visible = false; pr.pieces.push({ m: m, a: V(s[0], yC(i, s[0], 0), ZC), b: V(s[1], yC(i, s[1], 0), ZC) }); });
+        lista.forEach(function (s) { var m = mk(cylU(0.05, 8), Mt('aisl', 0.45), 0, 0, 0, G); m.visible = false; pr.pieces.push({ win: s[2] === 'w', m: m, a: V(s[0], yC(i, s[0], 0), ZC), b: V(s[1], yC(i, s[1], 0), ZC) }); });
         pr.cap = mk(sph(0.13, 10, 8), Mt('aisl', 0.45), 0, YF[i], 0.34, G); pr.cap.scale.set(0.001, 0.001, 0.001); pr.cap.visible = false;
         O.pr.push(pr);
       }
@@ -366,7 +366,7 @@
       var d = opt.desconexion ? 1 : 0;
       return { tr: null, vial: 0, valla: 0, verif: 0, guardar: 0, metal: 0, epi: 0, bolsa: 0,
         ay: { x: -1.3, z: 1.3, ry: PI, w: 0, tira: 0 }, cl: 0, sujeta: 0, climb: 0, arm: 0, cota: 0,
-        p: [0, 0, 0, 0], tela: 0, cgp: { door: 0, fus: 1, seal: 0, plE: 0, plI: 0 },
+        p: [0, 0, 0, 0], open: [0, 0, 0, 0], tela: 0, cgp: { door: 0, fus: 1, seal: 0, plE: 0, plI: 0 },
         s: [d, d, d, d], ded: [d, d, d, d], labAc: 0, labP: opt.acometida ? 0 : 1, dobl: 0, doblP: 0,
         h: 0, ret: 1, pul: 0, rope: 0, ten: 0, rana: 0, pull: 0, sust: 0, bolsaT: 0 };
     }
@@ -391,10 +391,10 @@
         var p = s.p[i], pr = O.pr[i];
         pr.cap.visible = p > 0.01; pr.cap.scale.setScalar(Math.max(0.001, ss(seg(p, 0, 0.4))));
         var g = ss(seg(p, 0.25, 1));
-        pr.pieces.forEach(function (q) { if (g < 0.01) q.m.visible = false; else { _d.copy(q.b).sub(q.a).multiplyScalar(g).add(q.a); place(q.m, q.a, _d.clone()); } });
+        pr.pieces.forEach(function (q) { if (g < 0.01 || (q.win && s.open[i] > 0.5)) q.m.visible = false; else { _d.copy(q.b).sub(q.a).multiplyScalar(g).add(q.a); place(q.m, q.a, _d.clone()); } });
         if (O.der[i]) {
           var C = O.C[i], J = O.J[i], dv = O.der[i];
-          if (g < 0.01) dv.visible = false; else place(dv, J, V(lerp(J.x, C.x, 0.22 * g), lerp(J.y, C.y, 0.22 * g), lerp(J.z, C.z, 0.22 * g)));
+          if (g < 0.01 || s.open[i] > 0.5) dv.visible = false; else place(dv, J, V(lerp(J.x, C.x, 0.22 * g), lerp(J.y, C.y, 0.22 * g), lerp(J.z, C.z, 0.22 * g)));
         }
       }
       O.tela.visible = s.tela > 0.01; O.tela.scale.setScalar(Math.max(0.001, ss(s.tela)));
@@ -520,13 +520,15 @@
 
     /* ---------- acciones ---------- */
     var U = function (t, p) { return p && p.inv ? 1 - t : t; };
+    /* ventana de trabajo: solo la fase que se trata (k de n, de N a T) abre un hueco en su protección; las demás siguen cubiertas */
+    function ventanas(t, n) { for (var k = 0; k < 4; k++) { var w = k < n ? seg(t, k / n, (k + 1) / n) : 0; st.open[k] = (w > 0 && w < 1) ? ss(seg(w, 0, 0.12)) * (1 - ss(seg(w, 0.88, 1))) : 0; } }
     var A = {
       identificar: function (t, p, act) { if (act) st.tr = { a: 'identificar', t: t }; },
       clima: function (t, p, act) { if (act) st.tr = { a: 'clima', t: t }; },
       inspeccion: function (t, p, act) { if (act) st.tr = { a: 'inspeccion', t: t }; },
       alveolos: function (t, p, act) { if (act) st.tr = { a: 'alveolos', t: t }; },
-      cepillo: function (t, p, act) { if (act) st.tr = { a: 'cepillo', t: t }; st.arm = 0.7; },
-      pinza: function (t, p, act) { if (act) st.tr = { a: 'pinza', t: t, p: p }; if (!p.sinBrazos) st.arm = 0.7; },
+      cepillo: function (t, p, act) { if (act) st.tr = { a: 'cepillo', t: t }; st.arm = 0.7; ventanas(t, 4); },
+      pinza: function (t, p, act) { if (act) st.tr = { a: 'pinza', t: t, p: p }; if (!p.sinBrazos) st.arm = 0.7; ventanas(t, p.fases || 4); },
       comprobador: function (t, p, act) { if (act) st.tr = { a: 'comprobador', t: t }; },
       resaltaN: function (t, p, act) { if (act) st.tr = { a: 'resaltaN', t: t }; },
       vial: function (t, p) { st.vial = ss(U(t, p)); },
@@ -583,6 +585,7 @@
         var fs = p.fases, n = fs.length; st.arm = 0.8;
         fs.forEach(function (f, k) {
           var i = FA.indexOf(f), w = seg(t, k / n, (k + 1) / n);
+          st.open[i] = ss(seg(w, 0, 0.12)) * (1 - ss(seg(w, 0.88, 1)));
           if (p.inv) { st.ded[i] = 1 - ss(seg(w, 0, 0.35)); st.s[i] = 1 - ss(seg(w, 0.3, 1)); }
           else { st.s[i] = ss(seg(w, 0, 0.65)); st.ded[i] = ss(seg(w, 0.65, 1)); }
         });

@@ -76,7 +76,7 @@ TET.montar({
       c2.anim={a:'conecta',fases:['R','S','T'],inv:true}; c2.nota='<strong>Desconexión:</strong> este paso se hace primero, desconectando las fases R, S y T.';
       c1.anim={a:'conecta',fases:['N'],inv:true}; c1.nota='<strong>Desconexión:</strong> el neutro se desconecta el último, tras R, S y T. Se invierte el orden de estos dos pasos porque el manual lo indica así (paso «En caso de desconexión…»).';
     } else { c1.anim={a:'conecta',fases:['N']}; c2.anim={a:'conecta',fases:['R','S','T']}; }
-    c1.ilus=c2.ilus='El dedal aislante representa «reponer aislamiento»; el orden entre fases R, S, T es ilustrativo.';
+    c1.ilus=c2.ilus='El dedal aislante representa «reponer aislamiento»; el orden entre fases R, S, T es ilustrativo. La ventana que se abre en la protección de la fase tratada es ilustrativa (el manual no la describe); las demás fases siguen cubiertas.';
     var ejec=[
       {texto:'Revisar la caja general de protección de la acometida.',pag:42,anim:'cgpAbre',cam:'cgp',ilus:'El manual no dice quién la revisa; se anima al ayudante.'},
       {texto:'Retirar fusibles de la caja general de protección.',pag:42,anim:{a:'cgpFus'},cam:'cgp',ilus:'El manual no dice quién lo hace; fusibles y barra de neutro son esquemáticos.'},
@@ -89,8 +89,8 @@ TET.montar({
         nota:'De abajo hacia arriba: primero la fase T, luego S, R y N. Se cubren conductores, aisladores (capuchones) y derivación, y al final el apoyo (tela), como en el esquema de la p. 44.',
         ilus:'El orden de colocación de cada pieza dentro de una fase es ilustrativo.'},
       {texto:'Si es necesario, identificar el neutro de la línea principal y de la acometida así como el resto de las fases.',pag:43,anim:'etiquetas',cam:'cabeza2',dur:3.5,ilus:'Las etiquetas N, R, S y T son solo una forma de mostrar la identificación.'},
-      {texto:'Limpiar el conductor.',pag:43,anim:{a:'cepillo'},cam:'cabeza2',dur:4,ilus:'El manual lista un «cepillo aislado» entre los materiales; el gesto de cepillar es ilustrativo.'},
-      {texto:'Comprobar la inexistencia de diferencia de potencial entre los conductores a conectar.',pag:43,anim:{a:'pinza',fases:4},cam:'cabeza2',dur:4.5,ilus:'La pinza se muestra sobre cada conductor; el manual no detalla el método de medida.'},
+      {texto:'Limpiar el conductor.',pag:43,anim:{a:'cepillo'},cam:'cabeza2',dur:4,ilus:'El manual lista un «cepillo aislado» entre los materiales; el gesto de cepillar es ilustrativo. La ventana que se abre en la protección de la fase tratada es ilustrativa (el manual no la describe); las demás fases siguen cubiertas.'},
+      {texto:'Comprobar la inexistencia de diferencia de potencial entre los conductores a conectar.',pag:43,anim:{a:'pinza',fases:4},cam:'cabeza2',dur:4.5,ilus:'La pinza se muestra sobre cada conductor; el manual no detalla el método de medida. La ventana que se abre en la protección de la fase tratada es ilustrativa (el manual no la describe); las demás fases siguen cubiertas.'},
       (des?c2:c1),(des?c1:c2),
       {texto:'Retirar las protecciones aislantes de arriba hacia abajo.',pag:43,anim:'quitarProt',cam:'cabeza',dur:6},
       {texto:'En caso de desconexión, el neutro es el último conductor en desconectarse.',pag:43,anim:'resaltaN',cam:'cabeza2',dur:3,
