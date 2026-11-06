@@ -34,6 +34,7 @@
     var CGX = 5.4, CGY = 1.3, CGZ = -3.45, AYT = [4.6, -2.8];   // caja general de protección (fachada) o armario de la caja de acometida (c3); AYT = sitio del ayudante junto a la caja
     var YT = -1.0;                              // fondo de la cala
 
+    var cor = window.TET && TET.corriente ? TET.corriente.crear(ctx) : null;   // puntos animados = conductor en tensión (ilustrativo)
     var opt = { modo: 'c1', puente: 'interruptor', fin: 'resina' };
     var G = null, O = null, st = null, own = [];
     var mats = {}, sprites = [], geos = {};
@@ -276,6 +277,7 @@
     /* ---------- construcción ---------- */
     function construir() {
       if (G) { scene.remove(G); own.forEach(function (g) { g.dispose(); }); own = []; sprites = []; }
+      if (cor) cor.clear();
       G = new T.Group(); scene.add(G); O = { extras: [] };
       var i, k, md = opt.modo;
       ZP = md === 'c3' ? [-1.0, -0.68, -0.36, -0.04] : [-0.9, -0.65, -0.4, -0.15];   // en c3 las fases van más separadas para que se lean el puente y los conductores
@@ -458,9 +460,55 @@
       O.pinzaK = etq('✓', 'ok', 0.4, 0.2); O.pinzaK.position.set(0, 0.28, 0.1); O.pinza.add(O.pinzaK);
       O.compr = grp(G, 0, 0, 0); O.compr.visible = false; mk(box(0.3, 0.2, 0.08), M('ropa2'), 0, 0, 0, O.compr);
       O.comprL = [0, 1, 2].map(function (q) { return mk(sph(0.03, 6, 5), MB(FA[q + 1]), -0.08 + q * 0.08, 0, 0.05, O.compr); });
+      if (cor) caminos();
       O.hemi = new T.HemisphereLight(0xffffff, 0x8899aa, 0.62); G.add(O.hemi);
       O.sun = new T.DirectionalLight(0xffffff, 0.55); O.sun.position.set(-6, 14, 10); G.add(O.sun);
       aplicaTema();
+    }
+    /* ---------- corriente (puntos animados): caminos y estado ---------- */
+    function caminos() {
+      var md = opt.modo, i, o = { size: 0.09, dens: 3 };
+      function cat() { var r = [], k, j; for (k = 0; k < arguments.length; k++) { var a = arguments[k]; for (j = 0; j < a.length; j++) r.push(a[j]); } return r; }
+      for (i = 0; i < 4; i++) (function (i) {
+        if (md === 'c2') {
+          var off = (i - 1.5) * 0.03;
+          cor.addPath('lin-' + i, function () { return cat([V(-6, Y2 + 0.11, Z2 + off), V(-1.0, Y2 + 0.11, Z2 + off)], O.corePts[i], [V(1.0, Y2 + 0.11, Z2 + off), V(6, Y2 + 0.11, Z2 + off)]); }, FA[i], o);
+        } else if (md === 'c1') {
+          cor.addPath('lin-' + i, [V(-6, YC + 0.045, ZP[i]), V(6, YC + 0.045, ZP[i])], FA[i], o);
+        } else {
+          cor.addPath('linL-' + i, [V(-6, YC + 0.045, ZP[i]), V(-XJ3, YC + 0.045, ZP[i])], FA[i], o);
+          cor.addPath('linR-' + i, [V(XJ3, YC + 0.045, ZP[i]), V(6, YC + 0.045, ZP[i])], FA[i], o);
+          cor.addPath('linM-' + i, [V(-XJ3, YC + 0.045, ZP[i]), V(XJ3, YC + 0.045, ZP[i])], FA[i], o);
+          cor.addPath('pte-' + i, function () { var b = O.br[i], r = b.ptsL.slice().reverse(); return cat(b.ptsR, r); }, FA[i], { size: 0.08, dens: 4 });
+          cor.addPath('caja-' + i, function () { var ry = CGY - 0.08 - 0.09 * i; return [V(CGX + 0.24, ry, CGZ + 0.0), V(CGX - 0.24, ry, CGZ + 0.0)]; }, FA[i], { size: 0.06, dens: 6 });
+        }
+      })(i);
+      O.acom.forEach(function (q) {
+        var id = (md === 'c3' ? 'es' + (q.side > 0 ? 'E' : 'S') : 'aco') + '-' + q.i;
+        var sx = md === 'c3' ? CGX + q.side * (0.3 + 0.06 * q.i) : CGX - 0.12 + 0.08 * q.i, base = md === 'c3' ? CGY - 0.45 : CGY - 0.45;
+        var head = [V(sx, base, CGZ - 0.02), V(sx, 0, CGZ - 0.02), q.S.clone()];
+        cor.addPath(id, function () { return cat(head, q.pts); }, FA[q.i], o);
+        q.corId = id;
+      });
+    }
+    function corriente() {
+      if (!cor) return;
+      var s = st, md = opt.modo, i, intr = opt.puente === 'interruptor';
+      for (i = 0; i < 4; i++) {
+        if (md === 'c3') {
+          var c = ss(s.cut[i]);
+          cor.setLive('linL-' + i, 1); cor.setLive('linR-' + i, 1); cor.setLive('linM-' + i, 1 - ss(seg(c, 0, 0.4)));
+          var vis = s.br > 0.5 && (intr || i === s.brPh), att = ss(seg(s.brAtt, 0.9, 1));
+          var cond = intr ? s.cond : 1;
+          cor.setLive('pte-' + i, vis ? att * cond * (1 - ss(s.brOff[i])) : 0);
+          cor.setLive('caja-' + i, ss(seg(s.cuch, 0.7, 0.95)));
+        } else cor.setLive('lin-' + i, 1);
+      }
+      O.acom.forEach(function (q) {
+        var con = ss(seg(s.con[q.i], 0.9, 1));
+        cor.setLive(q.corId, md === 'c3' ? con : con * ss(seg(s.cgp.fus, 0.9, 1)));
+      });
+      cor.refresh();
     }
     function aplicaTema() {
       Object.keys(mats).forEach(function (k) { mats[k].color.set(pal(mats[k].userData.k)); });
@@ -473,7 +521,7 @@
     /* ---------- estado por defecto ---------- */
     function defaults() {
       return { tr: null, vial: 0, valla: 0, verif: 0, guardar: 0, metal: 0, epi: 0, bolsaT: 0, entib: 0, alf: 0,
-        fc: 0, meas: -1, camCgp: 0, lad: 0, ay: { x: -3.0, z: 2.3, ry: PI, w: 0, tira: 0 }, win: 0, wx: opt.modo === 'c3' ? -1.8 : -1.2, arm: 0,
+        fc: 0, meas: -1, camCgp: 0, lad: 0, cond: 0, ay: { x: -3.0, z: 2.3, ry: PI, w: 0, tira: 0 }, win: 0, wx: opt.modo === 'c3' ? -1.8 : -1.2, arm: 0,
         cgp: { door: 0, fus: 1, seal: 0, plE: 0, plI: 0 },
         ded: [0, 0, 0, 0], con: [0, 0, 0, 0], tape: [0, 0, 0, 0], cut: [0, 0, 0, 0], labs: 0,
         br: 0, brAtt: 0, brOff: [0, 0, 0, 0], brPh: 0, sw: 0, brDed: 0, cuch: 0, cov: 0,
@@ -568,7 +616,7 @@
           _tg.subVectors(b.ptsR[0], b.ptsR[2]).normalize(); b.ends[1].quaternion.setFromUnitVectors(UP, _tg);
           /* flechas de corriente (ilustrativas): con el puente cerrado y la línea cortada la alimentación pasa por el puente */
           var flow = (intr ? s.sw > 0.5 : att > 0.5) && s.cut[i] > 0.01 && s.cut[i] < 2;
-          b.ar.forEach(function (a, q) { a.visible = flow; a.position.set(q ? -0.62 : 0.62, tp2 + 0.0, ZP[i] - 0.12); if (flow) anyFlow = true; });
+          b.ar.forEach(function (a, q) { a.visible = false; a.position.set(q ? -0.62 : 0.62, tp2 + 0.0, ZP[i] - 0.12); if (flow) anyFlow = true; });
           b.kn.position.y = tp2; b.bl.rotation.z = 0.95 * (1 - ss(s.sw));
         }
         var showB = anyBr && intr, ang = 0.95 * (1 - ss(s.sw)), tx = -0.14 + 0.3 * Math.cos(ang), ty = top + 0.3 * Math.sin(ang);
@@ -645,6 +693,7 @@
       O.bolsa.position.set(lerp(-2.4, -9, b2), lerp(0.28, 1.2, b2), lerp(3.2, 7, b2)); O.bolsa.scale.setScalar(Math.max(0.001, b1 * (1 - 0.7 * b2)));
       lazy();
       if (O.senM) { O.senM.visible = vCon > 0.85; O.sign.visible = O.signP.visible = false; }
+      corriente();
       drawTr();
       pedir();
     }
@@ -745,7 +794,7 @@
       /* c3 */
       puentePrep: function (t) { st.win = 1; st.arm = 0.6; st.br = ss(t); st.brDed = 1; st.brPh = 0; },
       puenteConecta: function (t) { st.labs = 0; st.win = 1; st.arm = 0.8; st.brAtt = ss(t); },
-      cierraSw: function (t) { st.win = 1; st.arm = 0.7; st.sw = ss(seg(t, 0.2, 0.8)); },
+      cierraSw: function (t) { st.win = 1; st.arm = 0.7; st.sw = ss(seg(t, 0.2, 0.8)); st.cond = ss(seg(t, 0.7, 0.95)); },
       concordancia: function (t, p, act) { st.win = 1; st.arm = 0.6; if (act) st.tr = { a: 'comprobador', t: t, p: { cala: true } }; },
       corta: function (t, p) { var fs = idx(p), n = fs.length; st.win = 1; st.arm = 0.8; fs.forEach(function (i, k) { st.cut[i] = ss(seg(t, k / n, (k + 1) / n)); }); if (opt.puente === 'unipolar') st.brPh = fs[fs.length - 1]; },
       /* unipolar: el puente va saltando de fase en fase mientras se corta y conecta; aquí cada fase: puente, corte, conexión, aislamiento */
@@ -813,9 +862,10 @@
         norm(anim).forEach(function (a) { var f = A[a.a]; if (f) f(t, a, activo); else if (window.console) console.warn('acción desconocida', a.a); });
         draw();
       },
-      tema: function () { aplicaTema(); draw(); },
+      tema: function () { aplicaTema(); if (cor) cor.refrescaColores(); draw(); },
+      corriente: cor,
       _dbg: function () { return { O: O, GL: GL }; },
-      dispose: function () { own.forEach(function (g) { g.dispose(); }); }
+      dispose: function () { own.forEach(function (g) { g.dispose(); }); if (cor) cor.dispose(); }
     };
     return api;
   };

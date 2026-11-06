@@ -34,6 +34,7 @@
     var SIDE = 1, AY0 = -1.3, XW = 0.7, YFEET = 0, FOOT = [2.55, 0.8];
 
     /* ---------- estado ---------- */
+    var cor = (window.TET && TET.corriente) ? TET.corriente.crear(ctx) : null; // puntos de corriente (ilustrativo)
     var opt = { fin: false, acometida: true, desconexion: false, sust: false, izq: false };
     /* opt.izq: escalera a la izquierda y derivación pegada al apoyo, como en el esquema de la p. 44 (A.1) */
     function lado() {
@@ -312,6 +313,7 @@
 
     /* ---------- construcción ---------- */
     function construir() {
+      if (cor) cor.clear();
       if (G) { scene.remove(G); own.forEach(function (g) { g.dispose(); }); own = []; sprites = []; }
       G = new T.Group(); scene.add(G); O = { extras: [] };
       var i, k;
@@ -332,7 +334,7 @@
       O.xs = xs; O.cond = []; O.condPts = [];
       for (i = 0; i < 4; i++) {
         var tb = tubo(xs.length, 0.03, M(FA[i], { side: T.DoubleSide })); G.add(tb); O.cond.push(tb);
-        O.condPts.push(xs.map(function () { return V(0, 0, 0); }));
+        O.condPts.push(xs.map(function (x) { return V(x, yC(i, x, 0), ZC); }));
       }
       O.condH = [null, null, null, null];
       O.tip = []; if (opt.fin) for (i = 0; i < 4; i++) { var tp = dedal(); tp.visible = false; G.add(tp); O.tip.push(tp); }
@@ -344,7 +346,7 @@
       var xs2 = []; for (j = xp.length - 1; j > 0; j--) xs2.push(-xp[j]); for (j = 0; j < xp.length; j++) xs2.push(xp[j]);
       for (i = 0; i < 4; i++) {
         var t2 = tubo(xs2.length, 0.03, M(FA[i], { side: T.DoubleSide })); O.c2.add(t2);
-        tuboSet(t2, xs2.map(function (x) { return V(x, yC(i, x, 0), -ZC); })); O.c2c.push(t2);
+        var pts2 = xs2.map(function (x) { return V(x, yC(i, x, 0), -ZC); }); tuboSet(t2, pts2); O.c2c.push(t2); (O.c2pts = O.c2pts || []).push(pts2);
         var a2 = aislador('aislador', -1); a2.position.set(0, YF[i], -0.3); O.c2.add(a2);
         var pf = [mk(cylU(0.05, 8), Mt('aisl', 0.45), 0, 0, 0, O.c2), mk(cylU(0.05, 8), Mt('aisl', 0.45), 0, 0, 0, O.c2)];
         var cp = capuchon(0.5); cp.position.set(0, YF[i], -ZC); O.c2.add(cp);
@@ -407,7 +409,7 @@
         [[6.4, 4.6], [9.3, 4.6], [9.3, 1.9]].forEach(function (w) { mk(box(1.0, 1.2, 0.04), MB('texto'), w[0], w[1], 2.02, G).material = M('ropa2'); });
         mk(box(0.9, 2.0, 0.04), M('ropa2'), 7.2, 1.0, 2.02, G);
         for (i = 0; i < 4; i++) {
-          var cb = tubo(14, 0.016, M(FA[i], { side: T.DoubleSide })); G.add(cb); O.cab.push(cb); O.cabPts.push(Array.apply(null, Array(14)).map(function () { return V(0, 0, 0); }));
+          var cb = tubo(14, 0.016, M(FA[i], { side: T.DoubleSide })); G.add(cb); O.cab.push(cb); O.cabPts.push(Array.apply(null, Array(14)).map(function (z, k) { return V(lerp(O.J[i].x, O.C[i].x, k / 13), lerp(O.J[i].y, O.C[i].y, k / 13), lerp(O.J[i].z, O.C[i].z, k / 13)); }));
           var dd = dedal(); G.add(dd); dd.visible = false; O.dedal.push(dd);
           var cn = mk(box(0.075, 0.05, 0.06), MM('metal'), O.J[i].x, O.J[i].y, O.J[i].z, G); cn.visible = false; (O.conn = O.conn || []).push(cn);
           var dv = mk(cylU(0.045, 8), Mt('aisl', 0.45), 0, 0, 0, G); dv.visible = false; O.der.push(dv);
@@ -417,6 +419,8 @@
         mk(box(0.6, 0.84, 0.03), M('ropa2'), 0, 0, -0.085, O.cgp);
         mk(box(0.03, 0.84, 0.2), M('cgp'), -0.285, 0, 0, O.cgp); mk(box(0.03, 0.84, 0.2), M('cgp'), 0.285, 0, 0, O.cgp);
         mk(box(0.6, 0.03, 0.2), M('cgp'), 0, 0.405, 0, O.cgp); mk(box(0.6, 0.03, 0.2), M('cgp'), 0, -0.405, 0, O.cgp);
+        O.edifPts = [];
+        for (i = 0; i < 4; i++) { var ex = CG.x - 0.12 + 0.08 * i, ep = [V(ex, CG.y - 0.42, CG.z + 0.06), V(ex, 2.2, CG.z + 0.06), V(ex, 1.2, CG.z + 0.06)]; var et = tubo(3, 0.014, M(FA[i], { side: T.DoubleSide })); G.add(et); tuboSet(et, ep); O.edifPts.push(ep); }
         O.fus = grp(O.cgp, 0, 0, -0.03);
         [-0.15, 0, 0.15].forEach(function (x, q) { mk(cylU(0.035, 8), M(FA[q + 1]), x, 0.03, 0, O.fus).scale.set(1, 0.3, 1); mk(box(0.07, 0.04, 0.04), M('metal'), x, 0.2, 0, O.fus); });
         mk(box(0.4, 0.05, 0.05), M(FA[0]), 0, -0.2, 0, O.fus);
@@ -480,6 +484,10 @@
       /* luces y niebla */
       O.hemi = new T.HemisphereLight(0xffffff, 0x8899aa, 0.62); G.add(O.hemi);
       O.sun = new T.DirectionalLight(0xffffff, 0.55); O.sun.position.set(-8, 14, 12); G.add(O.sun);
+      if (cor) {
+        FA.forEach(function (f, i) { cor.addPath('lin-' + f, function () { return O.condPts[i]; }, f); if (O.c2pts) cor.addPath('lin2-' + f, O.c2pts[i], f); });
+        if (opt.acometida) FA.forEach(function (f, i) { cor.addPath('aco-' + f, function () { return O.cabPts[i]; }, f); cor.addPath('edif-' + f, O.edifPts[i], f); });
+      }
       aplicaTema();
     }
     function aplicaTema() {
@@ -616,6 +624,14 @@
       var ex = ss(seg(s.valla, 0.7, 1)); O.extras.forEach(function (w) { w.visible = ex > 0.01; });
       if (O.senM) { O.senM.visible = vCon > 0.85; O.sign.visible = O.signP.visible = false; }
       /* transitorios */
+      if (cor) {
+        var fl = ss(seg(s.cgp.fus, 0.2, 1));
+        for (i = 0; i < 4; i++) {
+          cor.setLive('lin-' + FA[i], 1); cor.setLive('lin2-' + FA[i], ss(s.dobl));
+          if (opt.acometida) { var lv = ss(seg(s.s[i], 0.9, 1)) * fl; cor.setLive('aco-' + FA[i], lv); cor.setLive('edif-' + FA[i], lv); }
+        }
+        cor.refresh();
+      }
       drawTr();
       pedir();
     }
@@ -780,6 +796,7 @@
 
     var hid = [];
     var api = {
+      corriente: cor,
       camaras: camaras,
       configurar: function (o) { opt = Object.assign({ fin: false, acometida: true, desconexion: false, sust: false, izq: false }, o || {}); lado(); cache = {}; construir(); api.reset(); },
       reset: function () { st = defaults(); cache = {}; draw(); },
@@ -789,7 +806,7 @@
         draw();
       },
       detVista: function (on) { if (on) { hid = []; sprites.forEach(function (o) { if (o.s.visible) { o.s.visible = false; hid.push(o.s); } }); } else { hid.forEach(function (x) { x.visible = true; }); hid = []; } },
-      tema: function () { aplicaTema(); draw(); },
+      tema: function () { aplicaTema(); if (cor) cor.refrescaColores(); draw(); },
       _dbg: function () { return { O: O, GL: GL }; },
       dispose: function () { own.forEach(function (g) { g.dispose(); }); }
     };

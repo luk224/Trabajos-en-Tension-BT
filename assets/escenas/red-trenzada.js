@@ -42,7 +42,7 @@
 
     /* ---------- estado ---------- */
     var opt = { modo: 'b1', desconexion: false };
-    var G2 = null, AO = null, st = null, own = [], mats = {}, sprites = [], geos = {}, cache = {}, X = null, armReq = false;
+    var cor = null, sup = null, G2 = null, AO = null, st = null, own = [], mats = {}, sprites = [], geos = {}, cache = {}, X = null, armReq = false;
 
     function M(k, extra) {
       var key = k + (extra ? JSON.stringify(extra) : '');
@@ -192,7 +192,7 @@
         var C0 = V(5.4, 3.82, 2.16), Pb = b1 ? V(1.3, 6.45, 0.95) : V(1.45, 6.15, 0.78), NP = 64, path = [];
         for (k = 0; k < NP; k++) { var u = k / (NP - 1); path.push(V(lerp(C0.x, Pb.x, u), lerp(C0.y, Pb.y, u) - 0.5 * Math.sin(u * PI), lerp(C0.z, Pb.z, u))); }
         X.acom = [];
-        for (i = 0; i < 4; i++) { var ta = conHalo(tubo(NP, 0.03, M(FA[i], { side: T.DoubleSide })), i); G2.add(ta); tuboSet(ta, helix(path, i, 0.035, 0.55)); X.acom.push(ta); }
+        for (i = 0; i < 4; i++) { var ta = conHalo(tubo(NP, 0.03, M(FA[i], { side: T.DoubleSide })), i); G2.add(ta); X.acomH = X.acomH || []; X.acomH[i] = helix(path, i, 0.035, 0.55); tuboSet(ta, X.acomH[i]); X.acom.push(ta); }
         var e0 = extremo({ J: AO.J, free: 0.72 }); e0.Pe.copy(Pb);
         X.Pb = Pb;
       }
@@ -218,7 +218,7 @@
           if (d[2] === 'L') { xs = []; for (xx = -20; xx < -4; xx += 2) xs.push(xx); for (xx = -4; xx < d[1]; xx += 0.4) xs.push(xx); xs.push(d[1]); }
           for (var q = 0; q < 4; q++) {
             var tb = conHalo(tubo(xs.length, 0.03, M(FA[q], { side: T.DoubleSide })), q); G2.add(tb); X.conv[d[2]].push(tb);
-            tuboSet(tb, xs.map(function (x2) { return V(x2, yB(q, x2), ZC); }));
+            var pq = xs.map(function (x2) { return V(x2, yB(q, x2), ZC); }); tuboSet(tb, pq); (X['p' + d[2]] = X['p' + d[2]] || [])[q] = pq;
             if (d[2] === 'S') {   // tramo retirado: trazo discontinuo (segmentos) + puntas cortadas colgando, como en la p. 64
               var gh = grp(G2, 0, 0, 0); gh.visible = false; X.conv.G.push(gh);
               for (var xd = XC1 + 0.15; xd < XC2 - 0.5; xd += 0.8) { var dm = mk(cylU(0.03, 6), Mt(FA[q], 0.7), 0, 0, 0, gh); place(dm, V(xd, yB(q, xd), ZC), V(xd + 0.5, yB(q, xd + 0.5), ZC)); }
@@ -256,6 +256,36 @@
         var eR = extremo({ J: Jr, free: 0.72 });
         X.labF = FA.map(function (f, q) { var s = etq(f, f, 0.5, 0.25); s.position.set(XF - 2.3, YF[q] - 0.02, 0.85); s.visible = false; G2.add(s); return s; });
       }
+      /* puntos de corriente (ilustrativo): se añaden sobre el mismo `cor` de apoyo-bt; A los limpia en cada configurar */
+      cor = base.corriente || null;
+      if (cor) {
+        /* apoyo-bt vuelve a llamar a setLive en sus propios redibujos asíncronos (carga de GLB): se filtran sus caminos que aquí no proceden */
+        sup = { block: {}, force: {} };
+        FA.forEach(function (f) { sup.block['aco-' + f] = 1; if (!b1) sup.block['lin-' + f] = 1; });
+        if (!cor._rtFiltro) { cor._rtFiltro = true; var raw = cor.setLive; cor.setLive = function (id, v) { var q = cor._rtSup; if (q) { if (q.block[id]) v = 0; else if (q.force[id] != null) v = q.force[id]; } return raw.call(cor, id, v); }; }
+        cor._rtSup = sup;
+        var combo = function (a, b, c) { return function () { return (a ? a() : []).concat(b ? b() : [], c ? c() : []); }; };
+        var rev = function (pts) { return function () { return pts().slice().reverse(); }; };
+        var of = function (arr, k) { return function () { return arr[k]; }; };
+        if (b1 || b2) {
+          for (i = 0; i < 4; i++) cor.addPath('tac-' + FA[i], combo(rev(of(X.ends[0].pts, i)), rev(of(X.acomH, i))), FA[i]);
+          X.ends[0].pts.forEach(function (pp) { pp.forEach(function (v) { v.copy(X.Pb); }); });
+        }
+        if (b2) {
+          X.mainPts = []; for (i = 0; i < 4; i++) X.mainPts[i] = X.xs.map(function (x) { return coreAt(i, x, 0); });
+          for (i = 0; i < 4; i++) cor.addPath('tren-' + FA[i], of(X.mainPts, i), FA[i]);
+        }
+        if (b3) {
+          X.bPts = []; var pth = []; for (var xq = 1.3; xq <= XF - 1.2999; xq += 0.1) pth.push(V(xq, yBun(xq) + HB0, 0.9));
+          for (i = 0; i < 4; i++) X.bPts[i] = helix(pth, i, 0.035, 0.55);
+          X.ends.forEach(function (en, q) { en.pts.forEach(function (pp) { pp.forEach(function (v) { v.copy(pth[q ? pth.length - 1 : 0]); }); }); });
+          for (i = 0; i < 4; i++) {
+            cor.addPath('c3-' + FA[i], combo(of(X.pL, i), of(X.pS, i), of(X.pR, i)), FA[i]);
+            cor.addPath('c3L-' + FA[i], of(X.pL, i), FA[i]); cor.addPath('c3R-' + FA[i], of(X.pR, i), FA[i]);
+            cor.addPath('c3b-' + FA[i], combo(rev(of(X.ends[0].pts, i)), of(X.bPts, i), of(X.ends[1].pts, i)), FA[i]);
+          }
+        }
+      }
       aplicaTema();
     }
     function aplicaTema() {
@@ -265,7 +295,7 @@
 
     /* ---------- estado por defecto ---------- */
     function defaults() {
-      var des = opt.desconexion ? 1 : 0, o = { zs: 0, ci: 0, tela2: 0, lm: 0, la: 0, bun: X && X.b3 ? 0 : 1, hB: HB0, pF: [0, 0, 0, 0], openF: [0, 0, 0, 0], telaF: 0, ret3: 0, cut: 0, labF: 0, tr: null, ends: [] };
+      var des = opt.desconexion ? 1 : 0, o = { fus: 1, zs: 0, ci: 0, tela2: 0, lm: 0, la: 0, bun: X && X.b3 ? 0 : 1, hB: HB0, pF: [0, 0, 0, 0], openF: [0, 0, 0, 0], telaF: 0, ret3: 0, cut: 0, labF: 0, tr: null, ends: [] };
       for (var e = 0; e < 2; e++) o.ends.push({ s: [des, des, des, des], d: [1 - des, 1 - des, 1 - des, 1 - des], chk: [0, 0, 0, 0] });
       return o;
     }
@@ -303,7 +333,7 @@
       if (X.b2) {
         for (i = 0; i < 4; i++) coreAt(i, XB2[i], s.zs, AO.J[i]);
         if (chg('zs', s.zs.toFixed(3))) {
-          for (i = 0; i < 4; i++) tuboSet(X.main[i], X.xs.map(function (x) { return coreAt(i, x, s.zs); }));
+          for (i = 0; i < 4; i++) tuboSet(X.main[i], (X.mainPts[i] = X.xs.map(function (x) { return coreAt(i, x, s.zs); })));
         }
         var ci = ss(s.ci);
         X.cunas.forEach(function (c, q) { c.visible = ci > 0.01; c.position.set(q ? 2.05 : 0.68, 6.9 - 0.0, ZM + 0.4 * (1 - ci)); });
@@ -318,7 +348,7 @@
         X.ends[0].Pe.set(1.3, yBun(1.3) + s.hB, 0.9); X.ends[1].Pe.set(XF - 1.3, yBun(XF - 1.3) + s.hB, 0.9);
         if (vb && chg('hBv', s.hB.toFixed(3))) {
           var path = []; for (var x = 1.3; x <= XF - 1.2999; x += 0.1) path.push(V(x, yBun(x) + s.hB, 0.9));
-          for (i = 0; i < 4; i++) tuboSet(X.bundle[i], helix(path, i, 0.035, 0.55));
+          for (i = 0; i < 4; i++) tuboSet(X.bundle[i], (X.bPts[i] = helix(path, i, 0.035, 0.55)));
         }
         for (i = 0; i < 4; i++) {
           X.bundle[i].visible = vb;
@@ -332,8 +362,28 @@
         var rv = ss(s.ret3); X.ret3.forEach(function (r) { r.visible = rv > 0.01; r.scale.setScalar(Math.max(0.001, rv)); });
       }
       for (var e = 0; e < X.ends.length; e++) drawEnd(e);
+      drawCor();
       drawTr2();
       pedir();
+    }
+    /* corriente según el estado del paso (determinista). Ilustrativo: «conductor en tensión». */
+    function drawCor() {
+      if (!cor) return;
+      var i, f, s = st;
+      for (i = 0; i < 4; i++) {
+        f = FA[i];
+        if (X.b1 || X.b2) {
+          var lv = ss(seg(s.ends[0].s[i], 0.8, 1)) * ss(seg(s.fus, 0.2, 1));   // acometida trenzada: conectada y con fusibles puestos
+          sup.force['edif-' + f] = lv; cor.setLive('tac-' + f, lv); cor.setLive('edif-' + f, lv); cor.setLive('aco-' + f, 0);   // `aco-*` es la acometida convencional de A (oculta aquí)
+        }
+        if (X.b2) { cor.setLive('lin-' + f, 0); cor.setLive('tren-' + f, 1); }
+        if (X.b3) {
+          cor.setLive('lin-' + f, 0);
+          cor.setLive('c3-' + f, 1 - s.cut); cor.setLive('c3L-' + f, s.cut); cor.setLive('c3R-' + f, s.cut);
+          cor.setLive('c3b-' + f, Math.max(ss(seg(s.ends[0].s[i], 0.8, 1)), ss(seg(s.ends[1].s[i], 0.8, 1))) * (s.bun > 0.5 ? 1 : 0));   // ilustrativo: en tensión desde que se conecta por un extremo
+        }
+      }
+      cor.refresh();
     }
     function drawTr2() {
       var tr = st.tr, a = tr && tr.a, t = tr ? tr.t : 0;
@@ -399,6 +449,7 @@
         if (a.a === 'seq') { a.items.forEach(function (it) { apl(it.anim, seg(t, it.w[0], it.w[1]), activo); }); return; }
         (A[a.a] ? mine : theirs).push(a);
       });
+      theirs.forEach(function (a) { if (a.a === 'cgpFus') st.fus = a.inv ? ss(seg(t, 0.3, 1)) : 1 - ss(t); });   // fusibles de la CGP (estado propio, solo para la corriente)
       armReq = false;
       mine.forEach(function (a) { A[a.a](t, a, activo); });
       winF.forEach(function (q) { base.aplicar([{ a: 'conecta', fases: [q.f], inv: q.inv }], q.w, activo); });
@@ -426,6 +477,7 @@
 
     var api = {
       camaras: camaras,
+      corriente: base.corriente,
       configurar: function (o) { opt = Object.assign({ modo: 'b1', desconexion: false }, o || {}); cache = {}; construir(); api.reset(); },
       reset: function () { base.reset(); if (!X) return; st = defaults(); cache = {}; draw2(); },
       aplicar: function (anim, t, activo) { if (!X) { base.aplicar(null, t, activo); return; } if (activo) st.tr = null; apl(anim, t, activo); draw2(); },

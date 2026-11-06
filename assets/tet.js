@@ -49,6 +49,7 @@
     next: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l8 7-8 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="square"/></svg>',
     reset: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12a7 7 0 1 0 2.2-5.1M5 4v4.5h4.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="square"/></svg>',
     cam: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3" fill="currentColor"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l2.5 2.5M16.5 16.5L19 19M19 5l-2.5 2.5M7.5 16.5L5 19" fill="none" stroke="currentColor" stroke-width="2"/></svg>',
+    corr: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="4" cy="12" r="2.3" fill="currentColor"/><circle cx="12" cy="12" r="2.3" fill="currentColor"/><circle cx="20" cy="12" r="2.3" fill="currentColor"/></svg>',
     auto: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6l7 6-7 6zM13 6l7 6-7 6z" fill="currentColor"/></svg>',
     sol: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5" fill="currentColor"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M19.4 4.6l-2.1 2.1M6.7 17.3l-2.1 2.1" stroke="currentColor" stroke-width="2"/></svg>',
     persona: '<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="12" r="6" fill="currentColor"/><path d="M12 42c0-9 4-16 12-16s12 7 12 16z" fill="currentColor"/></svg>'
@@ -222,6 +223,7 @@
       var ley = h('div', { class: 'leyenda', 'aria-label': 'Leyenda de colores de las fases' });
       [['N', 'neutro azul'], ['R', 'R marrón'], ['S', 'S negro'], ['T', 'T gris']].forEach(function (x) { var b = h('b'); var i = h('i'); i.style.setProperty('--c', 'var(--e-' + x[0] + ')'); b.appendChild(i); b.appendChild(document.createTextNode(x[1])); ley.appendChild(b); });
       ley.appendChild(h('span', { text: 'Colores ilustrativos: el manual no los indica.' }));
+      me.leyCor = h('span', { text: 'Puntos = conductor en tensión (ilustrativo; no indica el sentido real de la corriente alterna).' }); me.leyCor.style.display = 'none'; ley.appendChild(me.leyCor);
       scroll.appendChild(ley);
     }
 
@@ -238,14 +240,16 @@
     me.bNext = h('button', { class: 'b', type: 'button', 'aria-label': 'Paso siguiente' }); me.bNext.innerHTML = '<span>Siguiente</span>' + ICON.next;
     var c2 = h('div', { class: 'ctrl2' });
     me.bReset = h('button', { class: 'mini rs', type: 'button', 'aria-label': 'Reiniciar desde el primer paso' }); me.bReset.innerHTML = ICON.reset + '<span>Reiniciar</span>';
-    me.bAuto = h('button', { class: 'mini', type: 'button', 'aria-pressed': 'false' }); me.bAuto.innerHTML = ICON.auto + '<span>Autoavance</span>';
+    me.bAuto = h('button', { class: 'mini', type: 'button', 'aria-pressed': 'false' }); me.bAuto.innerHTML = ICON.auto + '<span class="lg">Autoavance</span><span class="sm">Auto</span>'; me.bAuto.setAttribute('aria-label', 'Autoavance');
+    me.verCor = true; try { if (localStorage.getItem('corriente') === '0') me.verCor = false; } catch (e) {}
+    me.bCor = h('button', { class: 'mini', type: 'button', 'aria-pressed': me.verCor ? 'true' : 'false', 'aria-label': 'Ver corriente' }); me.bCor.innerHTML = ICON.corr + '<span class="lg">Ver corriente</span><span class="sm">Corriente</span>'; me.bCor.style.display = 'none';
     var vel = h('div', { class: 'seg', role: 'group', 'aria-label': 'Velocidad' });
     me.bVel = [0.5, 1, 2].map(function (v) {
       var b = h('button', { type: 'button', text: (v === 0.5 ? '0,5' : v) + '×', 'aria-pressed': v === 1 ? 'true' : 'false', 'aria-label': 'Velocidad ' + v + ' veces' });
       b.addEventListener('click', function () { me.speed = v; me.bVel.forEach(function (x, i) { x.setAttribute('aria-pressed', [0.5, 1, 2][i] === v ? 'true' : 'false'); }); });
       vel.appendChild(b); return b;
     });
-    c2.appendChild(me.bReset); c2.appendChild(vel); c2.appendChild(me.bAuto);
+    c2.appendChild(me.bReset); c2.appendChild(vel); c2.appendChild(me.bAuto); c2.appendChild(me.bCor);
     ctrl.appendChild(me.bPrev); ctrl.appendChild(me.bPlay); ctrl.appendChild(me.bNext); ctrl.appendChild(c2);
     panel.appendChild(ctrl);
     player.appendChild(stage); player.appendChild(panel); root.appendChild(player);
@@ -254,6 +258,11 @@
     me.bNext.addEventListener('click', function () { me.pausa(); me.ir(me.n + 1, true); me.alVer(); });
     me.bPlay.addEventListener('click', function () { me.togglePlay(); me.alVer(); });
     me.bReset.addEventListener('click', function () { me.pausa(); me.ir(0, false); });
+    me.bCor.addEventListener('click', function () {
+      me.verCor = !me.verCor; me.bCor.setAttribute('aria-pressed', me.verCor ? 'true' : 'false');
+      try { localStorage.setItem('corriente', me.verCor ? '1' : '0'); } catch (e) {}
+      if (me.escena && me.escena.corriente) me.escena.corriente.setEnabled(me.verCor); me.pedir();
+    });
     me.bAuto.addEventListener('click', function () { me.auto = !me.auto; me.pintaAuto(); });
     me.btnCam.addEventListener('click', function () { me.aplicaPose(me.pose, false); });
     me.pintaAuto(); me.pintaPlay();
@@ -332,6 +341,13 @@
     me.resize();
     var fn = TET.escenas[me.def.escena];
     if (fn) me.escena = fn({ THREE: THREE, scene: me.scene, camera: me.camera, pal: TET.pal, pedir: function () { me.pedir(); }, reducir: reduce });
+    var co = me.escena && me.escena.corriente;
+    if (co) {
+      co.setReducedMotion(reduce); co.setEnabled(me.verCor); me.bCor.style.display = ''; if (me.leyCor) me.leyCor.style.display = '';
+      me.enPantalla = true; me.corAcc = 0;
+      if (window.IntersectionObserver) new IntersectionObserver(function (en) { me.enPantalla = en[0].isIntersecting; if (me.enPantalla) me.pedir(); }, { threshold: 0.01 }).observe(me.stage);
+      document.addEventListener('visibilitychange', function () { if (!document.hidden) me.pedir(); });
+    }
   };
   P.ajustaToque = function () { this.canvas.style.touchAction = window.matchMedia('(max-width:959px)').matches ? 'pan-y' : 'none'; };
   P.noGL = function () { this.ok3d = false; this.sin3d.classList.add('on'); this.carga.style.display = 'none'; this.stage.classList.add('nogl'); };
@@ -376,8 +392,13 @@
       if (me.tween.k >= 1) me.tween = null;
     }
     if (me.running) me.avanza(dt);
+    var co = me.escena && me.escena.corriente, corKeep = false;
+    if (co && me.ok3d && me.verCor && me.enPantalla && !document.hidden && co.activo()) {   // corriente: ≤30 fps y solo si hay puntos en tensión a la vista
+      corKeep = true; me.corAcc += dt;
+      if (me.corAcc >= 0.032) { co.update(me.corAcc); me.corAcc = 0; me.dirty = true; }
+    }
     if (me.dirty && me.ok3d) { me.dirty = false; me.renderer.render(me.scene, me.camera); me.renderDet(); }
-    if (me.running || me.tween || me.dirty) requestAnimationFrame(function (n) { me.loop(n); });
+    if (me.running || me.tween || me.dirty || corKeep) requestAnimationFrame(function (n) { me.loop(n); });
     else me.loopOn = false;
   };
 

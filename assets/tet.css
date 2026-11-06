@@ -148,6 +148,7 @@ h2{font:800 1.5rem/1.15 var(--f-tit);margin:0 0 .8rem;letter-spacing:.005em}
 :root[data-theme="dark"] .ctrl2 .mini{border-color:var(--bd)}
 .ctrl2 .mini[aria-pressed="true"]{background:var(--aviso);color:var(--aviso-ink)}
 .ctrl2 .mini svg{width:16px;height:16px}
+.ctrl2 .sm{display:none}
 .ctrl2 .mini.rs span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 .ctrl2 .mini.rs{width:44px;justify-content:center;padding:0}
 
@@ -273,6 +274,9 @@ footer.pie{max-width:1400px;margin:0 auto;padding:1.4rem max(16px,env(safe-area-
   .ctrl2{flex-wrap:nowrap;gap:.4rem;justify-content:space-between}
   .ctrl2 .mini{padding:0 .6rem}
   .ctrl2 .mini span{font-size:.8rem}
+  .ctrl2 .lg{display:none}.ctrl2 .sm{display:inline}
+  .ctrl2 .mini{gap:.25rem}
+  .ctrl2 .mini svg{width:13px;height:13px}
   .ctrl2 .mini.rs span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
   .ctrl2 .mini.rs{width:44px;justify-content:center;padding:0}
   .ctrl2 .seg button{min-width:42px;padding:0 .45rem}

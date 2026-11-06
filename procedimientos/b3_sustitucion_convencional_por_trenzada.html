@@ -46,6 +46,7 @@
 <script src="../assets/three/GLTFLoader.js"></script>
 <script src="../assets/three/meshopt_decoder.js"></script>
 <script src="../assets/tet.js"></script>
+<script src="../assets/escenas/corriente.js"></script>
 <script src="../assets/escenas/apoyo-bt-pasos.js"></script>
 <script src="../assets/escenas/apoyo-bt.js"></script>
 <script src="../assets/escenas/red-trenzada-pasos.js"></script>
@@ -87,12 +88,12 @@ TET.montar({
         nota:'Se anima aquí el primer conductor (el neutro); el paso siguiente del manual manda repetir en los otros.',
         ilus:'El manual no dice con qué conductor se empieza en este extremo; se anima el neutro primero. Retirar el aislamiento se muestra quitando el dedal y dejando la punta metálica al aire.'},
       {texto:'Limpiar el conductor y realizar la conexión de cada uno de los conductores de la red trenzada en uno de los extremos, reponiendo aislamiento.',pag:63,anim:{a:'ciclo',e:0,fases:['N'],modo:'cc'},cam:'ext1',dur:5,det:{cam:'det-conexion',txt:'Detalle: conector con protección aislante unido al conductor convencional (Manual p. 64)'},
-        ilus:'El conector (metal) y su protección aislante (naranja) se dibujan de forma esquemática. El conductor al que se conecta es el convencional de la línea; el gesto de cepillar es ilustrativo.'},
+        ilus:'El conector (metal) y su protección aislante (naranja) se dibujan de forma esquemática. El conductor al que se conecta es el convencional de la línea; el gesto de cepillar es ilustrativo. Los puntos de tensión de la red trenzada nueva son ilustrativos: se muestra en tensión desde que se conecta por un extremo a la red existente.'},
       {texto:'Repetir los dos pasos anteriores en los otros conductores de la red trenzada.',pag:63,anim:{a:'ciclo',e:0,fases:['R','S','T'],modo:'todo'},cam:'ext1',dur:9,ilus:'El orden entre R, S y T es ilustrativo.'},
       {texto:'Identificar los conductores en el otro extremo del conductor, conectarlos secuencialmente comenzando por el neutro, comprobando previamente las concordancias de fases reponiendo finalmente el aislamiento.',pag:63,anim:{a:'ciclo',e:1,fases:['N','R','S','T'],modo:'ext2'},cam:'ext2',dur:10,det:{cam:'det-ext2',txt:'Detalle: conectores con protección aislante en el otro apoyo (Manual p. 64)'},
         ilus:'Las etiquetas y el ✓ (concordancia de fases comprobada) son solo una forma de mostrar la identificación y la comprobación. En este extremo no se dibuja al trabajador.'},
       {texto:'Retencionar los conductores convencionales, cortar y, si es necesario, convertir el apoyo de alineación en amarre.',pag:63,anim:{a:'corta'},cam:'vano',dur:5,det:{cam:'det-corte',txt:'Detalle: conductores convencionales retencionados y cortados; el tramo retirado en trazo tenue (Manual p. 64)'},
-        nota:'El tramo convencional retirado se muestra en trazo tenue, como en el esquema de la p. 64 («Conductores retirados»).',
+        nota:'El tramo convencional retirado se muestra en trazo tenue, como en el esquema de la p. 64 («Conductores retirados»). Los puntos de tensión dejan de recorrer el tramo retirado (ilustrativo).',
         ilus:'El manual no dice dónde se retencionan ni dónde se cortan los conductores; los puntos se dibujan de forma esquemática. No se anima la conversión del apoyo en amarre.'},
       {texto:'Si existen acometidas en línea a sustituir, las desconexiones y o conexiones de éstas se realizarán según el procedimiento correspondiente.',pag:63,anim:{a:'ping',k:'vano'},cam:'vano',dur:3.5,
         nota:'Aclaración propia (ilustrativo): el manual remite al «procedimiento correspondiente»; los de conexión y desconexión de acometidas de este mismo apartado son B.1 y B.2.',
