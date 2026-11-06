@@ -22,7 +22,7 @@
       var c = nombre === 'acom' ? 'caja de acometida' : 'caja general de protección';
       var rev = nombre === 'acom' ? 'Revisar la caja (de acometida).' : 'Revisar la caja general de protección de la acometida.';
       return [
-        { texto: rev, pag: pag, anim: 'cgpAbre', cam: 'cgp', ilus: 'El manual no dice quién la revisa; se anima al ayudante. La caja se dibuja en la fachada del edificio y el tramo enterrado de la acometida no se ve.' },
+        { texto: rev, pag: pag, anim: 'cgpAbre', cam: 'cgp', ilus: 'El manual no dice quién la revisa; se anima al ayudante. La caja se dibuja en la fachada del edificio; el tramo enterrado de la acometida (o de entrada y salida) no se ve y la geometría de la caja es representativa.' },
         { texto: 'Retirar fusibles de la ' + c + '.', pag: pag, anim: { a: 'cgpFus' }, cam: 'cgp', ilus: 'El manual no dice quién lo hace; fusibles y barra de neutro son esquemáticos.' },
         { texto: 'Cerrar y precintar la ' + c + (nombre === 'acom' ? ', si fuera necesario.' : ' si fuera necesario.'), pag: pag, anim: 'cgpCierra', cam: 'cgp', ilus: 'El precinto se dibuja como una esfera roja en el cierre.' },
         { texto: 'Si es necesario, señalizar, exterior e interiormente, la ' + c + '.', pag: pag, anim: 'senalCgp', cam: 'cgp', ilus: 'El tipo de cartel es representativo; el manual no lo describe.' }

@@ -15,3 +15,6 @@ Modelos de **NVIDIA SimReady**, licencia **CC BY 4.0**, tomados del dataset http
 | pinza_amperimetrica.glb | testingTool_multimeter_clamp_b01 |
 | alicates.glb | handTool_pliers_combination_a01 |
 | destornillador.glb | handTool_screwdriver_slotted_4mm_a01 |
+| cadena_metalica.glb | engineComponent_timing_chain_a01 (lod3) — usada como cadena/colgante de los objetos metálicos |
+| boligrafo_metal.glb | stationery_pen_metal_a01 |
+| navaja.glb | handTool_knife_foldingUtility_a01 |

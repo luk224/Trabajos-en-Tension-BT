@@ -35,7 +35,7 @@
     var XF = 14;                                                             // B.3: x del apoyo del otro extremo (tramo corto, no a escala)
     var XR = XL.map(function (x) { return XF - x; });                        // idem extremo derecho (B.3)
     var XB2 = [0, 1, 2, 3].map(function (i) { return 0.95 + 0.3 * i; });    // B.2: puntos de conexión sobre la red trenzada
-    var ZM = 0.45, XC1 = 3.4, XC2 = XF - 3.4, HB0 = -1.4;                       // z de la red principal (B.2), cortes y descenso inicial (B.3)
+    var ZM = 0.45, XC1 = 2.0, XC2 = XF - 2.0, HB0 = -1.4;                       // z de la red principal (B.2), cortes y descenso inicial (B.3)
     function ym(x) { var u = Math.min(1, Math.abs(x) / LTOT); return 6.95 - 4 * SAG * u * (1 - u); }
     function yBun(x) { var u = x / XF; return 6.05 - 2 * u * (1 - u); }
     function yB(i, x) { if (x <= 0) return yC(i, x); if (x >= XF) return YF[i]; var u = x / XF; return YF[i] - 4 * SAG * u * (1 - u); }   // B.3: conductor entre los dos apoyos
@@ -101,7 +101,7 @@
       g.fillStyle = o.k === 'check' ? pal('ok') : pal(o.k); g.beginPath();
       if (o.txt === '✓') { g.arc(W / 2, H / 2, 40, 0, PI * 2); } else { g.moveTo(r, 6); g.lineTo(W - r, 6); g.quadraticCurveTo(W - 6, 6, W - 6, r); g.lineTo(W - 6, H - r); g.quadraticCurveTo(W - 6, H - 6, W - r, H - 6); g.lineTo(r, H - 6); g.quadraticCurveTo(6, H - 6, 6, H - r); g.lineTo(6, r); g.quadraticCurveTo(6, 6, r, 6); }
       g.fill(); g.lineWidth = 5; g.strokeStyle = pal('texto'); g.globalAlpha = 0.9; g.stroke(); g.globalAlpha = 1;
-      g.fillStyle = '#ffffff'; g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.fillStyle = o.k === 'T' ? '#14181d' : '#ffffff'; g.textAlign = 'center'; g.textBaseline = 'middle';
       if (o.txt === '✓') { g.strokeStyle = '#fff'; g.lineWidth = 12; g.lineCap = 'round'; g.lineJoin = 'round'; g.beginPath(); g.moveTo(W / 2 - 20, H / 2 + 2); g.lineTo(W / 2 - 5, H / 2 + 18); g.lineTo(W / 2 + 22, H / 2 - 16); g.stroke(); }
       else { g.font = '800 64px "Avenir Next Condensed","Bahnschrift","Arial Narrow",system-ui,sans-serif'; g.fillText(o.txt, W / 2, H / 2 + 3); }
       o.tex.needsUpdate = true;
@@ -183,7 +183,7 @@
         var C0 = V(5.4, 3.82, 2.16), Pb = b1 ? V(1.3, 6.45, 0.95) : V(1.45, 6.15, 0.78), NP = 64, path = [];
         for (k = 0; k < NP; k++) { var u = k / (NP - 1); path.push(V(lerp(C0.x, Pb.x, u), lerp(C0.y, Pb.y, u) - 0.5 * Math.sin(u * PI), lerp(C0.z, Pb.z, u))); }
         X.acom = [];
-        for (i = 0; i < 4; i++) { var ta = tubo(NP, 0.03, M('ropa2', { side: T.DoubleSide })); G2.add(ta); tuboSet(ta, helix(path, i, 0.035, 0.55)); X.acom.push(ta); }
+        for (i = 0; i < 4; i++) { var ta = tubo(NP, 0.03, M(FA[i], { side: T.DoubleSide })); G2.add(ta); tuboSet(ta, helix(path, i, 0.035, 0.55)); X.acom.push(ta); }
         var e0 = extremo({ J: AO.J, free: 0.72 }); e0.Pe.copy(Pb);
         X.Pb = Pb;
       }
@@ -194,9 +194,7 @@
         for (x = -5; x < 9; x += 0.1) X.xs.push(Math.round(x * 100) / 100);
         for (x = 9; x <= 20; x += 1) X.xs.push(x);
         X.main = [];
-        for (i = 0; i < 4; i++) { var tm = tubo(X.xs.length, 0.03, M('ropa2', { side: T.DoubleSide })); G2.add(tm); X.main.push(tm); }
-        X.bandas = [0, 1, 2, 3].map(function (q) { return mk(cylU(0.045, 8), M(FA[q]), 0, 0, 0, G2); });
-        X.bandas.forEach(function (bd) { bd.rotation.z = PI / 2; bd.scale.y = 0.1; });
+        for (i = 0; i < 4; i++) { var tm = tubo(X.xs.length, 0.03, M(FA[i], { side: T.DoubleSide })); G2.add(tm); X.main.push(tm); }
         [-20, 0, 20].forEach(function (xx) { mk(box(0.16, 0.22, 0.3), M('cgp'), xx, 6.95 + (xx === 0 ? 0 : 0.0), 0.28, G2); });
         X.cunas = [0.68, 2.05].map(function (xx, q) { var c = mk(box(0.11, 0.36, 0.14), M('marca'), xx, 6.9, ZM, G2); c.rotation.z = q ? -0.2 : 0.2; c.visible = false; return c; });
         X.tela = mk(geo('tela2', function () { return new T.PlaneGeometry(2.6, 1.0); }), Mt('tela', 0.55), 1.4, 6.85, 0.27, G2); X.tela.visible = false;
@@ -219,13 +217,13 @@
         for (i = 0; i < 4; i++) { var ag = aislador('aislador'); ag.position.set(XF, YF[i], 0.3); G2.add(ag); }
         /* retenciones y cortes */
         X.ret3 = [];
-        for (i = 0; i < 4; i++) { [3.15, XF - 3.15].forEach(function (xx) { var r = mk(box(0.1, 0.1, 0.08), M('metal'), xx, yB(i, xx), ZC, G2); r.visible = false; X.ret3.push(r); }); }
+        for (i = 0; i < 4; i++) { [XC1 - 0.2, XC2 + 0.2].forEach(function (xx) { var r = mk(box(0.1, 0.1, 0.08), M('metal'), xx, yB(i, xx), ZC, G2); r.visible = false; X.ret3.push(r); }); }
         /* protecciones del apoyo de la izquierda: se deja descubierto el punto de conexión (como en B.1) */
         for (i = 0; i < 4; i++) {
           var pr0 = AO.pr[i], p1 = pr0.pieces[1];
           /* como en A.1: pieza completa 0,3-3,0 con una «ventana» (win) que se abre solo en la fase en curso */
           p1.a.set(0.3, yB(i, 0.3), ZC); p1.b.set(1.0, yB(i, 1.0), ZC);
-          [[1.0, 1.6, true], [1.6, 3.0, false]].forEach(function (sg) {
+          [[1.0, 1.6, true], [1.6, XC1, false]].forEach(function (sg) {
             var nm = mk(cylU(0.05, 8), Mt('aisl', 0.45), 0, 0, 0, G2); nm.visible = false;
             pr0.pieces.push({ win: sg[2], m: nm, a: V(sg[0], yB(i, sg[0]), ZC), b: V(sg[1], yB(i, sg[1]), ZC) });
           });
@@ -234,12 +232,12 @@
         X.pF = [];
         for (i = 0; i < 4; i++) {
           var o = { pieces: [], cap: null };
-          [[XF - 0.3, XF - 1.0], [XF - 1.0, XF - 1.6, 'w'], [XF - 1.6, XF - 3.0]].forEach(function (s2) { var m = mk(cylU(0.05, 8), Mt('aisl', 0.45), 0, 0, 0, G2); m.visible = false; o.pieces.push({ win: s2[2] === 'w', m: m, a: V(s2[0], yB(i, s2[0]), ZC), b: V(s2[1], yB(i, s2[1]), ZC) }); });
+          [[XF - 0.3, XF - 1.0], [XF - 1.0, XF - 1.6, 'w'], [XF - 1.6, XC2]].forEach(function (s2) { var m = mk(cylU(0.05, 8), Mt('aisl', 0.45), 0, 0, 0, G2); m.visible = false; o.pieces.push({ win: s2[2] === 'w', m: m, a: V(s2[0], yB(i, s2[0]), ZC), b: V(s2[1], yB(i, s2[1]), ZC) }); });
           o.cap = mk(sph(0.13, 10, 8), Mt('aisl', 0.45), XF, YF[i], 0.34, G2); o.cap.visible = false; X.pF.push(o);
         }
         X.telaF = mk(box(0.5, 1.9, 0.45), Mt('tela', 0.38), XF, 7.6, -0.02, G2); X.telaF.visible = false;
         /* cable trenzado nuevo */
-        X.bundle = []; for (i = 0; i < 4; i++) { var tn = tubo(Math.round((XF - 2.6) / 0.1) + 1, 0.03, M('ropa2', { side: T.DoubleSide })); G2.add(tn); X.bundle.push(tn); }
+        X.bundle = []; for (i = 0; i < 4; i++) { var tn = tubo(Math.round((XF - 2.6) / 0.1) + 1, 0.03, M(FA[i], { side: T.DoubleSide })); G2.add(tn); X.bundle.push(tn); }
         var eL = extremo({ J: AO.J, free: 0.72 });
         var Jr = XR.map(function (x2, q) { return V(x2, yB(q, x2), ZC); });
         var eR = extremo({ J: Jr, free: 0.72 });
@@ -294,7 +292,6 @@
         if (chg('zs', s.zs.toFixed(3))) {
           for (i = 0; i < 4; i++) tuboSet(X.main[i], X.xs.map(function (x) { return coreAt(i, x, s.zs); }));
         }
-        for (i = 0; i < 4; i++) { var bd = X.bandas[i], c = AO.J[i]; bd.visible = s.zs > 0.5; bd.position.set(c.x - 0.14, c.y, c.z); }
         var ci = ss(s.ci);
         X.cunas.forEach(function (c, q) { c.visible = ci > 0.01; c.position.set(q ? 2.05 : 0.68, 6.9 - 0.0, ZM + 0.4 * (1 - ci)); });
         X.tela.visible = s.tela2 > 0.01; X.tela.scale.setScalar(Math.max(0.001, ss(s.tela2)));

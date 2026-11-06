@@ -31,10 +31,17 @@
     function kern(x) { var k = Math.max(0, 1 - Math.abs(x) / 3.5); return k * k; }
     function yC(i, x, hh) { var u = Math.min(1, Math.abs(x) / LTOT); return YF[i] - 4 * SAG * u * (1 - u) + (hh || 0) * kern(x); }
     function ladX(y) { return LB.x + (LT.x - LB.x) * (y / LT.y); }
-    var XW = 0.7, YFEET = 0; (function () { for (var k = 0; k < 6; k++) { YFEET = yC(3, XW, 0) - HCOT - HEAD; XW = ladX(YFEET); } })();
+    var SIDE = 1, AY0 = -1.3, XW = 0.7, YFEET = 0;
 
     /* ---------- estado ---------- */
-    var opt = { fin: false, acometida: true, desconexion: false, sust: false };
+    var opt = { fin: false, acometida: true, desconexion: false, sust: false, izq: false };
+    /* opt.izq: escalera a la izquierda y derivación pegada al apoyo, como en el esquema de la p. 44 (A.1) */
+    function lado() {
+      SIDE = opt.izq ? -1 : 1; AY0 = opt.izq ? 1.3 : -1.3; XJ = opt.izq ? 0.8 : 1.3;
+      LB.set(2.0 * SIDE, 0, 0.22); LT.set(0.18 * SIDE, 6.9, 0.22); XW = 0.7 * SIDE;
+      for (var k = 0; k < 6; k++) { YFEET = yC(3, XW, 0) - HCOT - HEAD; XW = ladX(YFEET); }
+    }
+    lado();
     var G = null, O = null, st = null, own = [];
     var mats = {}, sprites = [], geos = {};
 
@@ -95,7 +102,8 @@
       g.fillStyle = o.k === 'check' ? pal('ok') : pal(o.k); g.beginPath();
       if (o.txt === '✓') { g.arc(W / 2, H / 2, 40, 0, PI * 2); } else { g.moveTo(r, 6); g.lineTo(W - r, 6); g.quadraticCurveTo(W - 6, 6, W - 6, r); g.lineTo(W - 6, H - r); g.quadraticCurveTo(W - 6, H - 6, W - r, H - 6); g.lineTo(r, H - 6); g.quadraticCurveTo(6, H - 6, 6, H - r); g.lineTo(6, r); g.quadraticCurveTo(6, 6, r, 6); }
       g.fill(); g.lineWidth = 5; g.strokeStyle = pal('texto'); g.globalAlpha = 0.9; g.stroke(); g.globalAlpha = 1;
-      g.fillStyle = o.tc === 'oscuro' ? '#14181d' : '#ffffff'; g.textAlign = 'center'; g.textBaseline = 'middle';
+      var cc = new T.Color(pal(o.k)), lum = 0.299 * cc.r + 0.587 * cc.g + 0.114 * cc.b, osc = o.tc === 'oscuro' || (o.tc === 'auto' && lum > 0.5);
+      g.fillStyle = osc ? '#14181d' : '#ffffff'; g.textAlign = 'center'; g.textBaseline = 'middle';
       if (o.txt === '✓') { g.strokeStyle = '#fff'; g.lineWidth = 12; g.lineCap = 'round'; g.lineJoin = 'round'; g.beginPath(); g.moveTo(W / 2 - 20, H / 2 + 2); g.lineTo(W / 2 - 5, H / 2 + 18); g.lineTo(W / 2 + 22, H / 2 - 16); g.stroke(); }
       else { var fs = o.txt.length > 3 ? 44 : 64; g.font = '800 ' + fs + 'px "Avenir Next Condensed","Bahnschrift","Arial Narrow",system-ui,sans-serif'; g.fillText(o.txt, W / 2, H / 2 + 3); }
       o.tex.needsUpdate = true;
@@ -220,6 +228,7 @@
         O.condPts.push(xs.map(function () { return V(0, 0, 0); }));
       }
       O.condH = [null, null, null, null];
+      O.halo = tubo(xs.length, 0.042, new T.MeshBasicMaterial({ color: pal('halo'), side: T.BackSide })); O.halo.material.userData.k = 'halo'; mats['Kh'] = O.halo.material; G.add(O.halo);
       /* postes lejanos */
       [-LTOT, LTOT].forEach(function (x) { if (opt.fin && x < 0) return; mk(cylU(0.13, 8), M('poste'), x, POLE_H / 2, 0, G).scale.set(1, POLE_H, 1); });
       /* circuito 2 (doble circuito, detrás del apoyo) */
@@ -235,7 +244,7 @@
       }
       O.c2tela = mk(box(0.5, 1.9, 0.45), Mt('tela', 0.38), 0, 7.6, -0.02, O.c2);
       /* protecciones del circuito 1 */
-      O.pr = []; var segsD = opt.acometida ? [[0.3, 1.0], [1.0, 1.6, 'w'], [1.6, 3.0]] : [[0.3, 3.0]];
+      O.pr = []; var segsD = opt.acometida ? [[0.3, XJ - 0.3], [XJ - 0.3, XJ + 0.3, 'w'], [XJ + 0.3, 3.0]] : [[0.3, 3.0]];
       for (i = 0; i < 4; i++) {
         var pr = { pieces: [], cap: null, ded: null, der: null };
         var lista = opt.fin ? segsD : [[-0.3, -3.0]].concat(segsD);
@@ -246,6 +255,7 @@
       O.tela = mk(box(0.5, 1.9, 0.45), Mt('tela', 0.38), 0, 7.6, -0.02, G); O.tela.visible = false;
       /* retención, polea, cuerda, rana y aparejo */
       O.ret = mk(box(0.1, 0.1, 0.07), M('metal'), 0, YF[IS], ZC, G);
+      O.dedS = mk(sph(0.08, 8, 6), Mt('aisl', 0.7), 0.3, YF[IS], ZC, G); O.dedS.visible = false;
       O.pul = grp(G, 0, 0, 0); O.pul.visible = false;
       mk(cylX(0.06, 0.04, 12), M('metal'), 0, 0, 0, O.pul); mk(box(0.04, 0.04, 0.62), M('metal'), 0, 0, -0.31, O.pul);
       O.rope = tubo(24, 0.02, M('texto', { side: T.DoubleSide })); O.rope.visible = false; G.add(O.rope);
@@ -253,8 +263,8 @@
       O.apar = grp(G, 0, 0, 0); O.apar.visible = false; mk(box(0.09, 0.16, 0.07), M('ropa2'), 0, 0, 0, O.apar); mk(box(0.09, 0.16, 0.07), M('ropa2'), 0.2, 0, 0, O.apar);
       /* tela inferior de apoyo: marcador del aislador viejo retirado */
       /* etiquetas de fase */
-      O.lab = FA.map(function (f, i) { var s = etq(f, f, 0.62, 0.31); s.position.set(-1.25, YF[i], 0.75); G.add(s); return s; });
-      O.labAc = FA.map(function (f, i) { var s = etq(f, f, 0.5, 0.25); s.position.set(XJ + 0.35, YF[i] - 0.45, 0.8); s.visible = false; G.add(s); return s; });
+      O.lab = FA.map(function (f, i) { var s = etq(f, f, 0.62, 0.31, 'auto'); s.position.set(-1.25, YF[i], 0.75); G.add(s); return s; });
+      O.labAc = FA.map(function (f, i) { var s = etq(f, f, 0.5, 0.25, 'auto'); s.position.set(XJ + 0.35, YF[i] - 0.45, 0.8); s.visible = false; G.add(s); return s; });
       /* escalera */
       O.esc = grp(G, LB.x, 0, LB.z); O.esc.visible = false;
       var top = V(LT.x - LB.x, LT.y, 0), base = V(0, 0, 0), L = top.length();
@@ -262,14 +272,14 @@
       var nr = Math.floor(L / 0.45); for (k = 1; k <= nr; k++) { var f = k / (nr + 1); mk(cylZ(0.022, 0.4, 6), M('esc'), top.x * f, top.y * f, 0, O.esc); }
       O.sujeta = mk(cylU(0.16, 12), M('marca'), LT.x, LT.y - 0.15, 0, G); O.sujeta.scale.set(1, 0.07, 1); O.sujeta.visible = false;
       /* trabajadores */
-      O.w = persona('casco'); G.add(O.w.g); O.w.g.rotation.y = -PI / 2;
+      O.w = persona('casco'); G.add(O.w.g); O.w.g.rotation.y = -SIDE * PI / 2;
       O.ay = persona('casco2'); G.add(O.ay.g);
       /* cota de 40 cm */
       O.cota = grp(G, XW, 0, 0.5); O.cota.visible = false;
       var yh = YFEET + HEAD, yt = yh + HCOT;
       mk(cylU(0.012, 6), MB('cota'), 0, (yh + yt) / 2, 0, O.cota).scale.set(1, HCOT, 1);
       mk(cylX(0.012, 0.22, 6), MB('cota'), 0, yh, 0, O.cota); mk(cylX(0.012, 0.22, 6), MB('cota'), 0, yt, 0, O.cota);
-      O.cotaL = etq('≈ 40 cm', 'cota', 1.15, 0.5); O.cotaL.position.set(0.7, (yh + yt) / 2, 0); O.cota.add(O.cotaL);
+      O.cotaL = etq('≈ 40 cm', 'cota', 1.15, 0.5); O.cotaL.position.set(0.7 * SIDE, (yh + yt) / 2, 0); O.cota.add(O.cotaL);
       /* acometida, edificio y CGP */
       O.J = FA.map(function (f, i) { return V(XJ, yC(i, XJ, 0), ZC); });
       O.C = FA.map(function (f, i) { return V(CG.x - 0.12 + 0.08 * i, CG.y + 0.42, CG.z); });
@@ -365,7 +375,7 @@
     function defaults() {
       var d = opt.desconexion ? 1 : 0;
       return { tr: null, vial: 0, valla: 0, verif: 0, guardar: 0, metal: 0, epi: 0, bolsa: 0,
-        ay: { x: -1.3, z: 1.3, ry: PI, w: 0, tira: 0 }, cl: 0, sujeta: 0, climb: 0, arm: 0, cota: 0,
+        ay: { x: AY0, z: 1.3, ry: PI, w: 0, tira: 0 }, cl: 0, sujeta: 0, climb: 0, arm: 0, cota: 0,
         p: [0, 0, 0, 0], open: [0, 0, 0, 0], tela: 0, cgp: { door: 0, fus: 1, seal: 0, plE: 0, plI: 0 },
         s: [d, d, d, d], ded: [d, d, d, d], labAc: 0, labP: opt.acometida ? 0 : 1, dobl: 0, doblP: 0,
         h: 0, ret: 1, pul: 0, rope: 0, ten: 0, rana: 0, pull: 0, sust: 0, bolsaT: 0 };
@@ -379,8 +389,9 @@
       /* conductores: solo se reconstruye el que cambia */
       for (i = 0; i < 4; i++) {
         var hh = (i === IS) ? s.h : 0;
-        if (chg('c' + i, hh)) { var P = O.condPts[i]; for (k = 0; k < O.xs.length; k++) P[k].set(O.xs[k], yC(i, O.xs[k], hh), ZC); tuboSet(O.cond[i], P); }
+        if (chg('c' + i, hh)) { var P = O.condPts[i]; for (k = 0; k < O.xs.length; k++) P[k].set(O.xs[k], yC(i, O.xs[k], hh), ZC); tuboSet(O.cond[i], P); if (i === 2) tuboSet(O.halo, P); }
       }
+      O.dedS.visible = !opt.acometida && s.p[3] > 0.9 && s.p[IS] < 0.5; O.dedS.position.set(0.3, yC(IS, 0.3, s.h), ZC);
       O.ret.visible = s.ret > 0.5; O.ret.position.set(0, YF[IS], ZC);
       /* aislador viejo/nuevo */
       var ov = O.ais[IS], a0 = ss(seg(s.sust, 0, 0.5)), a1 = ss(seg(s.sust, 0.5, 1));
@@ -443,8 +454,8 @@
       }
       /* trabajador */
       var w = O.w, y, x, z, ww = 0, climbing = false;
-      if (s.climb < 0.15) { var q3 = ss(s.climb / 0.15); x = lerp(2.9, LB.x - 0.05, q3); z = lerp(0.9, 0.22, q3); y = 0; ww = q3 > 0 && q3 < 1 ? s.climb * 60 : 0; }
-      else { y = YFEET * seg(s.climb, 0.15, 1); x = ladX(y) - 0.05; z = 0.22; ww = s.climb >= 0.999 ? 0 : y * 7; climbing = true; }
+      if (s.climb < 0.15) { var q3 = ss(s.climb / 0.15); x = lerp(2.9 * SIDE, LB.x - 0.05 * SIDE, q3); z = lerp(0.9, 0.22, q3); y = 0; ww = q3 > 0 && q3 < 1 ? s.climb * 60 : 0; }
+      else { y = YFEET * seg(s.climb, 0.15, 1); x = ladX(y) - 0.05 * SIDE; z = 0.22; ww = s.climb >= 0.999 ? 0 : y * 7; climbing = true; }
       w.g.position.set(x, y, z);
       var epi = ss(s.epi), armW = Math.max(-2.7 * s.arm, climbing && s.arm < 0.01 ? -0.9 : 0);
       w.pose({ visor: lerp(-1.6, 0, epi), guantes: epi > 0.4, cinto: epi > 0.7, w: ww, armL: armW, armR: armW });
@@ -545,7 +556,7 @@
       },
       polea: function (t, p) {
         st.pul = ss(seg(t, 0, 0.5)); if (p.cuerda) st.rope = t > 0.4 ? 1 : 0;
-        if (p.ayuda) A.ayVa(t, { a: [-1.3, 1.3], b: [0.55, 1.5], ry: PI });
+        if (p.ayuda) A.ayVa(t, { a: [AY0, 1.3], b: [0.55, 1.5], ry: PI });
         st.arm = 0.0;
       },
       tensar: function (t) { st.ten = ss(t); },
@@ -555,11 +566,11 @@
       quitaEquipo: function (t, p) { st.rope = t < 0.6 ? 1 : 0; st.ten = 1 - ss(seg(t, 0, 0.6)); st.pul = 1 - ss(seg(t, 0.5, 1)); st.rana = 1 - ss(seg(t, 0.2, 0.7)); st.pull = st.rana > 0.01 ? 1 : 0; if (t >= 1) { st.pull = 0; } },
       destensar: function (t) {
         st.rope = t > 0.1 ? 1 : 0; st.rana = ss(seg(t, 0, 0.2));
-        A.ayVa(seg(t, 0, 0.3), { a: [-1.3, 1.3], b: [0.55, 1.5], ry: PI });
+        A.ayVa(seg(t, 0, 0.3), { a: [AY0, 1.3], b: [0.55, 1.5], ry: PI });
         st.ten = ss(seg(t, 0.3, 0.6)); st.pull = ss(seg(t, 0.4, 0.8)); st.ret = t < 0.35 ? 1 : 0;
         st.h = HFIN * ss(seg(t, 0.7, 1)); st.arm = 0.5;
       },
-      cgpAbre: function (t) { st.cgp.door = ss(seg(t, 0.55, 1)); A.ayVa(seg(t, 0, 0.6), { a: [-1.3, 1.3], b: [CG.x, 2.85], ry: PI }); },
+      cgpAbre: function (t) { st.cgp.door = ss(seg(t, 0.55, 1)); A.ayVa(seg(t, 0, 0.6), { a: [AY0, 1.3], b: [CG.x, 2.85], ry: PI }); },
       cgpFus: function (t, p) { st.cgp.fus = p.inv ? ss(seg(t, 0.3, 1)) : 1 - ss(t); if (p.inv) { st.cgp.door = ss(seg(t, 0, 0.3)); st.cgp.seal = 0; } st.ay.tira = 0.5 * Math.sin(t * PI); },
       cgpCierra: function (t) { st.cgp.door = 1 - ss(seg(t, 0, 0.5)); st.cgp.seal = t > 0.6 ? 1 : 0; },
       senalCgp: function (t) {
@@ -606,7 +617,7 @@
       cgp: { p: [7.9, 4.5, 6.6], t: [5.3, 3.1, 2.1] },
       ascenso: { p: [5.8, 5.6, 11.5], t: [0.9, 4.5, 0.4] },
       cabeza: { p: [3.4, 7.8, 6.8], t: [0.7, 6.9, 0.4] },
-      cabeza2: { p: [3.8, 7.2, 6.4], t: [1.1, 6.7, 0.5] },
+      cabeza2: { p: [3.2, 7.2, 6.6], t: [0.6, 6.7, 0.5] },
       atras: { p: [-3.2, 7.6, -6.2], t: [0, 7.4, -0.2] },
       suelo2: { p: [4.5, 5.6, 9.8], t: [1.0, 1.1, 1.3] },
       sust: { p: [2.2, 7.9, 3.6], t: [0.3, 7.35, 0.4] },
@@ -615,7 +626,7 @@
 
     var api = {
       camaras: camaras,
-      configurar: function (o) { opt = Object.assign({ fin: false, acometida: true, desconexion: false, sust: false }, o || {}); cache = {}; construir(); api.reset(); },
+      configurar: function (o) { opt = Object.assign({ fin: false, acometida: true, desconexion: false, sust: false, izq: false }, o || {}); lado(); cache = {}; construir(); api.reset(); },
       reset: function () { st = defaults(); cache = {}; draw(); },
       aplicar: function (anim, t, activo) {
         if (activo) st.tr = null;

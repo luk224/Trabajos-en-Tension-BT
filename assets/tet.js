@@ -171,7 +171,7 @@
     me.stage = stage;
 
     var panel = h('div', { class: 'panel' });
-    var scroll = h('div', { class: 'scroll' });
+    var scroll = h('div', { class: 'scroll' }); me.scrollEl = scroll;
     if (def.selector) {
       var s = def.selector, box = h('div', { class: 'opcion', role: 'group', 'aria-label': s.etiqueta });
       box.appendChild(h('span', { class: 'et', text: s.etiqueta }));
@@ -194,6 +194,12 @@
     pasoBox.appendChild(me.pasoCab); pasoBox.appendChild(me.pasoTxt); pasoBox.appendChild(me.pasoNota);
     me.pasoBox = pasoBox;
     scroll.appendChild(me.fasesBar); scroll.appendChild(me.faseNom); scroll.appendChild(pasoBox);
+    if (def.leyendaFases !== false) {
+      var ley = h('div', { class: 'leyenda', 'aria-label': 'Leyenda de colores de las fases' });
+      [['N', 'neutro azul'], ['R', 'R marrón'], ['S', 'S negro'], ['T', 'T gris']].forEach(function (x) { var b = h('b'); var i = h('i'); i.style.setProperty('--c', 'var(--e-' + x[0] + ')'); b.appendChild(i); b.appendChild(document.createTextNode(x[1])); ley.appendChild(b); });
+      ley.appendChild(h('span', { text: 'Colores ilustrativos: el manual no los indica.' }));
+      scroll.appendChild(ley);
+    }
 
     var det = h('details', { class: 'todos' });
     det.open = window.matchMedia('(min-width:960px)').matches;
@@ -374,8 +380,15 @@
     if (p.ilus) me.pasoCab.appendChild(h('span', { class: 'ilus', text: 'Gesto ilustrativo' }));
     me.pasoTxt.textContent = p.texto;
     me.pasoNota.innerHTML = '';
-    if (p.nota) me.pasoNota.appendChild(h('p', { class: 'paso-nota', html: p.nota }));
-    if (typeof p.ilus === 'string') me.pasoNota.appendChild(h('p', { class: 'paso-nota', html: '<strong>Ilustrativo.</strong> ' + p.ilus }));
+    var nts = [];
+    if (p.nota) nts.push(h('p', { class: 'paso-nota', html: p.nota }));
+    if (typeof p.ilus === 'string') nts.push(h('p', { class: 'paso-nota', html: '<strong>Ilustrativo.</strong> ' + p.ilus }));
+    if (nts.length) {
+      var dn = h('details', { class: 'notas' }); dn.open = true;
+      dn.appendChild(h('summary', { text: p.nota && typeof p.ilus === 'string' ? 'Notas del paso' : (p.nota ? 'Nota del paso' : 'Ilustrativo') }));
+      nts.forEach(function (n) { dn.appendChild(n); }); me.pasoNota.appendChild(dn);
+    }
+    if (me.scrollEl && window.matchMedia('(min-width:960px)').matches) me.scrollEl.scrollTop = 0;
     // barra de fases
     var bs = me.fasesBar.children;
     for (var i = 0; i < bs.length; i++) {
@@ -389,10 +402,6 @@
       b.removeAttribute('aria-current'); b.classList.toggle('pasado', i < me.n);
       if (i === me.n) b.setAttribute('aria-current', 'step');
     });
-    var cur = me.items[me.n];
-    if (cur && me.det.open && window.matchMedia('(min-width:960px)').matches) {
-      var sc = me.lista; var top = cur.offsetTop - sc.clientHeight / 3; sc.scrollTo({ top: top, behavior: reduce ? 'auto' : 'smooth' });
-    }
     me.bPrev.disabled = me.n === 0; me.bNext.disabled = me.n === me.pasos.length - 1;
     try { history.replaceState(null, '', location.pathname + location.search + '#p=' + (me.n + 1)); } catch (e) {}
   };

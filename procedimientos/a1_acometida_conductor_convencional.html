@@ -109,7 +109,7 @@ TET.montar({
       {texto:'Retirar materiales de desecho.',pag:43,anim:'desecho',cam:'suelo2',dur:3.5,ilus:'La bolsa de desecho es representativa.'},
       {texto:'Retirar el equipo de señalización vial, si ha sido colocado.',pag:43,anim:{a:'vial',inv:true},cam:'vial'}
     ];
-    return {escena:{fin:false,acometida:true,desconexion:des},fases:[P.previas(42),{nombre:'Ejecución del trabajo',pasos:ejec},{nombre:'Operaciones finales',pasos:fin}]};
+    return {escena:{fin:false,acometida:true,desconexion:des,izq:true},fases:[P.previas(42),{nombre:'Ejecución del trabajo',pasos:ejec},{nombre:'Operaciones finales',pasos:fin}]};
   }
 });
 
