@@ -1,0 +1,5 @@
+.venv/
+paginas/
+fuentes/ocr/
+*.pdf
+__pycache__/
