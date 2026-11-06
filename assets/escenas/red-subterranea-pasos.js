@@ -13,7 +13,7 @@
         { texto: 'Inspeccionar la instalación donde se va a trabajar entibando si se considera necesario.', pag: pag, anim: 'inspeccion', cam: 'cala', dur: 5, ilus: 'El aro recorre la cala y, como «si se considera necesario», se dibuja un entibado de tablones y codales; el manual no describe su disposición.' },
         { texto: 'Delimitar y señalizar el lugar de trabajo.', pag: pag, anim: 'valla', cam: 'general', ilus: 'El tipo y la disposición de las vallas alrededor de la cala son representativos.' },
         { texto: 'Verificar el estado de los equipos de protección individual, equipos de protección colectiva y herramientas que se vayan a utilizar.', pag: pag, anim: 'verificar', cam: 'lona', ilus: 'Los equipos sobre la lona son una muestra; el manual no detalla cómo se verifican.' },
-        { texto: 'Desprenderse de los objetos metálicos el trabajador/es.', pag: pag, anim: 'metal', cam: 'suelo2', ilus: 'Reloj, anillo y cadena son ejemplos de objetos metálicos; el manual no los enumera.' },
+        { texto: 'Desprenderse de los objetos metálicos el trabajador/es.', pag: pag, anim: 'metal', cam: 'objetos', det: { cam: 'detObjetos', txt: 'Detalle: objetos metálicos que lleva cada trabajador (cadena, reloj, anillo, pulsera, hebilla, bolígrafo, navaja, llaves) y que se dejan en la bandeja de la lona (Manual p. ' + pag + ')' }, ilus: 'Cadena con colgante, reloj, anillo, pulsera, hebilla, bolígrafo, navaja y llaves son ejemplos de objetos metálicos; el manual no los enumera. Se dejan en una bandeja sobre la lona, lejos de la cala.' },
         { texto: 'Utilizar los equipos de protección tanto individual como colectivos, necesarios en cada fase del trabajo.', pag: pag, anim: 'epi', cam: 'suelo2', ilus: 'Se dibujan pantalla facial, guantes y cinturón; el resto de EPI de la ficha no se representa. En el ayudante solo se dibujan pantalla facial y guantes.' }
       ] };
     },
@@ -22,7 +22,7 @@
       var c = nombre === 'acom' ? 'caja de acometida' : 'caja general de protección';
       var rev = nombre === 'acom' ? 'Revisar la caja (de acometida).' : 'Revisar la caja general de protección de la acometida.';
       return [
-        { texto: rev, pag: pag, anim: 'cgpAbre', cam: 'cgp', ilus: 'El manual no dice quién la revisa; se anima al ayudante. La caja se dibuja en la fachada del edificio; el tramo enterrado de la acometida (o de entrada y salida) no se ve y la geometría de la caja es representativa.' },
+        { texto: rev, pag: pag, anim: 'cgpAbre', cam: 'cgp', ilus: 'El manual no dice quién la revisa; se anima al ayudante. ' + (nombre === 'acom' ? 'La caja de acometida se dibuja como un armario en la acera, bajo la línea principal del esquema; el tramo enterrado de entrada y salida no se ve y la geometría de la caja es representativa.' : 'La caja se dibuja en la fachada del edificio; el tramo enterrado de la acometida no se ve y la geometría de la caja es representativa.') + '' },
         { texto: 'Retirar fusibles de la ' + c + '.', pag: pag, anim: { a: 'cgpFus' }, cam: 'cgp', ilus: 'El manual no dice quién lo hace; fusibles y barra de neutro son esquemáticos.' },
         { texto: 'Cerrar y precintar la ' + c + (nombre === 'acom' ? ', si fuera necesario.' : ' si fuera necesario.'), pag: pag, anim: 'cgpCierra', cam: 'cgp', ilus: 'El precinto se dibuja como una esfera roja en el cierre.' },
         { texto: 'Si es necesario, señalizar, exterior e interiormente, la ' + c + '.', pag: pag, anim: 'senalCgp', cam: 'cgp', ilus: 'El tipo de cartel es representativo; el manual no lo describe.' }
