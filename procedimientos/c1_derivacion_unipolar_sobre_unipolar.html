@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<script>try{var t=localStorage.getItem('tema');var q=location.search.match(/[?&]tema=(dark|light)/);if(q)t=q[1];if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>C.1 Derivación subterránea unipolar sobre unipolar · Manual TETBT</title>
+<meta name="description" content="Animación paso a paso del procedimiento C.1 del Manual de Trabajos en Tensión en Baja Tensión.">
+<link rel="stylesheet" href="../assets/tet.css">
+</head>
+<body>
+<a class="skip" href="#reproductor">Ir al reproductor de pasos</a>
+<header class="cab">
+  <div class="cab-in">
+    <nav class="migas" aria-label="Migas de pan">
+      <a href="../index.html">← Manual TETBT</a><span class="sep" aria-hidden="true">·</span>
+      <a href="../index.html#s5">5. Procedimientos</a><span class="sep" aria-hidden="true">·</span>
+      <a class="act" href="../index.html#s5-c" aria-current="page">C. Red subterránea</a>
+    </nav>
+    <button class="btn-tema" type="button" data-tema-btn aria-pressed="false"><span>Modo oscuro</span></button>
+  </div>
+</header>
+<main>
+  <div class="titulo">
+    <span class="placa" aria-hidden="true">C.1</span>
+    <h1>Conexión de derivación subterránea de cable unipolar de aluminio sobre cable unipolar de aluminio</h1>
+  </div>
+  <section aria-label="Reproductor de pasos"><div id="reproductor"><noscript><p>Para ver la animación paso a paso hace falta JavaScript. Las fichas de abajo no lo necesitan.</p></noscript></div></section>
+  <section class="fichas" id="fichas" aria-label="Fichas del procedimiento"></section>
+</main>
+<footer class="pie">
+  <div class="hermano">
+    <div><div class="lbl">Procedimiento siguiente</div><strong>C.2 Conexión de derivación subterránea de cable unipolar de aluminio sobre cable tetrapolar de cobre</strong></div>
+    <a class="go" href="c2_derivacion_unipolar_sobre_tetrapolar.html">Abrir C.2</a>
+  </div>
+  <small>Material de formación basado en el Manual de Trabajos en Tensión en Baja Tensión, apartado 5.C. Las animaciones son una ayuda visual: el texto de cada paso es el del manual y los gestos que el manual no detalla están marcados como ilustrativos. Modelos 3D de vallas, señal, bolsa, casco, guantes y pinza: NVIDIA SimReady, licencia CC BY 4.0 (<a href="../assets/modelos/CREDITOS.md">créditos</a>).</small>
+</footer>
+<script src="../assets/three/three.min.js"></script>
+<script src="../assets/three/OrbitControls.js"></script>
+<script src="../assets/three/GLTFLoader.js"></script>
+<script src="../assets/three/meshopt_decoder.js"></script>
+<script src="../assets/tet.js"></script>
+<script src="../assets/escenas/red-subterranea-pasos.js"></script>
+<script src="../assets/escenas/red-subterranea.js"></script>
+<script>
+var NOTA_EPI='Los equipos de protección individual deberán tener marcas de homologación o de certificación.';
+var NOTA_EPC='Los materiales aislantes individuales deberán tener marcas de homologación o certificación o disponer de certificados de ensayos.';
+var NOTA_HER='Las herramientas aisladas deberán tener marcas de homologación o certificación.';
+var NOTA_MAT='Incluyen el material de señalización y delimitación, los dispositivos y accesorios para realizar el trabajo y los equipos de comprobación.';
+var RIESGOS=['Contacto eléctrico','Arco eléctrico','Caída de personas a distinto nivel','Caída de objetos','Choques y golpes','Cortes','Atrapamientos'];
+var HUMANOS='Dos trabajadores, uno habilitado para Trabajos en Tensión en Baja Tensión que actuará como Jefe de Trabajo y un ayudante para tareas auxiliares que, como mínimo, será un trabajador autorizado.';
+var EPI=['Casco de protección','Gafas inactínicas','Pantalla facial','Ropa de trabajo','Guantes aislantes','Guantes ignífugos','Guantes de protección mecánica','Calzado de seguridad','Cinturón de seguridad'];
+var EPC=['Tela aislante','Dedales aislantes','Alfombras aislantes'];
+var P=TET.pasosSubt;
+TET.montar({
+  id:'c1', escena:'red-subterranea',
+  fichas:{
+    definicion:{pag:65,texto:'Conectar en red subterránea una acometida con cale unipolar de aluminio sobre cable pasante unipolar de aluminio.'},
+    riesgosPag:65, riesgos:RIESGOS, humanos:{pag:65,texto:HUMANOS}, mediosPag:'65–67',
+    medios:{
+      epi:{nota:NOTA_EPI,items:EPI,pag:'65–66'},
+      epc:{nota:NOTA_EPC,items:EPC,pag:66},
+      herramientas:{nota:NOTA_HER,items:['Herramientas manuales aisladas','Bolsa portaherramientas'],pag:66},
+      materiales:{nota:NOTA_MAT,items:['Equipo de señalización y delimitación del lugar de trabajo','Equipo de señalización vial','Escalera aislante','Lona (para herramientas, equipos y materiales)','Pinzas aislantes','Pinza voltio-amperimétrica','Comprobador de secuencia de fases'],pag:'66–67'}
+    }
+  },
+  construir:function(){
+    var ejec=P.cajaPasos(67,'cgp').concat([
+      {texto:'Comprobar el estado de la cala y de los conductos de la línea pasante.',pag:67,anim:'cala',cam:'cala',dur:5,ilus:'El aro recorre el fondo de la cala; el manual no detalla qué se comprueba. El trabajador la mira desde la acera; baja a ella en el paso siguiente.'},
+      {texto:'Aislar la zona de trabajo en tensión; deberán protegerse las masas accesibles.',pag:67,anim:'aislar',cam:'cala',dur:6,
+        nota:'El manual lista como EPC las <strong>alfombras aislantes</strong> y los <strong>dedales aislantes</strong> y los dibuja en el esquema de la p. 69: alfombra o protección aislante en las paredes de la cala y dedales en los extremos de los conductores de la acometida.',
+        ilus:'La tela/alfombra sobre los demás conductores es ilustrativa; el manual solo dice “aislar la zona de trabajo en tensión” y lista tela, dedales y alfombras como EPC. El trabajador baja a la cala en este paso, pero el manual no dice cómo.'},
+      {texto:'Comprobar, antes de conectar, la inexistencia de diferencia de potencial entre el conductor principal y el de la acometida.',pag:67,anim:{a:'pinza',fases:4},cam:'trabajo',dur:5,ilus:'La pinza se muestra sobre cada conductor; el manual no detalla el método de medida.'},
+      {texto:'Realizar la conexión empezando por el conductor neutro.',pag:67,anim:{a:'conecta',fases:['N']},cam:'trabajo',dur:4,ilus:'El conector metálico y el movimiento del conductor derivado son ilustrativos; el manual no describe el tipo de conexión.'},
+      {texto:'Reponer el aislamiento.',pag:68,anim:{a:'aislamiento',fases:['N']},cam:'trabajo',dur:3.5,nota:'El esquema de la p. 69 indica «Conexión realizada (encintar)» y «Empalme realizado debidamente encintado (conductor neutro)».',ilus:'El encintado se dibuja como un manguito oscuro; el manual no describe el material.'},
+      {texto:'Repetir el proceso para los otros conductores.',pag:68,anim:{a:'faseUni',fases:['R','S','T'],soloConecta:true},cam:'trabajo',dur:8,ilus:'El orden R, S, T es ilustrativo.'},
+      {texto:'La conexión de la red trenzada se puede realizar conductor a conductor en los dos extremos a todos los conductores en un extremo y después en el otro extremo.',pag:68,anim:null,cam:'cala',dur:3,
+        nota:'Texto literal del manual. Se refiere a la red trenzada; no se anima ningún gesto concreto para este punto.'}
+    ]);
+    var fin=[
+      {texto:'Comprobar tensión y concordancia de fases en la caja general de protección, dándola nuevamente precintada.',pag:68,anim:'cgpVerif',cam:'cgp',dur:5,ilus:'El manual lista un «comprobador de secuencia de fases»; su aspecto y uso son esquemáticos.'},
+      {texto:'Reponer fusibles en la caja general de protección.',pag:68,anim:{a:'cgpFus',inv:true},cam:'cgp'},
+      {texto:'Inspeccionar visualmente el conjunto de la instalación.',pag:68,anim:'inspFinal',cam:'cala',dur:5,ilus:'La salida del trabajador de la cala no figura en el manual; se anima para que el recorrido sea coherente.'},
+      {texto:'Cerrar y precintar la caja general de protección.',pag:68,anim:'cgpCierra',cam:'cgp'},
+      {texto:'Revisar, limpiar y guardar los equipos, herramientas y materiales empleados en el trabajo.',pag:68,anim:['guardar','ayVuelve'],cam:'lona',dur:5,ilus:'Se recogen la lona, las alfombras y el entibado; el manual no detalla el orden ni el cierre de la cala.'},
+      {texto:'Retirar la señalización y delimitación del lugar de trabajo.',pag:68,anim:[{a:'valla',inv:true},'quitaSenal'],cam:'general',ilus:'Se retiran las vallas y también los carteles de la caja general de protección.'},
+      {texto:'Retirar materiales de desecho.',pag:68,anim:'desecho',cam:'suelo2',dur:3.5,ilus:'La bolsa de desecho es representativa.'},
+      {texto:'Retirar el equipo de señalización vial, si ha sido colocado.',pag:68,anim:{a:'vial',inv:true},cam:'vial'}
+    ];
+    return {escena:{modo:'c1'},fases:[P.previas(67),{nombre:'Ejecución del trabajo',pasos:ejec},{nombre:'Operaciones finales',pasos:fin}]};
+  }
+});
+
+</script>
+</body>
+</html>

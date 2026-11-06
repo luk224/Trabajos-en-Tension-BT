@@ -27,3 +27,4 @@ herramientas/ocr.py           OCR del PDF (easyocr, .venv con uv)
 - Modelos 3D reales: `assets/modelos/` (NVIDIA SimReady, CC BY 4.0, ver CREDITOS.md). Cargador GLTF + meshopt en `assets/three/`.
 - OCR: easyocr falla en esta CPU (Illegal instruction); `herramientas/ocr.py` usa RapidOCR (sin espacios/tildes, solo para buscar). Citar leyendo `paginas/pdf-NN.png` (`pdftoppm -r 110 -f N -l M`).
 - Móvil: lienzo con `touch-action:pan-y` (arrastre vertical = scroll; horizontal/pellizco = escena).
+- Mapa de páginas (PDF → impresa = PDF+2): A 38-47 · B.1 48-52, B.2 53-57, B.3 58-62 · C.1 63-67, C.2 67/68-72, C.3 73-77 · D.1 78-81 · E.1 82-86, E.2 87-91 · fin 92. Imágenes en `paginas/pdf-NN.png`.
