@@ -23,7 +23,7 @@ herramientas/ocr.py           OCR del PDF (easyocr, .venv con uv)
 5. Los PDF, páginas rasterizadas y el OCR en bruto no se suben (material de la empresa).
 
 ## Estado
-- Listo: 5.A (A.1, A.2) con reproductor 3D (`assets/tet.js`, escena `assets/escenas/apoyo-bt.js`), revisado por `revisor-fidelidad`. Pendiente: B.1-E.1 y secciones 1-4 (fichas).
+- Listo: 5.A (A.1, A.2), 5.B (B.1-B.3), 5.C (C.1-C.3) con reproductor 3D (`assets/tet.js`, escena `assets/escenas/apoyo-bt.js`), revisado por `revisor-fidelidad`. Pendiente: D.1, E.1, E.2 y secciones 1-4 (fichas).
 - Modelos 3D reales: `assets/modelos/` (NVIDIA SimReady, CC BY 4.0, ver CREDITOS.md). Cargador GLTF + meshopt en `assets/three/`.
 - OCR: easyocr falla en esta CPU (Illegal instruction); `herramientas/ocr.py` usa RapidOCR (sin espacios/tildes, solo para buscar). Citar leyendo `paginas/pdf-NN.png` (`pdftoppm -r 110 -f N -l M`).
 - Móvil: lienzo con `touch-action:pan-y` (arrastre vertical = scroll; horizontal/pellizco = escena).

@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<script>try{var t=localStorage.getItem('tema');var q=location.search.match(/[?&]tema=(dark|light)/);if(q)t=q[1];if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>B.3 Sustitución de red convencional por red trenzada · Manual TETBT</title>
+<meta name="description" content="Animación paso a paso del procedimiento B.3 del Manual de Trabajos en Tensión en Baja Tensión.">
+<link rel="stylesheet" href="../assets/tet.css">
+</head>
+<body>
+<a class="skip" href="#reproductor">Ir al reproductor de pasos</a>
+<header class="cab">
+  <div class="cab-in">
+    <nav class="migas" aria-label="Migas de pan">
+      <a href="../index.html">← Manual TETBT</a><span class="sep" aria-hidden="true">·</span>
+      <a href="../index.html#s5">5. Procedimientos</a><span class="sep" aria-hidden="true">·</span>
+      <a class="act" href="../index.html#s5-b" aria-current="page">B. Red aérea trenzada</a>
+    </nav>
+    <button class="btn-tema" type="button" data-tema-btn aria-pressed="false"><span>Modo oscuro</span></button>
+  </div>
+</header>
+<main>
+  <div class="titulo">
+    <span class="placa" aria-hidden="true">B.3</span>
+    <h1>Sustitución de red aérea convencional por red aérea trenzada</h1>
+  </div>
+  <section aria-label="Reproductor de pasos"><div id="reproductor"><noscript><p>Para ver la animación paso a paso hace falta JavaScript. Las fichas de abajo no lo necesitan.</p></noscript></div></section>
+  <section class="fichas" id="fichas" aria-label="Fichas del procedimiento"></section>
+</main>
+<footer class="pie">
+  <div class="hermano">
+    <div><div class="lbl">Procedimiento hermano</div><strong>B.2 Conexión o desconexión de acometidas de cable trenzado sobre red trenzada</strong></div>
+    <a class="go" href="b2_acometida_trenzado_sobre_trenzada.html">Abrir B.2</a>
+  </div>
+  <small>Material de formación basado en el Manual de Trabajos en Tensión en Baja Tensión, apartado 5.B. Las animaciones son una ayuda visual: el texto de cada paso es el del manual y los gestos que el manual no detalla están marcados como ilustrativos. Modelos 3D de escalera, vallas, señal, cinta, bolsa, casco, gafas, guantes y pinza: NVIDIA SimReady, licencia CC BY 4.0 (<a href="../assets/modelos/CREDITOS.md">créditos</a>).</small>
+</footer>
+<script src="../assets/three/three.min.js"></script>
+<script src="../assets/three/OrbitControls.js"></script>
+<script src="../assets/three/GLTFLoader.js"></script>
+<script src="../assets/three/meshopt_decoder.js"></script>
+<script src="../assets/tet.js"></script>
+<script src="../assets/escenas/apoyo-bt-pasos.js"></script>
+<script src="../assets/escenas/apoyo-bt.js"></script>
+<script src="../assets/escenas/red-trenzada-pasos.js"></script>
+<script src="../assets/escenas/red-trenzada.js"></script>
+<script>
+var NOTA_EPI='Los equipos de protección individual deberán tener marcas de homologación o de certificación.';
+var NOTA_EPC='Los materiales aislantes individuales deberán tener marcas de homologación o certificación o disponer de certificados de ensayos.';
+var NOTA_HER='Las herramientas aisladas deberán tener marcas de homologación o certificación.';
+var NOTA_MAT='Incluyen el material de señalización y delimitación, los dispositivos y accesorios para realizar el trabajo y los equipos de comprobación.';
+var RIESGOS=['Contacto eléctrico','Arco eléctrico','Caídas de personas a distinto nivel','Caída de objetos','Choques y golpes','Cortes','Atrapamientos'];
+var HUMANOS='El número de trabajadores requeridos dependerá de la longitud del tramo a sustituir. Al menos uno de estos trabajadores estará habilitado para Trabajos en Tensión en Baja Tensión, actuando como Jefe del Trabajo. El resto de los trabajadores, deberán ser trabajadores al menos autorizados.';
+var EPI=['Casco de protección','Gafas inactínicas','Pantalla facial','Ropa de trabajo','Guantes aislantes','Guantes ignífugos','Guantes de protección mecánica','Calzado de seguridad','Cinturón de seguridad'];
+var P=TET.pasosRedTrenzada;
+
+TET.montar({
+  id:'b3', escena:'red-trenzada',
+  fichas:{
+    definicion:{pag:60,texto:'Sustituir una red aérea convencional por una red aérea trenzada.'},
+    riesgosPag:60, riesgos:RIESGOS, humanos:{pag:60,texto:HUMANOS}, mediosPag:'60–62',
+    medios:{
+      epi:{nota:NOTA_EPI,items:EPI},
+      epc:{nota:NOTA_EPC,items:['Tela aislante','Perfiles aislantes','Protectores aislantes para aisladores','Dedales aislantes']},
+      herramientas:{nota:NOTA_HER,items:['Herramientas manuales aisladas','Bolsas portaherramientas']},
+      materiales:{nota:NOTA_MAT,items:['Equipo de señalización y delimitación del lugar de trabajo','Equipo de señalización vial','Polea y cuerdas aislantes','Cuñas aislantes','Arriostrador de postes','Equipo para el tensado','Lona (para herramientas, equipos y materiales)','Trepadores (para trabajos en apoyos de madera)','Escalera aislante','Pinzas aislantes','Pinza voltio-amperimétrica','Comprobador de secuencia de fases']}
+    }
+  },
+  construir:function(){
+    var ILUS_TREN='El cable trenzado se dibuja ya tendido y a menor altura; el manual no detalla su tendido ni su izado. Es un tramo corto y no está a escala.';
+    var ejec=[
+      {texto:'Ascender al punto de trabajo, mediante escalera aislante u otro medio, hasta situarse aproximadamente a 40 cm desde la cabeza del trabajador hasta el punto en tensión inferior más próximo.',pag:62,anim:'asciende',cam:'ascenso',dur:6,
+        nota:'La cota «≈ 40 cm» marca la distancia desde la cabeza hasta el punto en tensión inferior más próximo. Es la única cifra que da el manual para este paso.'},
+      {texto:'En los apoyos de hormigón con alvéolos, dotados de elementos para la instalación de líneas de seguridad, el ascenso se podrá realizar por los propios alvéolos.',pag:62,anim:'alveolos',cam:'poste',dur:3,ilus:'Se resaltan los alvéolos; el ascenso por ellos no se anima (aquí se sigue con la escalera).'},
+      {texto:'Aislar la zona de trabajo en tensión, comenzando de abajo hacia arriba; deberán protegerse elementos de tensión y masas accesibles.',pag:62,anim:['aislar',{a:'aislarFar'}],cam:'vano',dur:8,
+        nota:'De abajo hacia arriba: primero la fase T, luego S, R y N. Se cubren conductores, aisladores y apoyo (tela), dejándolas todas cubiertas. Solo se destapa el punto de conexión de la fase en curso; las demás siguen cubiertas (ilustrativo). El orden de las fases en la escena es ilustrativo.',
+        ilus:'Se protege también el otro extremo del tramo, donde luego se conectará; el manual solo habla de «la zona de trabajo en tensión». El orden de colocación es ilustrativo.'},
+      {texto:'Comprobar que todas las puntas de conductor de la nueva red trenzada a conectar están completamente aisladas mediante dedales aislantes.',pag:62,anim:{a:'dedales'},cam:'ext1',dur:5,ilus:ILUS_TREN},
+      {texto:'Posicionar la red trenzada en su posición definitiva.',pag:63,anim:{a:'posiciona'},cam:'vano',dur:5,ilus:'El manual no detalla cómo se posiciona; se anima el cable subiendo a su sitio.'},
+      {texto:'Retirar lo suficiente el aislamiento de cada uno de los conductores para colocar el conector.',pag:63,anim:{a:'ciclo',e:0,fases:['N'],modo:'pela'},cam:'ext1',dur:3.5,
+        nota:'Se anima aquí el primer conductor (el neutro); el paso siguiente del manual manda repetir en los otros.',
+        ilus:'El manual no dice con qué conductor se empieza en este extremo; se anima el neutro primero. Retirar el aislamiento se muestra quitando el dedal y dejando la punta metálica al aire.'},
+      {texto:'Limpiar el conductor y realizar la conexión de cada uno de los conductores de la red trenzada en uno de los extremos, reponiendo aislamiento.',pag:63,anim:{a:'ciclo',e:0,fases:['N'],modo:'cc'},cam:'ext1',dur:5,
+        ilus:'El conector (metal) y su protección aislante (naranja) se dibujan de forma esquemática. El conductor al que se conecta es el convencional de la línea; el gesto de cepillar es ilustrativo.'},
+      {texto:'Repetir los dos pasos anteriores en los otros conductores de la red trenzada.',pag:63,anim:{a:'ciclo',e:0,fases:['R','S','T'],modo:'todo'},cam:'ext1',dur:9,ilus:'El orden entre R, S y T es ilustrativo.'},
+      {texto:'Identificar los conductores en el otro extremo del conductor, conectarlos secuencialmente comenzando por el neutro, comprobando previamente las concordancias de fases reponiendo finalmente el aislamiento.',pag:63,anim:{a:'ciclo',e:1,fases:['N','R','S','T'],modo:'ext2'},cam:'ext2',dur:10,
+        ilus:'Las etiquetas y el ✓ (concordancia de fases comprobada) son solo una forma de mostrar la identificación y la comprobación. En este extremo no se dibuja al trabajador.'},
+      {texto:'Retencionar los conductores convencionales, cortar y, si es necesario, convertir el apoyo de alineación en amarre.',pag:63,anim:{a:'corta'},cam:'vano',dur:5,
+        nota:'El tramo convencional retirado se muestra en trazo tenue, como en el esquema de la p. 64 («Conductores retirados»).',
+        ilus:'El manual no dice dónde se retencionan ni dónde se cortan los conductores; los puntos se dibujan de forma esquemática. No se anima la conversión del apoyo en amarre.'},
+      {texto:'Si existen acometidas en línea a sustituir, las desconexiones y o conexiones de éstas se realizarán según el procedimiento correspondiente.',pag:63,anim:{a:'ping',k:'vano'},cam:'vano',dur:3.5,
+        nota:'Aclaración propia (ilustrativo): el manual remite al «procedimiento correspondiente»; los de conexión y desconexión de acometidas de este mismo apartado son B.1 y B.2.',
+        ilus:'Este paso no tiene gesto propio: el círculo solo marca «aquí iría una acometida». No se dibuja ninguna.'},
+      {texto:'La conexión de la red trenzada se puede realizar conductor a conductor en los dos extremos a todos los conductores en un extremo y después en el otro extremo.',pag:63,anim:{a:'ping',k:'ext'},cam:'vano',dur:3.5,
+        nota:'El manual deja libre el orden de la conexión: conductor a conductor en los dos extremos, o todos los conductores en un extremo y después en el otro. La animación de los pasos anteriores ha seguido la segunda opción.',
+        ilus:'Los círculos marcan los dos extremos del tramo.'}
+    ];
+    var fin={nombre:'Operaciones finales',pasos:[
+      {texto:'Revisar, limpiar y guardar los equipos, herramientas y materiales empleados en el trabajo.',pag:63,anim:{a:'seq',items:[{w:[0,0.35],anim:['quitarProt',{a:'quitarFar'}]},{w:[0.35,0.65],anim:'descenso'},{w:[0.65,1],anim:'guardar'}]},cam:'general',dur:7,
+        ilus:'El manual no dice cuándo se retiran las protecciones aislantes; se recogen con los equipos antes de bajar y guardar la escalera, que también se anima.'},
+      {texto:'Retirar la señalización y delimitación del lugar de trabajo.',pag:63,anim:{a:'valla',inv:true},cam:'general'},
+      {texto:'Retirar materiales de desecho.',pag:63,anim:'desecho',cam:'suelo2',dur:3.5,ilus:'La bolsa de desecho es representativa.'},
+      {texto:'Retirar la señalización vial, si ha sido necesario colocarla.',pag:63,anim:{a:'vial',inv:true},cam:'vial'}
+    ]};
+    return {escena:{modo:'b3'},fases:[P.previas(62,['ident','clima','vial','insp','delim','verif','metal','epi'],'Señalizar y delimitar el lugar de trabajo.'),{nombre:'Ejecución del trabajo',pasos:ejec},fin]};
+  }
+});
+
+</script>
+</body>
+</html>

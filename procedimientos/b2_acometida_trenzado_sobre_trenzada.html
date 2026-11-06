@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<script>try{var t=localStorage.getItem('tema');var q=location.search.match(/[?&]tema=(dark|light)/);if(q)t=q[1];if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>B.2 Acometida de cable trenzado sobre red trenzada · Manual TETBT</title>
+<meta name="description" content="Animación paso a paso del procedimiento B.2 del Manual de Trabajos en Tensión en Baja Tensión.">
+<link rel="stylesheet" href="../assets/tet.css">
+</head>
+<body>
+<a class="skip" href="#reproductor">Ir al reproductor de pasos</a>
+<header class="cab">
+  <div class="cab-in">
+    <nav class="migas" aria-label="Migas de pan">
+      <a href="../index.html">← Manual TETBT</a><span class="sep" aria-hidden="true">·</span>
+      <a href="../index.html#s5">5. Procedimientos</a><span class="sep" aria-hidden="true">·</span>
+      <a class="act" href="../index.html#s5-b" aria-current="page">B. Red aérea trenzada</a>
+    </nav>
+    <button class="btn-tema" type="button" data-tema-btn aria-pressed="false"><span>Modo oscuro</span></button>
+  </div>
+</header>
+<main>
+  <div class="titulo">
+    <span class="placa" aria-hidden="true">B.2</span>
+    <h1>Conexión o desconexión de acometidas de cable trenzado sobre red trenzada</h1>
+  </div>
+  <section aria-label="Reproductor de pasos"><div id="reproductor"><noscript><p>Para ver la animación paso a paso hace falta JavaScript. Las fichas de abajo no lo necesitan.</p></noscript></div></section>
+  <section class="fichas" id="fichas" aria-label="Fichas del procedimiento"></section>
+</main>
+<footer class="pie">
+  <div class="hermano">
+    <div><div class="lbl">Procedimiento hermano</div><strong>B.3 Sustitución de red aérea convencional por red aérea trenzada</strong></div>
+    <a class="go" href="b3_sustitucion_convencional_por_trenzada.html">Abrir B.3</a>
+  </div>
+  <small>Material de formación basado en el Manual de Trabajos en Tensión en Baja Tensión, apartado 5.B. Las animaciones son una ayuda visual: el texto de cada paso es el del manual y los gestos que el manual no detalla están marcados como ilustrativos. Modelos 3D de escalera, vallas, señal, cinta, bolsa, casco, gafas, guantes y pinza: NVIDIA SimReady, licencia CC BY 4.0 (<a href="../assets/modelos/CREDITOS.md">créditos</a>).</small>
+</footer>
+<script src="../assets/three/three.min.js"></script>
+<script src="../assets/three/OrbitControls.js"></script>
+<script src="../assets/three/GLTFLoader.js"></script>
+<script src="../assets/three/meshopt_decoder.js"></script>
+<script src="../assets/tet.js"></script>
+<script src="../assets/escenas/apoyo-bt-pasos.js"></script>
+<script src="../assets/escenas/apoyo-bt.js"></script>
+<script src="../assets/escenas/red-trenzada-pasos.js"></script>
+<script src="../assets/escenas/red-trenzada.js"></script>
+<script>
+var NOTA_EPI='Los equipos de protección individual deberán tener marcas de homologación o de certificación.';
+var NOTA_EPC='Los materiales aislantes individuales deberán tener marcas de homologación o certificación o disponer de certificados de ensayos.';
+var NOTA_HER='Las herramientas aisladas deberán tener marcas de homologación o certificación.';
+var NOTA_MAT='Incluyen el material de señalización y delimitación, los dispositivos y accesorios para realizar el trabajo y los equipos de comprobación.';
+var RIESGOS=['Contacto eléctrico','Arco eléctrico','Caídas de personas a distinto nivel','Caída de objetos','Choques y golpes','Cortes','Atrapamientos'];
+var HUMANOS='Dos trabajadores, uno habilitado para Trabajos en Tensión en Baja Tensión que actuará como Jefe de Trabajo y un ayudante para tareas auxiliares que, como mínimo, será un trabajador autorizado.';
+var EPI=['Casco de protección','Gafas inactínicas','Pantalla facial','Ropa de trabajo','Guantes aislantes','Guantes ignífugos','Guantes de protección mecánica','Calzado de seguridad','Cinturón de seguridad'];
+var P=TET.pasosRedTrenzada;
+
+TET.montar({
+  id:'b2', escena:'red-trenzada',
+  fichas:{
+    definicion:{pag:55,texto:'Conexión o desconexión de una acometida de cable trenzado sobre una red trenzada.'},
+    riesgosPag:55, riesgos:RIESGOS, humanos:{pag:55,texto:HUMANOS}, mediosPag:'55–57',
+    medios:{
+      epi:{nota:NOTA_EPI,items:EPI},
+      epc:{nota:NOTA_EPC,items:['Tela aislante','Perfiles aislantes','Dedales aislantes']},
+      herramientas:{nota:NOTA_HER,items:['Herramientas manuales aisladas','Bolsas portaherramientas']},
+      materiales:{nota:NOTA_MAT,items:['Equipo de señalización y delimitación del lugar de trabajo','Equipo de señalización vial','Polea y cuerdas aislantes','Cuñas aislantes','Arriostrador de postes','Lona (para herramientas, equipos y materiales)','Trepadores (para trabajos en apoyos de madera)','Escalera aislante','Pinzas aislantes','Pinza voltio-amperimétrica','Comprobador de secuencia de fases']}
+    }
+  },
+  selector:{etiqueta:'Operación',param:'op',defecto:'conexion',opciones:[
+    {id:'conexion',etiqueta:'Conexión',desc:'Se conecta la acometida de cable trenzado a la red trenzada: el conector neutro se conecta en primer lugar.'},
+    {id:'desconexion',etiqueta:'Desconexión',desc:'Se desconecta la acometida: el neutro sería el último conductor en desconectarse (p. 58). Es el único cambio de orden que indica el manual.'}]},
+  construir:function(sel){
+    var des=sel==='desconexion';
+    var c1={texto:'Realizar la conexión, conectando en primer lugar el conector neutro y colocar protección aislante del conector.',pag:58,cam:'zona2',dur:4};
+    var c2={texto:'Repetir el proceso en el resto de las fases.',pag:58,cam:'zona2',dur:5};
+    if(des){
+      c1.anim={a:'conectaT',fases:['R','S','T','N'],inv:true}; c1.nota='<strong>Texto del manual para la conexión; en desconexión se hace el orden inverso.</strong> Se desconectan R, S y T y el neutro el último (p. 58). Se muestra aquí la desconexión completa.';
+      c2.anim=null; c2.nota='<strong>Texto del manual para la conexión; en desconexión se hace el orden inverso.</strong> La desconexión de las demás fases ya se ha mostrado en el paso anterior; este paso no tiene gesto propio.'; c2.ilus='Paso sin gesto en la desconexión: el orden inverso ya se ha animado en el paso anterior.';
+    } else { c1.anim={a:'conectaT',fases:['N']}; c2.anim={a:'conectaT',fases:['R','S','T']}; }
+    c1.ilus='El conector (metal) y su protección aislante (naranja) se dibujan de forma esquemática; el orden entre fases R, S, T y el dedal retirado antes de conectar son ilustrativos.'; if(!des) c2.ilus=c1.ilus;
+    var ejec=[
+      {texto:'Revisar la caja general de protección acometida.',pag:57,anim:'cgpAbre',cam:'cgp',ilus:'El manual no dice quién la revisa; se anima al ayudante.'},
+      {texto:'Retirar fusibles de la caja general de protección.',pag:57,anim:{a:'cgpFus'},cam:'cgp',ilus:'El manual no dice quién lo hace; fusibles y barra de neutro son esquemáticos.'},
+      {texto:'Cerrar y precintar la caja general de protección si fuera necesario.',pag:57,anim:'cgpCierra',cam:'cgp',ilus:'El precinto se dibuja como una esfera roja en el cierre.'},
+      {texto:'Si es necesario, señalizar exterior o interiormente, la caja general de protección.',pag:57,anim:'senalCgp',cam:'cgp',ilus:'El tipo de cartel es representativo; el manual no lo describe.'},
+      {texto:'Ascender al punto de trabajo, mediante escalera aislante, que garantice el eficaz aislamiento respecto a tierra.',pag:57,anim:'asciende',cam:'ascenso',dur:6,
+        nota:'En este procedimiento el manual no da la cota de 40 cm: la escalera aislante debe garantizar el eficaz aislamiento respecto a tierra.',
+        ilus:'La red principal trenzada se dibuja sujeta al apoyo por herrajes esquemáticos; el manual no los describe.'},
+      {texto:'Aislar la zona de trabajo en tensión, deberá protegerse las masas accesibles.',pag:57,anim:{a:'cunas'},cam:'zona2',dur:6,
+        nota:'Como en el esquema de la p. 59: las cuñas aislantes abren el haz de la red principal trenzada en el punto de conexión y la tela aislante protege la zona.',
+        ilus:'El manual solo dice «proteger las masas accesibles»; la forma y colocación exactas de cuñas y tela son ilustrativas.'},
+      {texto:'Si es necesario, identificar el neutro de la línea principal y de la acometida, así como el resto de las fases.',pag:57,anim:'etiq2',cam:'zona2',dur:3.5,ilus:'Las etiquetas N, R, S y T son solo una forma de mostrar la identificación; el orden de las fases es ilustrativo.'},
+      {texto:'Verificar la ausencia de tensión entre conductor principal y derivado.',pag:57,anim:{a:'pinza',fases:4},cam:'zona2',dur:4.5,ilus:'La pinza se muestra sobre cada conductor de la red principal; el manual no detalla el método de medida.'},
+      c1,c2,
+      {texto:'Retirar el aislamiento de la zona de trabajo de tensión.',pag:58,anim:'quitaCunas',cam:'zona2',dur:4.5,
+        nota:'Se retiran la tela y las cuñas aislantes. La protección aislante de cada conector se queda: es la que se coloca al conectar.'},
+      {texto:'En caso de desconexión, el neutro sería el último conductor en desconectarse.',pag:58,anim:'resaltaN2',cam:'zona2',dur:3,
+        nota:des?'Es lo que se ha hecho en esta variante: R, S y T primero, y el neutro al final.':'Este punto solo aplica a la desconexión. En la conexión, el neutro es el primero (ver los dos pasos de conexión). Cambia a «Desconexión» para ver el orden inverso.'}
+    ];
+    return {escena:{modo:'b2',desconexion:des},fases:[P.previas(57,['clima','ident','insp','delim','vial','verif','metal','epi'],'Delimitar y señalizar el lugar de trabajo.'),{nombre:'Ejecución del trabajo',pasos:ejec},P.finales9(58,'Reponer fusibles en la caja general de protección o elemento equivalente.',true)]};
+  }
+});
+
+</script>
+</body>
+</html>
