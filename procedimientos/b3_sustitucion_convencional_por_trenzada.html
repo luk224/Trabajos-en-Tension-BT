@@ -27,6 +27,11 @@
     <h1>Sustitución de red aérea convencional por red aérea trenzada</h1>
   </div>
   <section aria-label="Reproductor de pasos"><div id="reproductor"><noscript><p>Para ver la animación paso a paso hace falta JavaScript. Las fichas de abajo no lo necesitan.</p></noscript></div></section>
+  <p class="paso-nota" id="leyenda-colores" style="margin:.9rem 0 0"><strong>Colores de los conductores (ilustrativo; el manual no los indica):</strong>
+    <span style="white-space:nowrap"><i style="display:inline-block;width:.8em;height:.8em;border-radius:50%;background:var(--e-N);border:1.5px solid var(--ink,currentColor);vertical-align:-1px"></i> N neutro, azul</span> ·
+    <span style="white-space:nowrap"><i style="display:inline-block;width:.8em;height:.8em;border-radius:50%;background:var(--e-R);border:1.5px solid var(--ink,currentColor);vertical-align:-1px"></i> R, marrón</span> ·
+    <span style="white-space:nowrap"><i style="display:inline-block;width:.8em;height:.8em;border-radius:50%;background:var(--e-S);border:1.5px solid var(--ink,currentColor);vertical-align:-1px"></i> S, negro</span> ·
+    <span style="white-space:nowrap"><i style="display:inline-block;width:.8em;height:.8em;border-radius:50%;background:var(--e-T);border:1.5px solid var(--ink,currentColor);vertical-align:-1px"></i> T, gris</span>.</p>
   <section class="fichas" id="fichas" aria-label="Fichas del procedimiento"></section>
 </main>
 <footer class="pie">
@@ -73,20 +78,20 @@ TET.montar({
       {texto:'Ascender al punto de trabajo, mediante escalera aislante u otro medio, hasta situarse aproximadamente a 40 cm desde la cabeza del trabajador hasta el punto en tensión inferior más próximo.',pag:62,anim:'asciende',cam:'ascenso',dur:6,
         nota:'La cota «≈ 40 cm» marca la distancia desde la cabeza hasta el punto en tensión inferior más próximo. Es la única cifra que da el manual para este paso.'},
       {texto:'En los apoyos de hormigón con alvéolos, dotados de elementos para la instalación de líneas de seguridad, el ascenso se podrá realizar por los propios alvéolos.',pag:62,anim:'alveolos',cam:'poste',dur:3,ilus:'Se resaltan los alvéolos; el ascenso por ellos no se anima (aquí se sigue con la escalera).'},
-      {texto:'Aislar la zona de trabajo en tensión, comenzando de abajo hacia arriba; deberán protegerse elementos de tensión y masas accesibles.',pag:62,anim:['aislar',{a:'aislarFar'}],cam:'vano',dur:8,
+      {texto:'Aislar la zona de trabajo en tensión, comenzando de abajo hacia arriba; deberán protegerse elementos de tensión y masas accesibles.',pag:62,anim:['aislar',{a:'aislarFar'}],cam:'vano',dur:8,det:{cam:'det-cruceta',txt:'Detalle: protección de conductores con perfiles aislantes, aisladores protegidos y apoyo con tela aislante (Manual p. 64)'},
         nota:'De abajo hacia arriba: primero la fase T, luego S, R y N. Se cubren conductores, aisladores y apoyo (tela), dejándolas todas cubiertas. Solo se destapa el punto de conexión de la fase en curso; las demás siguen cubiertas (ilustrativo). El orden de las fases en la escena es ilustrativo.',
         ilus:'Se protege también el otro extremo del tramo, donde luego se conectará; el manual solo habla de «la zona de trabajo en tensión». El orden de colocación es ilustrativo.'},
-      {texto:'Comprobar que todas las puntas de conductor de la nueva red trenzada a conectar están completamente aisladas mediante dedales aislantes.',pag:62,anim:{a:'dedales'},cam:'ext1',dur:5,ilus:ILUS_TREN},
+      {texto:'Comprobar que todas las puntas de conductor de la nueva red trenzada a conectar están completamente aisladas mediante dedales aislantes.',pag:62,anim:{a:'dedales'},cam:'ext1',dur:5,det:{cam:'det-dedal3',txt:'Detalle: puntas de la nueva red trenzada con dedal aislante (Manual p. 62)'},ilus:ILUS_TREN},
       {texto:'Posicionar la red trenzada en su posición definitiva.',pag:63,anim:{a:'posiciona'},cam:'vano',dur:5,ilus:'El manual no detalla cómo se posiciona; se anima el cable subiendo a su sitio.'},
       {texto:'Retirar lo suficiente el aislamiento de cada uno de los conductores para colocar el conector.',pag:63,anim:{a:'ciclo',e:0,fases:['N'],modo:'pela'},cam:'ext1',dur:3.5,
         nota:'Se anima aquí el primer conductor (el neutro); el paso siguiente del manual manda repetir en los otros.',
         ilus:'El manual no dice con qué conductor se empieza en este extremo; se anima el neutro primero. Retirar el aislamiento se muestra quitando el dedal y dejando la punta metálica al aire.'},
-      {texto:'Limpiar el conductor y realizar la conexión de cada uno de los conductores de la red trenzada en uno de los extremos, reponiendo aislamiento.',pag:63,anim:{a:'ciclo',e:0,fases:['N'],modo:'cc'},cam:'ext1',dur:5,
+      {texto:'Limpiar el conductor y realizar la conexión de cada uno de los conductores de la red trenzada en uno de los extremos, reponiendo aislamiento.',pag:63,anim:{a:'ciclo',e:0,fases:['N'],modo:'cc'},cam:'ext1',dur:5,det:{cam:'det-conexion',txt:'Detalle: conector con protección aislante unido al conductor convencional (Manual p. 64)'},
         ilus:'El conector (metal) y su protección aislante (naranja) se dibujan de forma esquemática. El conductor al que se conecta es el convencional de la línea; el gesto de cepillar es ilustrativo.'},
       {texto:'Repetir los dos pasos anteriores en los otros conductores de la red trenzada.',pag:63,anim:{a:'ciclo',e:0,fases:['R','S','T'],modo:'todo'},cam:'ext1',dur:9,ilus:'El orden entre R, S y T es ilustrativo.'},
-      {texto:'Identificar los conductores en el otro extremo del conductor, conectarlos secuencialmente comenzando por el neutro, comprobando previamente las concordancias de fases reponiendo finalmente el aislamiento.',pag:63,anim:{a:'ciclo',e:1,fases:['N','R','S','T'],modo:'ext2'},cam:'ext2',dur:10,
+      {texto:'Identificar los conductores en el otro extremo del conductor, conectarlos secuencialmente comenzando por el neutro, comprobando previamente las concordancias de fases reponiendo finalmente el aislamiento.',pag:63,anim:{a:'ciclo',e:1,fases:['N','R','S','T'],modo:'ext2'},cam:'ext2',dur:10,det:{cam:'det-ext2',txt:'Detalle: conectores con protección aislante en el otro apoyo (Manual p. 64)'},
         ilus:'Las etiquetas y el ✓ (concordancia de fases comprobada) son solo una forma de mostrar la identificación y la comprobación. En este extremo no se dibuja al trabajador.'},
-      {texto:'Retencionar los conductores convencionales, cortar y, si es necesario, convertir el apoyo de alineación en amarre.',pag:63,anim:{a:'corta'},cam:'vano',dur:5,
+      {texto:'Retencionar los conductores convencionales, cortar y, si es necesario, convertir el apoyo de alineación en amarre.',pag:63,anim:{a:'corta'},cam:'vano',dur:5,det:{cam:'det-corte',txt:'Detalle: conductores convencionales retencionados y cortados; el tramo retirado en trazo tenue (Manual p. 64)'},
         nota:'El tramo convencional retirado se muestra en trazo tenue, como en el esquema de la p. 64 («Conductores retirados»).',
         ilus:'El manual no dice dónde se retencionan ni dónde se cortan los conductores; los puntos se dibujan de forma esquemática. No se anima la conversión del apoyo en amarre.'},
       {texto:'Si existen acometidas en línea a sustituir, las desconexiones y o conexiones de éstas se realizarán según el procedimiento correspondiente.',pag:63,anim:{a:'ping',k:'vano'},cam:'vano',dur:3.5,

@@ -75,27 +75,27 @@ TET.montar({
       {texto:'Ascender al punto de trabajo, mediante escalera aislante, u otro medio, hasta situarse aproximadamente a 40 cm desde la cabeza del trabajador hasta el punto en tensión o neutro más próximo.',pag:47,anim:'asciende',cam:'ascenso',dur:6,
         nota:'La cota «≈ 40 cm» marca la distancia desde la cabeza hasta el punto en tensión más próximo. Es la única cifra que da el manual para este paso.'},
       {texto:'En los apoyos de hormigón con alvéolos, dotados de elementos para la instalación de líneas de seguridad, el ascenso se podrá realizar por los propios alvéolos.',pag:47,anim:'alveolos',cam:'poste',dur:3,ilus:'Se resaltan los alvéolos; el ascenso por ellos no se anima (aquí se sigue con la escalera).'},
-      {texto:'Aislar la zona de trabajo en tensión procediendo de abajo hacia arriba; deberán protegerse los elementos en tensión y las masas accesibles.',pag:47,anim:{a:'aislar',skip:['S']},cam:'cabeza',dur:7,
+      {texto:'Aislar la zona de trabajo en tensión procediendo de abajo hacia arriba; deberán protegerse los elementos en tensión y las masas accesibles.',pag:47,anim:{a:'aislar',skip:['S']},cam:'cabeza',dur:7,det:[{cam:'dCapuchon',txt:'Detalle: capuchón o protector aislante de aislador (Manual p. 49)'},{cam:'dPerfil',txt:'Detalle: perfiles aislantes sobre los conductores (Manual p. 49)'},{cam:'dTela',txt:'Detalle: tela aislante para protección del apoyo (Manual p. 49)'}],
         nota:'De abajo hacia arriba: primero la fase T, luego R y N, y por último el apoyo con tela aislante (esquema de la p. 49).',
         ilus:ILUS_S+' Su aislador y su conductor se dejan a la vista como punto de trabajo; se protegen en el último paso de la sustitución. El dedal aislante del esquema (p. 49) sobre el conductor expuesto se dibuja como una esfera translúcida; las varillas aislantes y la bajante no se dibujan.'},
       {texto:'En caso de apoyos de doble circuito, el circuito sobre el que no se va a trabajar, debe estar aislado.',pag:47,anim:'doble',cam:'atras',dur:5,ilus:'Se dibuja un segundo circuito detrás del apoyo, solo para ilustrar este caso.'}
     ];
     var apoyo=[
-      {texto:'Colocar la polea de apoyo del aislador superior o en la parte superior del apoyo para pasar por ella la cuerda que amarre el conductor a mover.',pag:47,anim:{a:'polea',cuerda:true,ayuda:true},cam:'cabeza',dur:4,ilus:'Se dibuja la polea en la parte superior del apoyo (una de las dos opciones del manual); cuerda, polea y anclaje son ilustrativos. '+ILUS_S},
+      {texto:'Colocar la polea de apoyo del aislador superior o en la parte superior del apoyo para pasar por ella la cuerda que amarre el conductor a mover.',pag:47,anim:{a:'polea',cuerda:true,ayuda:true},cam:'cabeza',dur:4,det:{cam:'dPolea',txt:'Detalle: polea y cuerda aislante (Manual p. 49)'},ilus:'Se dibuja la polea en la parte superior del apoyo (una de las dos opciones del manual); cuerda, polea y anclaje son ilustrativos. '+ILUS_S},
       {texto:'El trabajador ayudante desde el suelo tensará la cuerda.',pag:48,anim:'tensar',cam:'poste',dur:3,ilus:'Cuerda, polea y anclaje son ilustrativos.'},
       {texto:'Soltar la retención y elevar el conductor suavemente, vigilando en todo momento el movimiento del conductor en los vanos.',pag:48,anim:'elevar',cam:'sust',dur:5,ilus:'La altura de elevación es ilustrativa; el manual no da cifra.'},
-      {texto:'Retirar el aislador viejo y colocar el nuevo.',pag:48,anim:'cambiaAislador',cam:'sust',dur:4.5,ilus:'Solo queda al descubierto la fase S (punto de trabajo); el resto sigue cubierto.'},
+      {texto:'Retirar el aislador viejo y colocar el nuevo.',pag:48,anim:'cambiaAislador',cam:'sust',dur:4.5,det:{cam:'dAislador',txt:'Detalle: aislador viejo (oscuro) y aislador nuevo (claro)'},ilus:'Solo queda al descubierto la fase S (punto de trabajo); el resto sigue cubierto.'},
       {texto:'Retencionar el conductor al aislador. El conductor se mantendrá sujeto con la cuerda en tanto no se realice la retención.',pag:48,anim:{a:'retencionar'},cam:'sust',dur:4.5},
       {texto:'Retirar el equipo para el tensado del conductor.',pag:48,anim:'quitaEquipo',cam:'poste',dur:3.5},
-      {texto:'Colocar protecciones aislantes sobre el aislador sustituido y conductor correspondiente.',pag:48,anim:{a:'proteger',fases:['S']},cam:'sust',dur:3.5}
+      {texto:'Colocar protecciones aislantes sobre el aislador sustituido y conductor correspondiente.',pag:48,anim:{a:'proteger',fases:['S']},cam:'sust',dur:3.5,det:{cam:'dDedalS',txt:'Detalle: protección del aislador sustituido y dedal aislante (Manual p. 49)'}}
     ];
     var fl=[
-      {texto:'Colocar la polea para situar el elemento de amarre del conductor a mover.',pag:48,anim:{a:'polea'},cam:'sust',dur:3.5,ilus:'Cuerda, polea y anclaje son ilustrativos. '+ILUS_S},
+      {texto:'Colocar la polea para situar el elemento de amarre del conductor a mover.',pag:48,anim:{a:'polea'},cam:'sust',dur:3.5,det:{cam:'dPoleaFin',txt:'Detalle: polea para el elemento de amarre (Manual p. 49)'},ilus:'Cuerda, polea y anclaje son ilustrativos. '+ILUS_S},
       {texto:'Colocar el equipo para el tensado del conductor. Soltar la retención del aislador y destensar desde el suelo el conductor mediante el aparejo aislante y rana.',pag:48,anim:'destensar',cam:'sust',dur:7,ilus:'Rana, aparejo y cuerda se dibujan de forma esquemática; el manual no los describe en detalle.'},
-      {texto:'Retirar el aislador viejo y colocar el nuevo.',pag:48,anim:'cambiaAislador',cam:'sust',dur:4.5,ilus:'Solo queda al descubierto la fase S (punto de trabajo); el resto sigue cubierto.'},
+      {texto:'Retirar el aislador viejo y colocar el nuevo.',pag:48,anim:'cambiaAislador',cam:'sust',dur:4.5,det:{cam:'dAislador',txt:'Detalle: aislador viejo (oscuro) y aislador nuevo (claro)'},ilus:'Solo queda al descubierto la fase S (punto de trabajo); el resto sigue cubierto.'},
       {texto:'Retencionar el conductor al aislador. El conductor se mantendrá sujeto con el elemento de amarre en tanto no se finalice la retención.',pag:48,anim:{a:'retencionar',fin:true},cam:'sust',dur:4.5},
       {texto:'Retirar los elementos de amarre del conductor.',pag:48,anim:'quitaEquipo',cam:'sust',dur:3.5},
-      {texto:'Colocar protecciones aislantes sobre el aislador sustituido y conductor correspondiente.',pag:48,anim:{a:'proteger',fases:['S']},cam:'sust',dur:3.5},
+      {texto:'Colocar protecciones aislantes sobre el aislador sustituido y conductor correspondiente.',pag:48,anim:{a:'proteger',fases:['S']},cam:'sust',dur:3.5,det:{cam:'dDedalS',txt:'Detalle: protección del aislador sustituido y dedal aislante (Manual p. 49)'}},
       {texto:'Retirar protecciones aislantes procediendo de arriba hacia abajo.',pag:48,anim:'quitarProt',cam:'cabeza',dur:6}
     ];
     var fnl=[

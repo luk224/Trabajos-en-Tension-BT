@@ -27,6 +27,11 @@
     <h1>Conexión o desconexión de acometidas de cable trenzado sobre red aérea convencional</h1>
   </div>
   <section aria-label="Reproductor de pasos"><div id="reproductor"><noscript><p>Para ver la animación paso a paso hace falta JavaScript. Las fichas de abajo no lo necesitan.</p></noscript></div></section>
+  <p class="paso-nota" id="leyenda-colores" style="margin:.9rem 0 0"><strong>Colores de los conductores (ilustrativo; el manual no los indica):</strong>
+    <span style="white-space:nowrap"><i style="display:inline-block;width:.8em;height:.8em;border-radius:50%;background:var(--e-N);border:1.5px solid var(--ink,currentColor);vertical-align:-1px"></i> N neutro, azul</span> ·
+    <span style="white-space:nowrap"><i style="display:inline-block;width:.8em;height:.8em;border-radius:50%;background:var(--e-R);border:1.5px solid var(--ink,currentColor);vertical-align:-1px"></i> R, marrón</span> ·
+    <span style="white-space:nowrap"><i style="display:inline-block;width:.8em;height:.8em;border-radius:50%;background:var(--e-S);border:1.5px solid var(--ink,currentColor);vertical-align:-1px"></i> S, negro</span> ·
+    <span style="white-space:nowrap"><i style="display:inline-block;width:.8em;height:.8em;border-radius:50%;background:var(--e-T);border:1.5px solid var(--ink,currentColor);vertical-align:-1px"></i> T, gris</span>.</p>
   <section class="fichas" id="fichas" aria-label="Fichas del procedimiento"></section>
 </main>
 <footer class="pie">
@@ -72,7 +77,7 @@ TET.montar({
     {id:'desconexion',etiqueta:'Desconexión',desc:'Se desconecta la acometida: el neutro sería el último conductor en desconectarse, si ello es posible (p. 53). Es el único cambio de orden que indica el manual.'}]},
   construir:function(sel){
     var des=sel==='desconexion';
-    var con={texto:'Realizar la conexión, conectando en primer lugar el conector neutro si ello es posible, y reponer aislamiento.',pag:53,cam:'ext1',dur:8,
+    var con={texto:'Realizar la conexión, conectando en primer lugar el conector neutro si ello es posible, y reponer aislamiento.',pag:53,cam:'ext1',dur:8,det:{cam:'det-conexion',txt:'Detalle: conector (4 tornillos) con protección aislante en el punto de conexión; solo queda descubierto ese punto (Manual p. 54)'},
       ilus:'El manual da una sola línea para este paso. Se anima el conector (metal) y la protección aislante (naranja) de cada fase; el orden entre R, S y T y el dedal retirado antes de conectar son ilustrativos.'};
     if(des){
       con.anim={a:'conectaT',fases:['R','S','T','N'],inv:true};
@@ -86,10 +91,10 @@ TET.montar({
         nota:'La cota «≈ 40 cm» marca la distancia desde la cabeza hasta el punto en tensión inferior más próximo. Es la única cifra que da el manual para este paso.',
         ilus:'El manual admite también trepadores u otro medio; aquí se anima el ascenso con escalera aislante.'},
       {texto:'En los apoyos de hormigón con alvéolos dotados de elementos para la instalación de línea de seguridad, el ascenso se podrá realizar por los propios alvéolos.',pag:53,anim:'alveolos',cam:'poste',dur:3,ilus:'Se resaltan los alvéolos; el ascenso por ellos no se anima (aquí se sigue con la escalera).'},
-      {texto:'Aislar la zona de trabajo en tensión procediendo de abajo a arriba; deberán protegerse todos los elementos en tensión y masas accesibles.',pag:53,anim:{a:'aislar'},cam:'cabeza',dur:7,
+      {texto:'Aislar la zona de trabajo en tensión procediendo de abajo a arriba; deberán protegerse todos los elementos en tensión y masas accesibles.',pag:53,anim:{a:'aislar'},cam:'cabeza',dur:7,det:{cam:'det-cruceta',txt:'Detalle: protección de toda la palomilla con tela aislante, aisladores con capuchones y perfiles aislantes (Manual p. 54)'},
         nota:'De abajo a arriba: primero la fase T, luego S, R y N. Quedan cubiertos conductores, aisladores (capuchones) y apoyo (tela). Solo se destapa el punto de conexión de la fase en curso; las demás siguen cubiertas (ilustrativo), en línea con el esquema de la p. 54 («sólo descubierto el punto de conexión»). El orden de las fases en la escena es el de A.1, ilustrativo.',
         ilus:'El orden de colocación de cada pieza dentro de una fase es ilustrativo.'},
-      {texto:'Si es necesario, identificar el neutro de la línea principal y de la acometida, así como el resto de las fases.',pag:53,anim:'etiquetas',cam:'cabeza2',dur:3.5,ilus:'Las etiquetas N, R, S y T son solo una forma de mostrar la identificación.'},
+      {texto:'Si es necesario, identificar el neutro de la línea principal y de la acometida, así como el resto de las fases.',pag:53,anim:'etiquetas',cam:'cabeza2',dur:3.5,det:{cam:'det-dedal',txt:'Detalle: puntas de la acometida trenzada con dedal aislante (Manual p. 54)'},ilus:'Las etiquetas N, R, S y T son solo una forma de mostrar la identificación.'},
       {texto:'Limpiar el conductor.',pag:53,anim:{a:'cepillo'},cam:'cabeza2',dur:4,ilus:'El manual lista un «cepillo aislado» entre los materiales; el gesto de cepillar es ilustrativo.'},
       {texto:'Comprobar la inexistencia de diferencia de potencial entre los conductores a conectar.',pag:53,anim:{a:'pinza',fases:4},cam:'cabeza2',dur:4.5,ilus:'La pinza se muestra sobre cada conductor; el manual no detalla el método de medida.'},
       con,

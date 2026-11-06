@@ -27,6 +27,11 @@
     <h1>Conexión o desconexión de acometidas de cable trenzado sobre red trenzada</h1>
   </div>
   <section aria-label="Reproductor de pasos"><div id="reproductor"><noscript><p>Para ver la animación paso a paso hace falta JavaScript. Las fichas de abajo no lo necesitan.</p></noscript></div></section>
+  <p class="paso-nota" id="leyenda-colores" style="margin:.9rem 0 0"><strong>Colores de los conductores (ilustrativo; el manual no los indica):</strong>
+    <span style="white-space:nowrap"><i style="display:inline-block;width:.8em;height:.8em;border-radius:50%;background:var(--e-N);border:1.5px solid var(--ink,currentColor);vertical-align:-1px"></i> N neutro, azul</span> ·
+    <span style="white-space:nowrap"><i style="display:inline-block;width:.8em;height:.8em;border-radius:50%;background:var(--e-R);border:1.5px solid var(--ink,currentColor);vertical-align:-1px"></i> R, marrón</span> ·
+    <span style="white-space:nowrap"><i style="display:inline-block;width:.8em;height:.8em;border-radius:50%;background:var(--e-S);border:1.5px solid var(--ink,currentColor);vertical-align:-1px"></i> S, negro</span> ·
+    <span style="white-space:nowrap"><i style="display:inline-block;width:.8em;height:.8em;border-radius:50%;background:var(--e-T);border:1.5px solid var(--ink,currentColor);vertical-align:-1px"></i> T, gris</span>.</p>
   <section class="fichas" id="fichas" aria-label="Fichas del procedimiento"></section>
 </main>
 <footer class="pie">
@@ -72,7 +77,7 @@ TET.montar({
     {id:'desconexion',etiqueta:'Desconexión',desc:'Se desconecta la acometida: el neutro sería el último conductor en desconectarse (p. 58). Es el único cambio de orden que indica el manual.'}]},
   construir:function(sel){
     var des=sel==='desconexion';
-    var c1={texto:'Realizar la conexión, conectando en primer lugar el conector neutro y colocar protección aislante del conector.',pag:58,cam:'zona2',dur:4};
+    var c1={texto:'Realizar la conexión, conectando en primer lugar el conector neutro y colocar protección aislante del conector.',pag:58,cam:'zona2',dur:4,det:{cam:'det-conexion2',txt:'Detalle: punto de conexión entre la acometida y la red principal, con conector y protección aislante (Manual p. 59)'}};
     var c2={texto:'Repetir el proceso en el resto de las fases.',pag:58,cam:'zona2',dur:5};
     if(des){
       c1.anim={a:'conectaT',fases:['R','S','T','N'],inv:true}; c1.nota='<strong>Texto del manual para la conexión; en desconexión se hace el orden inverso.</strong> Se desconectan R, S y T y el neutro el último (p. 58). Se muestra aquí la desconexión completa.';
@@ -87,10 +92,10 @@ TET.montar({
       {texto:'Ascender al punto de trabajo, mediante escalera aislante, que garantice el eficaz aislamiento respecto a tierra.',pag:57,anim:'asciende',cam:'ascenso',dur:6,
         nota:'En este procedimiento el manual no da la cota de 40 cm: la escalera aislante debe garantizar el eficaz aislamiento respecto a tierra.',
         ilus:'La red principal trenzada se dibuja sujeta al apoyo por herrajes esquemáticos; el manual no los describe.'},
-      {texto:'Aislar la zona de trabajo en tensión, deberá protegerse las masas accesibles.',pag:57,anim:{a:'cunas'},cam:'zona2',dur:6,
+      {texto:'Aislar la zona de trabajo en tensión, deberá protegerse las masas accesibles.',pag:57,anim:{a:'cunas'},cam:'zona2',dur:6,det:{cam:'det-cunas',txt:'Detalle: cuñas aislantes que abren la red principal en el punto de conexión y tela aislante (Manual p. 59)'},
         nota:'Como en el esquema de la p. 59: las cuñas aislantes abren el haz de la red principal trenzada en el punto de conexión y la tela aislante protege la zona.',
         ilus:'El manual solo dice «proteger las masas accesibles»; la forma y colocación exactas de cuñas y tela son ilustrativas.'},
-      {texto:'Si es necesario, identificar el neutro de la línea principal y de la acometida, así como el resto de las fases.',pag:57,anim:'etiq2',cam:'zona2',dur:3.5,ilus:'Las etiquetas N, R, S y T son solo una forma de mostrar la identificación; el orden de las fases es ilustrativo.'},
+      {texto:'Si es necesario, identificar el neutro de la línea principal y de la acometida, así como el resto de las fases.',pag:57,anim:'etiq2',cam:'zona2',dur:3.5,det:{cam:'det-dedal2',txt:'Detalle: dedales aislantes en las puntas de la acometida de red trenzada (Manual p. 59)'},ilus:'Las etiquetas N, R, S y T son solo una forma de mostrar la identificación; el orden de las fases es ilustrativo.'},
       {texto:'Verificar la ausencia de tensión entre conductor principal y derivado.',pag:57,anim:{a:'pinza',fases:4},cam:'zona2',dur:4.5,ilus:'La pinza se muestra sobre cada conductor de la red principal; el manual no detalla el método de medida.'},
       c1,c2,
       {texto:'Retirar el aislamiento de la zona de trabajo de tensión.',pag:58,anim:'quitaCunas',cam:'zona2',dur:4.5,

@@ -40,6 +40,11 @@
       SIDE = opt.izq ? -1 : 1; AY0 = opt.izq ? 1.3 : -1.3; XJ = opt.izq ? 0.8 : 1.3;
       LB.set(2.0 * SIDE, 0, 0.22); LT.set(0.18 * SIDE, 6.9, 0.22); XW = 0.7 * SIDE;
       for (var k = 0; k < 6; k++) { YFEET = yC(3, XW, 0) - HCOT - HEAD; XW = ladX(YFEET); }
+      var cs = camaras, wx = 2.9 * SIDE; if (!cs) return;
+      cs.dDedal.t = [XJ, YF[0], ZC]; cs.dDedal.p = [XJ + 0.6, YF[0] - 0.05, 1.2]; cs.dDedal2.t = [XJ, YF[1], ZC]; cs.dDedal2.p = [XJ + 0.6, YF[1] - 0.05, 1.2];
+      cs.dSujecion.t = [LT.x, 6.8, 0.2]; cs.dSujecion.p = [LT.x + 0.9 * SIDE, 6.9, 1.5];
+      cs.dObjetos.t = [wx, 1.28, 0.9]; cs.dObjetos.p = [wx - SIDE * 1.5, 1.45, 1.45]; cs.objetos.t = [(wx + AY0) * 0.5, 1.0, 1.3]; cs.objetos.p = [(wx + AY0) * 0.5 + 1.5, 4.8, 6.6];
+      cs.dObjetosAy.t = [AY0, 1.3, 1.3]; cs.dObjetosAy.p = [AY0 + 0.3, 1.45, -0.3];
     }
     lado();
     var G = null, O = null, st = null, own = [];
@@ -107,6 +112,98 @@
       if (o.txt === '✓') { g.strokeStyle = '#fff'; g.lineWidth = 12; g.lineCap = 'round'; g.lineJoin = 'round'; g.beginPath(); g.moveTo(W / 2 - 20, H / 2 + 2); g.lineTo(W / 2 - 5, H / 2 + 18); g.lineTo(W / 2 + 22, H / 2 - 16); g.stroke(); }
       else { var fs = o.txt.length > 3 ? 44 : 64; g.font = '800 ' + fs + 'px "Avenir Next Condensed","Bahnschrift","Arial Narrow",system-ui,sans-serif'; g.fillText(o.txt, W / 2, H / 2 + 3); }
       o.tex.needsUpdate = true;
+    }
+
+
+    /* ---------- material metálico (envMap procedural: sirve en claro y en oscuro) ---------- */
+    var envTex = null;
+    function env() {
+      if (envTex) return envTex;
+      var faces = [], i;
+      for (i = 0; i < 6; i++) {
+        var c = document.createElement('canvas'); c.width = c.height = 32; var g = c.getContext('2d'), gr = g.createLinearGradient(0, 0, 0, 32);
+        if (i === 2) { gr.addColorStop(0, '#ffffff'); gr.addColorStop(1, '#e6eef6'); }
+        else if (i === 3) { gr.addColorStop(0, '#59636d'); gr.addColorStop(1, '#3d454d'); }
+        else { gr.addColorStop(0, '#f4f8fc'); gr.addColorStop(0.45, '#cfdbe6'); gr.addColorStop(0.55, '#5f6b76'); gr.addColorStop(1, '#8a97a3'); }
+        g.fillStyle = gr; g.fillRect(0, 0, 32, 32); if (i === 0 || i === 4) { g.fillStyle = 'rgba(255,255,255,.9)'; g.fillRect(8, 4, 10, 8); }
+        faces.push(c);
+      }
+      envTex = new T.CubeTexture(faces); envTex.needsUpdate = true; return envTex;
+    }
+    function MM(k) { // metal brillante; k = clave de paleta ('metal' dorado, 'halo' acero)
+      var key = 'MM' + k;
+      if (!mats[key]) { var m = new T.MeshStandardMaterial({ color: pal(k), metalness: 0.95, roughness: 0.26, envMap: env(), envMapIntensity: 1.3 }); m.userData.k = k; mats[key] = m; }
+      return mats[key];
+    }
+    function metalizaGLB(o) { o.traverse(function (x) { if (x.isMesh && x.material) { var ms = Array.isArray(x.material) ? x.material : [x.material]; ms.forEach(function (m) { m.envMap = env(); m.envMapIntensity = 1.3; if (m.metalness < 0.7) m.metalness = 0.85; if (m.roughness > 0.45) m.roughness = 0.35; }); } }); }
+    /* modelo GLB normalizado: eje más largo → ejeL, más fino → ejeF (axes 'x'|'y'|'z'), centrado, largo en metros */
+    function envolverOr(src, largo, ejeL, ejeF) {
+      var m = src.clone(true), b = new T.Box3().setFromObject(m), sz = b.getSize(V(0, 0, 0)), c = b.getCenter(V(0, 0, 0));
+      var a = [sz.x, sz.y, sz.z], idx = [0, 1, 2].sort(function (p, q) { return a[q] - a[p]; }), iL = idx[0], iM = idx[1], iF = idx[2];
+      var E = { x: V(1, 0, 0), y: V(0, 1, 0), z: V(0, 0, 1) }, eL = E[ejeL], eF = E[ejeF], eM = new T.Vector3().crossVectors(eL, eF);
+      var cols = []; cols[iL] = eL; cols[iF] = eF; cols[iM] = eM;
+      var Mx = new T.Matrix4().makeBasis(cols[0], cols[1], cols[2]); if (Mx.determinant() < 0) { cols[iM] = eM.clone().negate(); Mx.makeBasis(cols[0], cols[1], cols[2]); }
+      m.position.set(-c.x, -c.y, -c.z); var inner = new T.Group(); inner.add(m); inner.scale.setScalar(largo / a[iL]); inner.quaternion.setFromRotationMatrix(Mx);
+      var g = new T.Group(); g.add(inner); return g;
+    }
+    /* capuchón o protector aislante de aislador: arco en U sobre el aislador con lengüetas (esquema p. 49) */
+    function capuchon(opac) {
+      var g = new T.Group(), ge = geo('capuchonArco', function () { var q = new T.CylinderGeometry(0.14, 0.14, 0.3, 14, 1, true, 0, PI); q.rotateZ(PI / 2); return q; });
+      var arco = new T.Mesh(ge, Mt('aisl', opac || 0.5)); g.add(arco);
+      mk(geo('capuchonTapa', function () { var q = new T.CircleGeometry(0.14, 14, 0, PI); q.rotateY(PI / 2); return q; }), Mt('aisl', opac || 0.5), 0.15, 0, 0, g);
+      mk(geo('capuchonTapa', function () { var q = new T.CircleGeometry(0.14, 14, 0, PI); q.rotateY(PI / 2); return q; }), Mt('aisl', opac || 0.5), -0.15, 0, 0, g);
+      for (var q = -1; q <= 1; q++) { mk(box(0.04, 0.075, 0.012), M('aisl'), q * 0.1, -0.035, 0.14, g); mk(box(0.04, 0.075, 0.012), M('aisl'), q * 0.1, -0.035, -0.14, g); }
+      return g;
+    }
+    /* dedal aislante: caperuza cilíndrica con extremo redondeado y borde */
+    function dedal() {
+      var g = new T.Group();
+      mk(geo('dedalCil', function () { return new T.CylinderGeometry(0.055, 0.055, 0.13, 12, 1, true); }), Mt('aisl', 0.7), 0, -0.065, 0, g);
+      mk(geo('dedalCup', function () { return new T.SphereGeometry(0.055, 12, 6, 0, PI * 2, 0, PI / 2); }), Mt('aisl', 0.7), 0, 0, 0, g);
+      mk(geo('dedalRim', function () { var q = new T.TorusGeometry(0.055, 0.009, 6, 14); q.rotateX(PI / 2); return q; }), M('aisl'), 0, -0.13, 0, g);
+      return g;
+    }
+    /* polea: garganta, placas laterales, eje y gancho */
+    function polea(par) {
+      mk(geo('polRueda', function () { var q = new T.TorusGeometry(0.06, 0.016, 8, 18); q.rotateY(PI / 2); return q; }), MM('halo'), 0, 0, 0, par);
+      mk(box(0.012, 0.15, 0.11), MM('metal'), 0.035, 0.015, 0, par); mk(box(0.012, 0.15, 0.11), MM('metal'), -0.035, 0.015, 0, par);
+      mk(cylX(0.012, 0.09, 8), MM('halo'), 0, 0, 0, par);
+      mk(geo('polGancho', function () { var q = new T.TorusGeometry(0.03, 0.007, 6, 12); return q; }), MM('metal'), 0, 0.105, 0, par);
+      mk(box(0.04, 0.04, 0.62), M('metal'), 0, 0, -0.31, par);
+    }
+
+    /* ---------- objetos metálicos que lleva cada trabajador (anclados al cuerpo) ---------- */
+    function llevaMetal(P) {
+      var it = [], g = P.g;
+      function add(o, home, x, y, z, rx, ry, rz) { o.position.set(x, y, z); o.rotation.set(rx || 0, ry || 0, rz || 0); home.add(o); var r = { o: o, home: home, lp: V(x, y, z), lr: V(rx || 0, ry || 0, rz || 0) }; it.push(r); return r; }
+      var neck = grp(g, 0, 1.5, 0.05), cint = grp(g, 0, 0.93, 0), pocket = grp(g, 0.1, 1.34, 0.125);
+      mk(box(0.43, 0.045, 0.255), M('ropa2'), 0, 0.0, 0, cint);
+      // cadena con colgante (el GLB sustituye al fallback)
+      var cad = new T.Group(); mk(geo('cadTor', function () { return new T.TorusGeometry(0.085, 0.01, 6, 18); }), MM('metal'), 0, -0.07, 0.01, cad).rotation.x = 0.35;
+      mk(box(0.04, 0.05, 0.012), MM('metal'), 0, -0.16, 0.085, cad);
+      var rCad = add(cad, neck, 0, 0, 0.03, 0, 0, 0);
+      // reloj, pulsera, anillo
+      var rel = new T.Group(); mk(box(0.135, 0.05, 0.135), MM('halo'), 0, 0, 0, rel); mk(box(0.07, 0.012, 0.07), MB('texto'), 0, 0.03, 0.0, rel).rotation.set(0, 0, 0);
+      add(rel, P.aL, 0, -0.52, 0, 0, 0, 0);
+      add(mk(geo('pulsT', function () { var q = new T.TorusGeometry(0.075, 0.014, 6, 16); q.rotateX(PI / 2); return q; }), MM('metal'), 0, 0, 0), P.aR, 0, -0.5, 0, 0, 0, 0);
+      add(mk(geo('anilT', function () { var q = new T.TorusGeometry(0.034, 0.009, 6, 12); q.rotateX(PI / 2); return q; }), MM('metal'), 0, 0, 0), P.aR, 0, -0.68, 0, 0, 0, 0);
+      // hebilla del cinturón
+      var heb = new T.Group(); mk(box(0.085, 0.07, 0.014), MM('halo'), 0, 0, 0, heb); mk(box(0.045, 0.04, 0.02), M('ropa2'), 0, 0, 0.004, heb);
+      add(heb, cint, 0, 0, 0.133, 0, 0, 0);
+      // bolígrafo en el bolsillo del pecho
+      var bol = new T.Group(); mk(geo('bolCil', function () { return new T.CylinderGeometry(0.009, 0.009, 0.15, 8); }), MM('halo'), 0, 0, 0, bol); mk(box(0.012, 0.05, 0.01), MM('metal'), 0.012, 0.045, 0, bol);
+      var rBol = add(bol, pocket, 0, 0.045, 0.012, 0, 0, 0);
+      // navaja y llaves en el cinturón
+      var nav = new T.Group(); mk(box(0.1, 0.022, 0.03), MM('halo'), 0, 0, 0, nav); mk(box(0.04, 0.024, 0.032), M('ropa2'), 0.035, 0, 0, nav);
+      var rNav = add(nav, cint, 0.19, -0.01, 0.1, 0, 0.3, 0);
+      var llv = new T.Group(); mk(geo('llvT', function () { return new T.TorusGeometry(0.028, 0.006, 6, 12); }), MM('halo'), 0, 0.03, 0, llv);
+      mk(box(0.02, 0.075, 0.006), MM('metal'), -0.012, -0.03, 0, llv); mk(box(0.02, 0.065, 0.006), MM('halo'), 0.012, -0.025, 0, llv);
+      add(llv, cint, -0.17, -0.05, 0.12, 0, 0, 0.15);
+      // GLB: sustituyen a los fallback cuando cargan
+      usar('cadena_metalica', function (src) { var w = envolverOr(src, 0.3, 'x', 'z'); metalizaGLB(w); cad.children.forEach(function (c) { c.visible = false; }); w.position.set(0, -0.12, 0.07); cad.add(w); });
+      usar('boligrafo_metal', function (src) { var w = envolverOr(src, 0.15, 'y', 'z'); metalizaGLB(w); bol.children.forEach(function (c) { c.visible = false; }); bol.add(w); });
+      usar('navaja', function (src) { var w = envolverOr(src, 0.11, 'x', 'z'); metalizaGLB(w); nav.children.forEach(function (c) { c.visible = false; }); nav.add(w); });
+      return it;
     }
 
     /* ---------- personas ---------- */
@@ -239,7 +336,7 @@
         tuboSet(t2, xs2.map(function (x) { return V(x, yC(i, x, 0), -ZC); })); O.c2c.push(t2);
         var a2 = aislador('aislador', -1); a2.position.set(0, YF[i], -0.3); O.c2.add(a2);
         var pf = [mk(cylU(0.05, 8), Mt('aisl', 0.45), 0, 0, 0, O.c2), mk(cylU(0.05, 8), Mt('aisl', 0.45), 0, 0, 0, O.c2)];
-        var cp = mk(sph(0.13, 10, 8), Mt('aisl', 0.45), 0, YF[i], -0.34, O.c2); cp.scale.set(1, 1, 1.4);
+        var cp = capuchon(0.5); cp.position.set(0, YF[i], -ZC); O.c2.add(cp);
         O.c2p.push({ pf: pf, cp: cp, i: i });
       }
       O.c2tela = mk(box(0.5, 1.9, 0.45), Mt('tela', 0.38), 0, 7.6, -0.02, O.c2);
@@ -249,15 +346,15 @@
         var pr = { pieces: [], cap: null, ded: null, der: null };
         var lista = opt.fin ? segsD : [[-0.3, -3.0]].concat(segsD);
         lista.forEach(function (s) { var m = mk(cylU(0.05, 8), Mt('aisl', 0.45), 0, 0, 0, G); m.visible = false; pr.pieces.push({ win: s[2] === 'w', m: m, a: V(s[0], yC(i, s[0], 0), ZC), b: V(s[1], yC(i, s[1], 0), ZC) }); });
-        pr.cap = mk(sph(0.13, 10, 8), Mt('aisl', 0.45), 0, YF[i], 0.34, G); pr.cap.scale.set(0.001, 0.001, 0.001); pr.cap.visible = false;
+        pr.cap = capuchon(0.5); pr.cap.position.set(0, YF[i], ZC); G.add(pr.cap); pr.cap.scale.set(0.001, 0.001, 0.001); pr.cap.visible = false;
         O.pr.push(pr);
       }
       O.tela = mk(box(0.5, 1.9, 0.45), Mt('tela', 0.38), 0, 7.6, -0.02, G); O.tela.visible = false;
       /* retención, polea, cuerda, rana y aparejo */
       O.ret = mk(box(0.1, 0.1, 0.07), M('metal'), 0, YF[IS], ZC, G);
-      O.dedS = mk(sph(0.08, 8, 6), Mt('aisl', 0.7), 0.3, YF[IS], ZC, G); O.dedS.visible = false;
+      O.dedS = dedal(); O.dedS.position.set(0.3, YF[IS], ZC); G.add(O.dedS); O.dedS.visible = false;
       O.pul = grp(G, 0, 0, 0); O.pul.visible = false;
-      mk(cylX(0.06, 0.04, 12), M('metal'), 0, 0, 0, O.pul); mk(box(0.04, 0.04, 0.62), M('metal'), 0, 0, -0.31, O.pul);
+      polea(O.pul);
       O.rope = tubo(24, 0.02, M('texto', { side: T.DoubleSide })); O.rope.visible = false; G.add(O.rope);
       O.rana = grp(G, 0, 0, 0); O.rana.visible = false; mk(box(0.16, 0.12, 0.1), M('metal'), 0, 0, 0, O.rana); mk(box(0.06, 0.06, 0.2), M('texto'), 0, 0, 0.12, O.rana);
       O.apar = grp(G, 0, 0, 0); O.apar.visible = false; mk(box(0.09, 0.16, 0.07), M('ropa2'), 0, 0, 0, O.apar); mk(box(0.09, 0.16, 0.07), M('ropa2'), 0.2, 0, 0, O.apar);
@@ -272,8 +369,8 @@
       var nr = Math.floor(L / 0.45); for (k = 1; k <= nr; k++) { var f = k / (nr + 1); mk(cylZ(0.022, 0.4, 6), M('esc'), top.x * f, top.y * f, 0, O.esc); }
       O.sujeta = mk(cylU(0.16, 12), M('marca'), LT.x, LT.y - 0.15, 0, G); O.sujeta.scale.set(1, 0.07, 1); O.sujeta.visible = false;
       /* trabajadores */
-      O.w = persona('casco'); G.add(O.w.g); O.w.g.rotation.y = -SIDE * PI / 2;
-      O.ay = persona('casco2'); G.add(O.ay.g);
+      O.w = persona('casco'); G.add(O.w.g); O.mItems = llevaMetal(O.w); O.w.g.rotation.y = -SIDE * PI / 2;
+      O.ay = persona('casco2'); G.add(O.ay.g); O.mItems = O.mItems.concat(llevaMetal(O.ay));
       /* cota de 40 cm */
       O.cota = grp(G, XW, 0, 0.5); O.cota.visible = false;
       var yh = YFEET + HEAD, yt = yh + HCOT;
@@ -291,7 +388,8 @@
         mk(box(0.9, 2.0, 0.04), M('ropa2'), 7.2, 1.0, 2.02, G);
         for (i = 0; i < 4; i++) {
           var cb = tubo(14, 0.016, M(FA[i], { side: T.DoubleSide })); G.add(cb); O.cab.push(cb); O.cabPts.push(Array.apply(null, Array(14)).map(function () { return V(0, 0, 0); }));
-          var dd = mk(sph(0.075, 8, 6), Mt('aisl', 0.7), O.J[i].x, O.J[i].y, O.J[i].z, G); dd.visible = false; O.dedal.push(dd);
+          var dd = dedal(); dd.position.set(O.J[i].x, O.J[i].y - 0.02, O.J[i].z); G.add(dd); dd.visible = false; O.dedal.push(dd);
+          var cn = mk(box(0.075, 0.05, 0.06), MM('metal'), O.J[i].x, O.J[i].y, O.J[i].z, G); cn.visible = false; (O.conn = O.conn || []).push(cn);
           var dv = mk(cylU(0.045, 8), Mt('aisl', 0.45), 0, 0, 0, G); dv.visible = false; O.der.push(dv);
         }
         /* CGP */
@@ -341,8 +439,9 @@
         mk(box(0.14, 0.05, 0.2), M('guante'), 0.75, 0.06, -0.1, O.lona)];
       O.checks = O.items.map(function (m) { var s = etq('✓', 'ok', 0.34, 0.17); s.position.set(m.position.x, 0.55, m.position.z); s.visible = false; O.lona.add(s); return s; });
       /* objetos metálicos que se retiran */
-      O.metal = [mk(cylX(0.05, 0.03, 10), M('metal'), 0, 0, 0, G), mk(box(0.07, 0.05, 0.09), M('metal'), 0, 0, 0, G), mk(sph(0.04, 6, 5), M('metal'), 0, 0, 0, G)];
-      O.cajaM = mk(box(0.3, 0.18, 0.22), M('ropa2'), 3.6, 0.09, 1.7, G); O.cajaM.visible = false;
+      O.bandeja = grp(G, -0.9, 0, 2.4); O.bandeja.visible = false;
+      mk(box(0.66, 0.04, 0.46), M('ropa2'), 0, 0.03, 0, O.bandeja);
+      [[0.33, 0, 0.02, 0.46], [-0.33, 0, 0.02, 0.46], [0, 0.23, 0.66, 0.02], [0, -0.23, 0.66, 0.02]].forEach(function (b) { mk(box(b[2], 0.06, b[3]), M('ropa2'), b[0], 0.06, b[1], O.bandeja); });
       O.bolsa = mk(sph(0.28, 8, 6), M('techo'), 0, 0, 0, G); O.bolsa.visible = false;
       /* efectos transitorios */
       O.sol = mk(sph(1.3, 12, 8), MB('sol'), -15, 15, -12, G); O.sol.visible = false;
@@ -391,7 +490,7 @@
         var hh = (i === IS) ? s.h : 0;
         if (chg('c' + i, hh)) { var P = O.condPts[i]; for (k = 0; k < O.xs.length; k++) P[k].set(O.xs[k], yC(i, O.xs[k], hh), ZC); tuboSet(O.cond[i], P); if (i === 2) tuboSet(O.halo, P); }
       }
-      O.dedS.visible = !opt.acometida && s.p[3] > 0.9 && s.p[IS] < 0.5; O.dedS.position.set(0.3, yC(IS, 0.3, s.h), ZC);
+      O.dedS.visible = !opt.acometida && s.p[3] > 0.9 && s.p[IS] < 0.5; O.dedS.position.set(0.3, yC(IS, 0.3, s.h) - 0.02, ZC);
       O.ret.visible = s.ret > 0.5; O.ret.position.set(0, YF[IS], ZC);
       /* aislador viejo/nuevo */
       var ov = O.ais[IS], a0 = ss(seg(s.sust, 0, 0.5)), a1 = ss(seg(s.sust, 0.5, 1));
@@ -428,7 +527,7 @@
             for (k = 0; k < pp.length; k++) { var u = k / (pp.length - 1); pp[k].set(lerp(E.x, C2.x, u), lerp(E.y, C2.y, u) - 0.3 * 4 * u * (1 - u), lerp(E.z, C2.z, u)); }
             tuboSet(O.cab[i], pp);
           }
-          O.dedal[i].visible = s.ded[i] > 0.01; O.dedal[i].scale.setScalar(Math.max(0.001, ss(s.ded[i])));
+          if (O.conn) O.conn[i].visible = s.s[i] > 0.5; O.dedal[i].visible = s.ded[i] > 0.01; O.dedal[i].scale.setScalar(Math.max(0.001, ss(s.ded[i])));
           O.labAc[i].visible = s.labAc > 0.01; O.labAc[i].scale.set(0.5 * ss(s.labAc), 0.25 * ss(s.labAc), 1);
         }
         var c = s.cgp; O.door.rotation.y = -c.door * 1.9;
@@ -477,14 +576,7 @@
       var vi = ss(seg(s.verif, 0, 0.35)) * (1 - ss(s.guardar));
       O.lona.visible = vi > 0.01; O.lona.scale.setScalar(Math.max(0.001, vi));
       O.checks.forEach(function (c, q) { c.visible = s.verif > 0.4 + q * 0.08 && s.guardar < 0.5; });
-      /* metal */
-      var mm = ss(s.metal), hand = V(w.g.position.x + 0.1, 1.0, w.g.position.z + 0.2);
-      O.cajaM.visible = s.metal > 0.05;
-      O.metal.forEach(function (m, q) {
-        m.visible = s.metal < 0.98;
-        var from = V(w.g.position.x + (q - 1) * 0.12, 1.1 + (q === 2 ? 0.45 : 0), w.g.position.z + 0.15), to = V(3.6, 0.2, 1.7);
-        m.position.set(lerp(from.x, to.x, mm), lerp(from.y, to.y, mm) + 0.6 * Math.sin(mm * PI), lerp(from.z, to.z, mm));
-      });
+      drawMetal();
       /* bolsa de desecho */
       var bb = s.bolsaT; O.bolsa.visible = bb > 0.02 && bb < 0.98;
       var b1 = ss(seg(bb, 0, 0.35)), b2 = ss(seg(bb, 0.45, 1));
@@ -496,6 +588,19 @@
       /* transitorios */
       drawTr();
       pedir();
+    }
+    function drawMetal() {
+      var m = st.metal; O.bandeja.visible = m > 0.03; G.updateMatrixWorld(true);
+      O.mItems.forEach(function (r, k) {
+        var e = ss(seg(m, k * 0.028, k * 0.028 + 0.55)), o = r.o, sl = V(-0.24 + (k % 6) * 0.095, 0.075, -0.1 + Math.floor(k / 6) * 0.1);
+        if (e <= 0.0005) { if (o.parent !== r.home) r.home.add(o); o.position.copy(r.lp); o.rotation.set(r.lr.x, r.lr.y, r.lr.z); }
+        else if (e >= 0.999) { if (o.parent !== O.bandeja) O.bandeja.add(o); o.position.copy(sl); o.rotation.set(0, k * 0.8, 0); }
+        else {
+          if (o.parent !== G) G.add(o);
+          var a = r.home.localToWorld(r.lp.clone()), b = O.bandeja.localToWorld(sl.clone());
+          o.position.set(lerp(a.x, b.x, e), lerp(a.y, b.y, e) + 0.5 * Math.sin(e * PI), lerp(a.z, b.z, e)); o.rotation.set(e * 6, e * 4 + k, 0);
+        }
+      });
     }
     function drawTr() {
       var tr = st.tr, a = tr && tr.a, t = tr ? tr.t : 0, p = tr ? tr.p : {}, i;
@@ -621,6 +726,20 @@
       atras: { p: [-3.2, 7.6, -6.2], t: [0, 7.4, -0.2] },
       suelo2: { p: [4.5, 5.6, 9.8], t: [1.0, 1.1, 1.3] },
       sust: { p: [2.2, 7.9, 3.6], t: [0.3, 7.35, 0.4] },
+      objetos: { p: [1.5, 4.8, 6.6], t: [0.0, 1.0, 1.2] },
+      dObjetos: { p: [-1.2, 1.5, 1.6], t: [-2.9, 1.3, 0.9], fov: 30 },
+      dBandeja: { p: [-0.2, 1.3, 3.0], t: [-0.9, 0.08, 2.4], fov: 30 },
+      dObjetosAy: { p: [-1.3, 1.45, -0.3], t: [-1.3, 1.3, 1.3], fov: 32 },
+      dCapuchon: { p: [0.5, 8.0, 1.2], t: [0, 7.75, 0.44], fov: 26 },
+      dPerfil: { p: [2.3, 7.95, 1.4], t: [1.8, 7.75, 0.42], fov: 30 },
+      dTela: { p: [1.5, 8.2, 1.8], t: [0, 7.6, 0.05], fov: 38 },
+      dDedal: { p: [1.4, 8.05, 1.2], t: [0.8, 8.1, 0.42], fov: 26 },
+      dDedalS: { p: [0.9, 7.5, 1.1], t: [0.15, 7.4, 0.42], fov: 28 },
+      dDedal2: { p: [1.4, 7.7, 1.2], t: [0.8, 7.75, 0.42], fov: 26 },
+      dPolea: { p: [0.9, 8.8, 1.5], t: [0, 8.5, 0.62], fov: 28 },
+      dPoleaFin: { p: [1.0, 7.5, 1.5], t: [0.2, 7.22, 0.62], fov: 28 },
+      dAislador: { p: [0.8, 7.65, 1.1], t: [0, 7.4, 0.3], fov: 28 },
+      dSujecion: { p: [1.0, 6.9, 1.5], t: [0.18, 6.8, 0.2], fov: 36 },
       lona: { p: [0.5, 5.6, 8.2], t: [-1.4, 0.4, 1.7] }
     };
 

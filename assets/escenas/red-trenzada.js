@@ -88,6 +88,13 @@
         }
       }
       g.attributes.position.needsUpdate = true; g.computeVertexNormals(); g.computeBoundingSphere();
+      if (m.userData.halo) tuboSet(m.userData.halo, pts);
+    }
+    /* halo claro (--e-halo) para los conductores negros (S): contorno ligeramente mayor, dibuja la cara interior lejana (por el sentido de los triángulos de tubo()), hijo del tubo */
+    function conHalo(tb, i) {
+      if (FA[i] !== 'S' || !tb) return tb;
+      var h = tubo(tb.geometry.attributes.position.count / 5, tb.userData.rad * 1.5, new T.MeshBasicMaterial({ color: pal('halo'), side: T.FrontSide }));
+      h.material.userData.k = 'halo'; mats['halo' + tb.id] = h.material; tb.add(h); tb.userData.halo = h; return tb;
     }
     function etq(txt, k, w, h) {
       var c = document.createElement('canvas'); c.width = 192; c.height = 96;
@@ -150,9 +157,9 @@
       /* piezas de A que aquí no proceden */
       (AO.cab || []).forEach(hide); (AO.dedal || []).forEach(hide); (AO.der || []).forEach(hide);
       (AO.labAc || []).forEach(hide);   // las etiquetas de la acometida de A se sustituyen por las propias (más pequeñas)
-      if (b2) { AO.cond.forEach(hide); AO.ais.forEach(hide); hide(AO.ret); hide(AO.cota); AO.lab.forEach(hide); }
+      if (b2) { AO.cond.forEach(hide); hide(AO.halo); AO.ais.forEach(hide); hide(AO.ret); hide(AO.cota); AO.lab.forEach(hide); }
       if (b3) {
-        AO.cond.forEach(hide); hide(AO.ret);
+        AO.cond.forEach(hide); hide(AO.halo); hide(AO.ret);
         var aG = scene.children[scene.children.indexOf(G2) - 1];
         if (aG) aG.children.forEach(function (o) { if (o.isMesh && o.geometry && o.geometry.type === 'CylinderGeometry' && Math.abs(o.position.x - 20) < 0.01) hide(o); });
         var pl = mk(geo('polo', function () { return new T.CylinderGeometry(0.13, 0.22, 8.6, 12); }), M('poste'), XF, 4.3, 0, G2);
@@ -164,11 +171,13 @@
       function extremo(cfg) {
         var e = { Pe: V(0, 0, 0), J: cfg.J, tubes: [], ded: [], bare: [], con: [], pro: [], labA: [], pts: [], tf: [], dir: V(0, 1, 0) };
         for (var q = 0; q < 4; q++) {
-          var tb = tubo(10, 0.02, M(FA[q], { side: T.DoubleSide })); G2.add(tb); e.tubes.push(tb);
+          var tb = conHalo(tubo(10, 0.02, M(FA[q], { side: T.DoubleSide })), q); G2.add(tb); e.tubes.push(tb);
           e.pts.push(Array.apply(null, Array(10)).map(function () { return V(0, 0, 0); })); e.tf.push(V(0, 0, 0));
           e.ded.push(mk(cylU(0.05, 8), Mt('aisl', 0.75), 0, 0, 0, G2)); e.ded[q].visible = false;
           e.bare.push(mk(cylU(0.02, 6), M('metal'), 0, 0, 0, G2)); e.bare[q].visible = false;
-          var cn = mk(box(0.13, 0.06, 0.07), M('metal'), 0, 0, 0, G2); cn.visible = false; e.con.push(cn);
+          var cn = mk(box(0.13, 0.06, 0.07), M('metal'), 0, 0, 0, G2); cn.visible = false;
+          [[-0.03, 0.015], [0.03, 0.015], [-0.03, -0.015], [0.03, -0.015]].forEach(function (d) { mk(cylZ(0.009, 0.02, 8), M('texto'), d[0], d[1], 0.04, cn); });   // 4 tornillos del conector (detalle de la p. 54)
+          e.con.push(cn);
           var pr = mk(sph(0.13, 10, 8), Mt('aisl', 0.5), 0, 0, 0, G2); pr.visible = false; e.pro.push(pr);
           var lb = etq(FA[q], FA[q], 0.34, 0.17); lb.visible = false; G2.add(lb); e.labA.push(lb);
         }
@@ -183,7 +192,7 @@
         var C0 = V(5.4, 3.82, 2.16), Pb = b1 ? V(1.3, 6.45, 0.95) : V(1.45, 6.15, 0.78), NP = 64, path = [];
         for (k = 0; k < NP; k++) { var u = k / (NP - 1); path.push(V(lerp(C0.x, Pb.x, u), lerp(C0.y, Pb.y, u) - 0.5 * Math.sin(u * PI), lerp(C0.z, Pb.z, u))); }
         X.acom = [];
-        for (i = 0; i < 4; i++) { var ta = tubo(NP, 0.03, M(FA[i], { side: T.DoubleSide })); G2.add(ta); tuboSet(ta, helix(path, i, 0.035, 0.55)); X.acom.push(ta); }
+        for (i = 0; i < 4; i++) { var ta = conHalo(tubo(NP, 0.03, M(FA[i], { side: T.DoubleSide })), i); G2.add(ta); tuboSet(ta, helix(path, i, 0.035, 0.55)); X.acom.push(ta); }
         var e0 = extremo({ J: AO.J, free: 0.72 }); e0.Pe.copy(Pb);
         X.Pb = Pb;
       }
@@ -194,7 +203,7 @@
         for (x = -5; x < 9; x += 0.1) X.xs.push(Math.round(x * 100) / 100);
         for (x = 9; x <= 20; x += 1) X.xs.push(x);
         X.main = [];
-        for (i = 0; i < 4; i++) { var tm = tubo(X.xs.length, 0.03, M(FA[i], { side: T.DoubleSide })); G2.add(tm); X.main.push(tm); }
+        for (i = 0; i < 4; i++) { var tm = conHalo(tubo(X.xs.length, 0.03, M(FA[i], { side: T.DoubleSide })), i); G2.add(tm); X.main.push(tm); }
         [-20, 0, 20].forEach(function (xx) { mk(box(0.16, 0.22, 0.3), M('cgp'), xx, 6.95 + (xx === 0 ? 0 : 0.0), 0.28, G2); });
         X.cunas = [0.68, 2.05].map(function (xx, q) { var c = mk(box(0.11, 0.36, 0.14), M('marca'), xx, 6.9, ZM, G2); c.rotation.z = q ? -0.2 : 0.2; c.visible = false; return c; });
         X.tela = mk(geo('tela2', function () { return new T.PlaneGeometry(2.6, 1.0); }), Mt('tela', 0.55), 1.4, 6.85, 0.27, G2); X.tela.visible = false;
@@ -208,7 +217,7 @@
           var xs = []; for (var xx = d[0]; xx < d[1]; xx += (d[2] === 'S' ? 1.1 : 1.6)) xs.push(xx); xs.push(d[1]);
           if (d[2] === 'L') { xs = []; for (xx = -20; xx < -4; xx += 2) xs.push(xx); for (xx = -4; xx < d[1]; xx += 0.4) xs.push(xx); xs.push(d[1]); }
           for (var q = 0; q < 4; q++) {
-            var tb = tubo(xs.length, 0.03, M(FA[q], { side: T.DoubleSide })); G2.add(tb); X.conv[d[2]].push(tb);
+            var tb = conHalo(tubo(xs.length, 0.03, M(FA[q], { side: T.DoubleSide })), q); G2.add(tb); X.conv[d[2]].push(tb);
             tuboSet(tb, xs.map(function (x2) { return V(x2, yB(q, x2), ZC); }));
             if (d[2] === 'S') { var gh = tubo(xs.length, 0.03, Mt(FA[q], 0.28)); G2.add(gh); gh.visible = false; X.conv.G.push(gh); tuboSet(gh, xs.map(function (x2) { return V(x2, yB(q, x2), ZC); })); }
           }
@@ -237,7 +246,7 @@
         }
         X.telaF = mk(box(0.5, 1.9, 0.45), Mt('tela', 0.38), XF, 7.6, -0.02, G2); X.telaF.visible = false;
         /* cable trenzado nuevo */
-        X.bundle = []; for (i = 0; i < 4; i++) { var tn = tubo(Math.round((XF - 2.6) / 0.1) + 1, 0.03, M(FA[i], { side: T.DoubleSide })); G2.add(tn); X.bundle.push(tn); }
+        X.bundle = []; for (i = 0; i < 4; i++) { var tn = conHalo(tubo(Math.round((XF - 2.6) / 0.1) + 1, 0.03, M(FA[i], { side: T.DoubleSide })), i); G2.add(tn); X.bundle.push(tn); }
         var eL = extremo({ J: AO.J, free: 0.72 });
         var Jr = XR.map(function (x2, q) { return V(x2, yB(q, x2), ZC); });
         var eR = extremo({ J: Jr, free: 0.72 });
@@ -296,7 +305,7 @@
         X.cunas.forEach(function (c, q) { c.visible = ci > 0.01; c.position.set(q ? 2.05 : 0.68, 6.9 - 0.0, ZM + 0.4 * (1 - ci)); });
         X.tela.visible = s.tela2 > 0.01; X.tela.scale.setScalar(Math.max(0.001, ss(s.tela2)));
         for (i = 0; i < 4; i++) {
-          X.labM[i].visible = s.lm > 0.5; X.labM[i].position.set(XB2[i], ym(XB2[i]) + 0.4, 0.82);
+          X.labM[i].visible = s.lm > 0.5; X.labM[i].position.set(XB2[i], ym(XB2[i]) + 0.75, 0.82);
           X.labA2[i].visible = s.la > 0.5; X.labA2[i].position.set(XB2[i] - 0.05, 5.85, 1.02);
         }
       }
@@ -397,7 +406,17 @@
       zona2: { p: [3.9, 7.5, 5.4], t: [1.4, 6.75, 0.5] },
       ext1: { p: [3.8, 6.8, 6.0], t: [1.3, 6.4, 0.6] },
       vano: { p: [XF / 2, 7.4, 25], t: [XF / 2, 6.4, 0.6] },
-      ext2: { p: [XF - 3.4, 8.0, 6.0], t: [XF - 1.3, 6.9, 0.6] }
+      ext2: { p: [XF - 3.4, 8.0, 6.0], t: [XF - 1.3, 6.9, 0.6] },
+      /* cámaras de primer plano para los planos de detalle (campo `det` de los pasos) */
+      'det-cruceta': { p: [1.9, 8.1, 2.3], t: [0.3, 7.6, 0.3] },
+      'det-dedal': { p: [0.3, 6.9, 2.0], t: [1.3, 6.95, 0.7] },
+      'det-conexion': { p: [1.7, 8.2, 1.4], t: [1.1, 7.95, 0.5] },
+      'det-cunas': { p: [2.4, 7.3, 1.9], t: [1.4, 6.9, 0.45] },
+      'det-dedal2': { p: [2.5, 6.6, 1.9], t: [1.5, 6.5, 0.8] },
+      'det-conexion2': { p: [1.8, 7.2, 1.3], t: [1.15, 6.9, 0.5] },
+      'det-dedal3': { p: [2.5, 6.6, 2.0], t: [1.2, 6.5, 0.7] },
+      'det-corte': { p: [3.2, 7.8, 1.8], t: [2.0, 7.4, 0.42] },
+      'det-ext2': { p: [XF - 2.3, 8.2, 1.4], t: [XF - 1.3, 7.8, 0.45] }
     });
 
     var api = {

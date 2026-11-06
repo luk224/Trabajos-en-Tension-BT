@@ -14,6 +14,14 @@
      configurar(opts), reset(), aplicar(anim, t, activo), camaras:{}, tema(), dispose()
    }). aplicar() debe ser determinista: el estado «tras el paso N» se obtiene con
    reset() + aplicar(paso_k, 1, false) para k<N + aplicar(paso_N, t, true).
+
+   PLANO DE DETALLE (picture-in-picture): un paso puede llevar
+     det:{cam:'dCapuchon', txt:'Detalle: capuchón o protector aislante de aislador (Manual p. 49)'}
+   o una lista [{cam,txt},{cam,txt}] (el recuadro ofrece «Siguiente detalle»). `cam` es una clave de
+   escena.camaras con el mismo formato {p:[x,y,z], t:[x,y,z], fov?:grados} (fov por defecto 28).
+   El reproductor dibuja la MISMA escena con una segunda cámara en un recuadro (esquina inferior derecha del lienzo,
+   ~38 % del ancho, mín. 140 px) con scissor/viewport, solo mientras el paso está activo; el usuario puede
+   ocultarlo/mostrarlo. Si la cámara no existe o no hay WebGL, el detalle no se dibuja y su texto pasa a la nota del paso.
    ============================================================ */
 (function () {
   'use strict';
@@ -168,6 +176,21 @@
     me.carga = h('div', { class: 'carga', text: 'Cargando escena…' });
     me.pista = h('div', { class: 'pista', 'aria-hidden': 'true', text: 'Desliza en horizontal para girar · pellizca para zoom' });
     stage.appendChild(me.canvas); stage.appendChild(me.pista); stage.appendChild(me.tag); stage.appendChild(me.btnCam); stage.appendChild(me.sin3d); stage.appendChild(me.carga);
+    me.detBox = h('div', { class: 'detbox', role: 'group', 'aria-label': 'Plano de detalle' });
+    me.detCap = h('div', { class: 'detcap' });
+    me.detTxt = h('span', { class: 'dettxt', 'aria-live': 'polite' });
+    me.detNext = h('button', { class: 'detb', type: 'button', 'aria-label': 'Siguiente detalle', text: '›' });
+    me.detHide = h('button', { class: 'detb', type: 'button', 'aria-label': 'Ocultar el plano de detalle', text: '×' });
+    me.detView = h('div', { class: 'detview' });
+    me.detCap.appendChild(me.detTxt); me.detCap.appendChild(me.detNext); me.detCap.appendChild(me.detHide);
+    me.detBox.appendChild(me.detCap); me.detBox.appendChild(me.detView);
+    me.detShow = h('button', { class: 'detshow', type: 'button', text: 'Ver detalle' });
+    stage.appendChild(me.detBox); stage.appendChild(me.detShow);
+    me.detBox.style.display = 'none'; me.detShow.style.display = 'none';
+    me.detOn = true; me.detIdx = 0; me.det = null;
+    me.detHide.addEventListener('click', function () { me.detOn = false; me.pintaDet(); me.pedir(); });
+    me.detShow.addEventListener('click', function () { me.detOn = true; me.pintaDet(); me.pedir(); });
+    me.detNext.addEventListener('click', function () { me.detIdx = (me.detIdx + 1) % me.det.length; me.pintaDet(); me.pedir(); });
     me.stage = stage;
 
     var panel = h('div', { class: 'panel' });
@@ -182,7 +205,7 @@
         me.seg.appendChild(b);
       });
       box.appendChild(me.seg);
-      me.desc = h('p', { class: 'desc' }); box.appendChild(me.desc);
+      me.desc = h('p', { class: 'descvar' });
       scroll.appendChild(box);
     }
     me.faseNom = h('div', { class: 'fase-nom' });
@@ -194,6 +217,7 @@
     pasoBox.appendChild(me.pasoCab); pasoBox.appendChild(me.pasoTxt); pasoBox.appendChild(me.pasoNota);
     me.pasoBox = pasoBox;
     scroll.appendChild(me.fasesBar); scroll.appendChild(me.faseNom); scroll.appendChild(pasoBox);
+    if (me.desc) scroll.appendChild(me.desc);
     if (def.leyendaFases !== false) {
       var ley = h('div', { class: 'leyenda', 'aria-label': 'Leyenda de colores de las fases' });
       [['N', 'neutro azul'], ['R', 'R marrón'], ['S', 'S negro'], ['T', 'T gris']].forEach(function (x) { var b = h('b'); var i = h('i'); i.style.setProperty('--c', 'var(--e-' + x[0] + ')'); b.appendChild(i); b.appendChild(document.createTextNode(x[1])); ley.appendChild(b); });
@@ -241,6 +265,37 @@
       var t = e.changedTouches[0], dx = t.clientX - sx, dy = t.clientY - sy;
       if (Math.abs(dx) > 55 && Math.abs(dx) > 1.6 * Math.abs(dy) && Date.now() - st < 700) { me.pausa(); me.ir(me.n + (dx < 0 ? 1 : -1), true); }
     }, { passive: true });
+  };
+
+  /* ----- plano de detalle ----- */
+  P.pintaDet = function () {
+    var d = this.det, ok = !!d && this.ok3d;
+    this.stage.classList.toggle('has-det', ok && this.detOn);
+    if (!ok) { this.detBox.style.display = 'none'; this.detShow.style.display = 'none'; return; }
+    this.detBox.style.display = this.detOn ? '' : 'none'; this.detShow.style.display = this.detOn ? 'none' : '';
+    this.detTxt.textContent = d[this.detIdx].txt || 'Detalle';
+    this.detNext.style.display = d.length > 1 ? '' : 'none';
+  };
+  P.setDet = function (det) {
+    var me = this, arr = !det ? null : (Array.isArray(det) ? det : [det]);
+    if (arr) arr = arr.filter(function (x) { return x && me.escena && me.escena.camaras && me.escena.camaras[x.cam]; });
+    me.det = arr && arr.length ? arr : null; me.detIdx = 0;
+    if (me.det) {
+      me.camDet = me.camDet || new THREE.PerspectiveCamera(28, 1, 0.05, 220);
+    }
+    me.pintaDet();
+  };
+  P.renderDet = function () {
+    var me = this, d = me.det && me.det[me.detIdx];
+    if (!d || !me.detOn || !me.ok3d) return;
+    var pose = me.escena.camaras[d.cam], c = me.camDet;
+    var sr = me.stage.getBoundingClientRect(), vr = me.detView.getBoundingClientRect();
+    var x = vr.left - sr.left, w = vr.width, hh = vr.height, y = sr.height - (vr.top - sr.top) - hh;
+    if (w < 20 || hh < 20) return;
+    c.fov = pose.fov || 28; c.aspect = w / hh; c.near = 0.05; c.updateProjectionMatrix();
+    c.position.fromArray(pose.p); c.lookAt(new THREE.Vector3().fromArray(pose.t)); c.updateMatrixWorld();
+    var r = me.renderer; r.setScissorTest(true); r.setViewport(x, y, w, hh); r.setScissor(x, y, w, hh);
+    r.render(me.scene, c); r.setScissorTest(false); r.setViewport(0, 0, sr.width, sr.height);
   };
 
   P.pintaAuto = function () { this.bAuto.setAttribute('aria-pressed', this.auto ? 'true' : 'false'); };
@@ -318,7 +373,7 @@
       if (me.tween.k >= 1) me.tween = null;
     }
     if (me.running) me.avanza(dt);
-    if (me.dirty && me.ok3d) { me.dirty = false; me.renderer.render(me.scene, me.camera); }
+    if (me.dirty && me.ok3d) { me.dirty = false; me.renderer.render(me.scene, me.camera); me.renderDet(); }
     if (me.running || me.tween || me.dirty) requestAnimationFrame(function (n) { me.loop(n); });
     else me.loopOn = false;
   };
@@ -380,12 +435,14 @@
     if (p.ilus) me.pasoCab.appendChild(h('span', { class: 'ilus', text: 'Gesto ilustrativo' }));
     me.pasoTxt.textContent = p.texto;
     me.pasoNota.innerHTML = '';
-    var nts = [];
-    if (p.nota) nts.push(h('p', { class: 'paso-nota', html: p.nota }));
-    if (typeof p.ilus === 'string') nts.push(h('p', { class: 'paso-nota', html: '<strong>Ilustrativo.</strong> ' + p.ilus }));
+    var nts = [], nch = 0;
+    if (p.nota) { nts.push(h('p', { class: 'paso-nota', html: p.nota })); nch += p.nota.length; }
+    if (typeof p.ilus === 'string') { nts.push(h('p', { class: 'paso-nota', html: '<strong>Ilustrativo.</strong> ' + p.ilus })); nch += p.ilus.length + 12; }
+    var detT = p.det && !me.ok3d ? [].concat(p.det).map(function (d) { return d && d.txt; }).filter(Boolean) : [];
+    detT.forEach(function (t) { nts.push(h('p', { class: 'paso-nota', text: t })); nch += t.length; });
     if (nts.length) {
-      var dn = h('details', { class: 'notas' }); dn.open = true;
-      dn.appendChild(h('summary', { text: p.nota && typeof p.ilus === 'string' ? 'Notas del paso' : (p.nota ? 'Nota del paso' : 'Ilustrativo') }));
+      var dn = h('details', { class: 'notas' }); dn.open = p.texto.length <= 120 && nch <= 220;
+      dn.appendChild(h('summary', { text: (nts.length > 1 ? 'Notas del paso' : (p.nota ? 'Nota del paso' : 'Ilustrativo')) + (dn.open ? '' : ' (tocar para ver)') }));
       nts.forEach(function (n) { dn.appendChild(n); }); me.pasoNota.appendChild(dn);
     }
     if (me.scrollEl && window.matchMedia('(min-width:960px)').matches) me.scrollEl.scrollTop = 0;
@@ -421,6 +478,7 @@
     me.pose = me.poseDe(cams || 'general');
     if (!sinPose || !me.userMoved) me.aplicaPose(me.pose, !!sinPose);
     me.userMoved = false;
+    me.setDet(me.pasos[n].p.det);
     me.pinta(); me.pedir();
   };
   P.durPaso = function () { return (this.pasos[this.n].p.dur || 2.6); };

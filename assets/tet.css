@@ -22,7 +22,7 @@
   --aviso:#ffb81c; --aviso-ink:#14181d; --aviso-txt:#ffc94d; --carbon:#0a0d10; --carbon-ink:#eaeff3;
   --ok:#4ade80; --foco:#7aa7ff; --sombra:0 1px 0 rgba(0,0,0,.4),0 10px 24px -14px rgba(0,0,0,.8);
   --e-fondo:#10171d; --e-suelo:#2d3829; --e-calzada:#2a2f34; --e-poste:#6f6c66; --e-edificio:#4d4840; --e-techo:#38342e;
-  --e-N:#4f8dff; --e-R:#b07a43; --e-S:#2a2d34; --e-T:#c3c8ce; --e-halo:#9aa5b1;
+  --e-N:#4f8dff; --e-R:#b07a43; --e-S:#1c1f25; --e-T:#c3c8ce; --e-halo:#dde3e8;
   --e-aisl:#ff9a12; --e-tela:#ffd23a; --e-aislador:#a07c55; --e-viejo:#6b5440; --e-nuevo:#f2ecda; --e-metal:#e0be3a;
   --e-piel:#d09a79; --e-casco:#e9e9e6; --e-casco2:#ffd23a; --e-ropa:#ff8b1e; --e-ropa2:#52667d; --e-guante:#f04a4a;
   --e-valla:#ff7a00; --e-furgo:#cfd3d6; --e-cono:#ff6a00; --e-cota:#ff5fa2; --e-ok:#4ade80; --e-esc:#ffc933;
@@ -80,6 +80,14 @@ h2{font:800 1.5rem/1.15 var(--f-tit);margin:0 0 .8rem;letter-spacing:.005em}
 .stage.nogl .sinwebgl{position:static;padding:1.2rem;font-size:.95rem}
 .pista{display:none;position:absolute;left:10px;right:10px;bottom:8px;text-align:center;font:600 .74rem var(--f-txt);color:var(--ink);background:color-mix(in srgb,var(--panel) 82%,transparent);border-radius:6px;padding:.2rem .4rem;pointer-events:none}
 .stage.nogl .pista{display:none!important}
+.detbox{position:absolute;right:10px;bottom:10px;width:max(140px,38%);max-width:60%;border:2px solid var(--carbon);background:transparent;border-radius:8px;overflow:hidden;box-shadow:var(--sombra);z-index:3}
+:root[data-theme="dark"] .detbox{border-color:var(--aviso)}
+.detcap{display:flex;gap:.2rem;align-items:flex-start;padding:.2rem .25rem .2rem .4rem;font:700 .7rem/1.2 var(--f-txt);color:var(--ink);background:var(--panel)}
+.dettxt{flex:1;min-width:0}
+.detb{flex:none;min-width:28px;min-height:28px;border:1.5px solid var(--carbon);border-radius:6px;background:var(--panel);color:var(--ink);font:800 1rem/1 var(--f-txt);cursor:pointer}
+.detview{width:100%;aspect-ratio:4/3;background:transparent;border-top:2px solid var(--carbon)}
+.detshow{position:absolute;right:10px;bottom:10px;min-height:40px;padding:0 .8rem;border:2px solid var(--carbon);border-radius:8px;background:var(--aviso);color:var(--aviso-ink);font:800 .85rem var(--f-tit);cursor:pointer;z-index:3}
+.stage.has-det .pista,.stage.nogl .detbox,.stage.nogl .detshow{display:none!important}
 .carga{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--mut);font-weight:600;pointer-events:none}
 
 .panel{display:flex;flex-direction:column;min-width:0}
@@ -91,6 +99,8 @@ h2{font:800 1.5rem/1.15 var(--f-tit);margin:0 0 .8rem;letter-spacing:.005em}
 .seg button+button{border-left:2px solid var(--carbon)}
 :root[data-theme="dark"] .seg button+button{border-left-color:var(--bd)}
 .seg button[aria-pressed="true"]{background:var(--aviso);color:var(--aviso-ink)}
+.descvar{margin:0;padding:.45rem .9rem;font-size:.8rem;color:var(--mut);border-top:1px solid var(--bd)}
+.descvar:empty{display:none}
 .opcion .desc{flex:1 1 100%;font-size:.84rem;color:var(--mut);margin:0}
 
 .leyenda{margin:0;padding:.45rem .9rem;display:flex;flex-wrap:wrap;gap:.25rem .7rem;align-items:center;font-size:.78rem;color:var(--mut);border-top:1px solid var(--bd)}
@@ -166,17 +176,19 @@ details.todos[open]>summary::before{transform:rotate(45deg)}
   .stage{position:sticky;top:0;height:max(520px,min(calc(100svh - 190px),820px));min-height:520px}
   .panel{height:max(520px,min(calc(100svh - 190px),820px));overflow:hidden;border-left:2px solid var(--carbon)}
   :root[data-theme="dark"] .panel{border-left-color:var(--bd)}
-  .panel .scroll{flex:1 1 0;min-height:0;overflow-y:auto;overscroll-behavior:contain}
+  .panel .scroll{flex:1 1 0;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--mut) var(--panel2);background:linear-gradient(var(--panel) 30%,transparent),linear-gradient(transparent,var(--panel) 70%) bottom,linear-gradient(var(--mut),transparent 90%),linear-gradient(transparent,var(--mut) 90%) bottom;background-repeat:no-repeat;background-size:100% 26px,100% 26px,100% 6px,100% 6px;background-attachment:local,local,scroll,scroll}
   .ctrl{position:static;flex:none}
   .paso{min-height:0}
 }
 @media (max-width:959px){
+  .detbox{width:max(150px,50%);max-width:70%}
+  .detcap{font-size:.64rem}
   .panel .scroll{display:contents}
-  .leyenda{order:4}
+  .descvar{order:4}.leyenda{order:5}
   .opcion{order:0}.fases{order:1}.fase-nom{order:2}.paso{order:3}
   .stage{touch-action:pan-y}
   .pista{display:block}
-  details.todos{order:5}.ctrl{order:6}
+  details.todos{order:6}.ctrl{order:7}
 }
 
 /* ---------- fichas ---------- */
