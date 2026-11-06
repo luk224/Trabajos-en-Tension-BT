@@ -21,3 +21,9 @@ herramientas/ocr.py           OCR del PDF (easyocr, .venv con uv)
 3. Colores solo con variables CSS; claro/oscuro; `prefers-reduced-motion` respetado; sin WebGL → imagen estática o lista de pasos igualmente utilizable.
 4. Tras cada cambio: commit en español + `git push origin main` (Pages desde `main`, raíz, `.nojekyll`). Pipeline: constructor → revisor-fidelidad → corregir → publicar → avisar al usuario.
 5. Los PDF, páginas rasterizadas y el OCR en bruto no se suben (material de la empresa).
+
+## Estado
+- Listo: 5.A (A.1, A.2) con reproductor 3D (`assets/tet.js`, escena `assets/escenas/apoyo-bt.js`), revisado por `revisor-fidelidad`. Pendiente: B.1-E.1 y secciones 1-4 (fichas).
+- Modelos 3D reales: `assets/modelos/` (NVIDIA SimReady, CC BY 4.0, ver CREDITOS.md). Cargador GLTF + meshopt en `assets/three/`.
+- OCR: easyocr falla en esta CPU (Illegal instruction); `herramientas/ocr.py` usa RapidOCR (sin espacios/tildes, solo para buscar). Citar leyendo `paginas/pdf-NN.png` (`pdftoppm -r 110 -f N -l M`).
+- Móvil: lienzo con `touch-action:pan-y` (arrastre vertical = scroll; horizontal/pellizco = escena).

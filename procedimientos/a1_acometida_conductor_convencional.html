@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<script>try{var t=localStorage.getItem('tema');var q=location.search.match(/[?&]tema=(dark|light)/);if(q)t=q[1];if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>A.1 Conexión o desconexión de acometidas · Manual TETBT</title>
+<meta name="description" content="Animación paso a paso del procedimiento A.1 del Manual de Trabajos en Tensión en Baja Tensión.">
+<link rel="stylesheet" href="../assets/tet.css">
+</head>
+<body>
+<a class="skip" href="#reproductor">Ir al reproductor de pasos</a>
+<header class="cab">
+  <div class="cab-in">
+    <nav class="migas" aria-label="Migas de pan">
+      <a href="../index.html">← Manual TETBT</a><span class="sep" aria-hidden="true">·</span>
+      <a href="../index.html#s5">5. Procedimientos</a><span class="sep" aria-hidden="true">·</span>
+      <a class="act" href="../index.html#s5-a" aria-current="page">A. Red aérea convencional</a>
+    </nav>
+    <button class="btn-tema" type="button" data-tema-btn aria-pressed="false"><span>Modo oscuro</span></button>
+  </div>
+</header>
+<main>
+  <div class="titulo">
+    <span class="placa" aria-hidden="true">A.1</span>
+    <h1>Conexión o desconexión de acometidas de conductor convencional a red aérea convencional</h1>
+  </div>
+  <section aria-label="Reproductor de pasos"><div id="reproductor"><noscript><p>Para ver la animación paso a paso hace falta JavaScript. Las fichas de abajo no lo necesitan.</p></noscript></div></section>
+  <section class="fichas" id="fichas" aria-label="Fichas del procedimiento"></section>
+</main>
+<footer class="pie">
+  <div class="hermano">
+    <div><div class="lbl">Procedimiento hermano</div><strong>A.2 Sustitución de aislador en apoyo de alineación o de fin de línea</strong></div>
+    <a class="go" href="a2_sustitucion_aislador.html">Abrir A.2</a>
+  </div>
+  <small>Material de formación basado en el Manual de Trabajos en Tensión en Baja Tensión, apartado 5.A. Las animaciones son una ayuda visual: el texto de cada paso es el del manual y los gestos que el manual no detalla están marcados como ilustrativos. Modelos 3D de escalera, vallas, señal, cinta, bolsa, casco, gafas, guantes y pinza: NVIDIA SimReady, licencia CC BY 4.0 (<a href="../assets/modelos/CREDITOS.md">créditos</a>).</small>
+</footer>
+<script src="../assets/three/three.min.js"></script>
+<script src="../assets/three/OrbitControls.js"></script>
+<script src="../assets/three/GLTFLoader.js"></script>
+<script src="../assets/three/meshopt_decoder.js"></script>
+<script src="../assets/tet.js"></script>
+<script src="../assets/escenas/apoyo-bt-pasos.js"></script>
+<script src="../assets/escenas/apoyo-bt.js"></script>
+<script>
+var NOTA_EPI='Los equipos de protección individual deberán tener marcas de homologación o de certificación.';
+var NOTA_EPC='Los materiales aislantes individuales deberán tener marcas de homologación o certificación o disponer de certificados de ensayos.';
+var NOTA_HER='Las herramientas aisladas deberán tener marcas de homologación o certificación.';
+var NOTA_MAT='Incluyen el material de señalización y delimitación, los dispositivos y accesorios para realizar el trabajo y los equipos de comprobación.';
+var RIESGOS=['Contacto eléctrico','Arco eléctrico','Caída de personas a distinto nivel','Caída de objetos','Choques y golpes','Cortes','Atrapamientos'];
+var HUMANOS='Dos trabajadores: uno habilitado para Trabajos en Tensión en Baja Tensión que actuará como Jefe de Trabajo y un ayudante para tareas auxiliares que, como mínimo, será un trabajador autorizado.';
+var EPI=['Casco de protección','Gafas inactínicas','Pantalla facial','Ropa de trabajo','Guantes aislantes','Guantes ignífugos','Guantes de protección mecánica','Calzado de seguridad','Cinturón de seguridad'];
+
+var P=TET.pasosApoyoBT;
+TET.montar({
+  id:'a1', escena:'apoyo-bt',
+  fichas:{
+    definicion:{pag:40,texto:'Conectar o desconectar una acometida de red aérea convencional de conductor desnudo o con protección mecánica, a una línea principal de red aérea convencional desnuda o con protección mecánica.'},
+    riesgosPag:40, riesgos:RIESGOS, humanos:{pag:40,texto:HUMANOS}, mediosPag:'40–42',
+    medios:{
+      epi:{nota:NOTA_EPI,items:EPI},
+      epc:{nota:NOTA_EPC,items:['Tela aislante','Perfiles aislantes','Protectores aislantes para aisladores','Dedales aislantes','Alfombras aislantes']},
+      herramientas:{nota:NOTA_HER,items:['Herramientas manuales aisladas','Bolsa portaherramientas']},
+      materiales:{nota:NOTA_MAT,items:['Equipo de señalización y delimitación del lugar de trabajo','Equipo de señalización vial','Poleas y cuerdas aislantes','Cepillo aislado','Arriostrador de postes','Lona (para herramientas, equipos y materiales)','Trepadores (para trabajos en apoyos de madera)','Escalera aislante','Pinzas aislantes','Pinza voltio-amperimétrica','Comprobador de secuencia de fases']}
+    }
+  },
+  selector:{etiqueta:'Operación',param:'op',defecto:'conexion',opciones:[
+    {id:'conexion',etiqueta:'Conexión',desc:'Se conecta la acometida a la línea principal: el neutro es el primer conductor en conectarse.'},
+    {id:'desconexion',etiqueta:'Desconexión',desc:'Se desconecta la acometida: el neutro es el último conductor en desconectarse (p. 43). Es el único cambio de orden que indica el manual.'}]},
+  construir:function(sel){
+    var des=sel==='desconexion';
+    var c1={texto:'Realizar la conexión, conectando en primer lugar el conductor neutro y reponer aislamiento.',pag:43,cam:'cabeza2',dur:4};
+    var c2={texto:'Repetir el proceso para el resto de las fases.',pag:43,cam:'cabeza2',dur:5};
+    if(des){
+      c2.anim={a:'conecta',fases:['R','S','T'],inv:true}; c2.nota='<strong>Desconexión:</strong> este paso se hace primero, desconectando las fases R, S y T.';
+      c1.anim={a:'conecta',fases:['N'],inv:true}; c1.nota='<strong>Desconexión:</strong> el neutro se desconecta el último, tras R, S y T. Se invierte el orden de estos dos pasos porque el manual lo indica así (paso «En caso de desconexión…»).';
+    } else { c1.anim={a:'conecta',fases:['N']}; c2.anim={a:'conecta',fases:['R','S','T']}; }
+    c1.ilus=c2.ilus='El dedal aislante representa «reponer aislamiento»; el orden entre fases R, S, T es ilustrativo.';
+    var ejec=[
+      {texto:'Revisar la caja general de protección de la acometida.',pag:42,anim:'cgpAbre',cam:'cgp',ilus:'El manual no dice quién la revisa; se anima al ayudante.'},
+      {texto:'Retirar fusibles de la caja general de protección.',pag:42,anim:{a:'cgpFus'},cam:'cgp',ilus:'El manual no dice quién lo hace; fusibles y barra de neutro son esquemáticos.'},
+      {texto:'Cerrar y precintar la caja general de protección si fuera necesario.',pag:42,anim:'cgpCierra',cam:'cgp',ilus:'El precinto se dibuja como una esfera roja en el cierre.'},
+      {texto:'Si es necesario, señalizar, exterior e interiormente, la caja general de protección.',pag:42,anim:'senalCgp',cam:'cgp',ilus:'El tipo de cartel es representativo; el manual no lo describe.'},
+      {texto:'Ascender al punto de trabajo, mediante escalera aislante, u otro medio, hasta situarse aproximadamente a 40 cm desde la cabeza del trabajador hasta el punto en tensión o neutro más próximo.',pag:42,anim:'asciende',cam:'ascenso',dur:6,
+        nota:'La cota «≈ 40 cm» marca la distancia desde la cabeza hasta el punto en tensión más próximo. Es la única cifra que da el manual para este paso.'},
+      {texto:'En los apoyos de hormigón con alvéolos, dotados de elementos para la instalación de líneas de seguridad, el ascenso se podrá realizar por los propios alvéolos.',pag:43,anim:'alveolos',cam:'poste',dur:3,ilus:'Se resaltan los alvéolos; el ascenso por ellos no se anima (aquí se sigue con la escalera).'},
+      {texto:'Aislar la zona de trabajo en tensión procediendo de abajo hacia arriba; deberán protegerse los elementos en tensión y las masas accesibles.',pag:43,anim:{a:'aislar'},cam:'cabeza',dur:7,
+        nota:'De abajo hacia arriba: primero la fase T, luego S, R y N. Se cubren conductores, aisladores (capuchones) y derivación, y al final el apoyo (tela), como en el esquema de la p. 44.',
+        ilus:'El orden de colocación de cada pieza dentro de una fase es ilustrativo.'},
+      {texto:'Si es necesario, identificar el neutro de la línea principal y de la acometida así como el resto de las fases.',pag:43,anim:'etiquetas',cam:'cabeza2',dur:3.5,ilus:'Las etiquetas N, R, S y T son solo una forma de mostrar la identificación.'},
+      {texto:'Limpiar el conductor.',pag:43,anim:{a:'cepillo'},cam:'cabeza2',dur:4,ilus:'El manual lista un «cepillo aislado» entre los materiales; el gesto de cepillar es ilustrativo.'},
+      {texto:'Comprobar la inexistencia de diferencia de potencial entre los conductores a conectar.',pag:43,anim:{a:'pinza',fases:4},cam:'cabeza2',dur:4.5,ilus:'La pinza se muestra sobre cada conductor; el manual no detalla el método de medida.'},
+      (des?c2:c1),(des?c1:c2),
+      {texto:'Retirar las protecciones aislantes de arriba hacia abajo.',pag:43,anim:'quitarProt',cam:'cabeza',dur:6},
+      {texto:'En caso de desconexión, el neutro es el último conductor en desconectarse.',pag:43,anim:'resaltaN',cam:'cabeza2',dur:3,
+        nota:des?'Es lo que se ha hecho en esta variante: R, S y T primero, y el neutro al final.':'Este punto solo aplica a la desconexión. En la conexión, el neutro es el primero (ver los dos pasos anteriores). Cambia a «Desconexión» para ver el orden inverso.'},
+      {texto:'En el caso de apoyos de doble circuito, el circuito sobre el que no se va a trabajar, debe estar aislado.',pag:43,anim:'doble',cam:'atras',dur:5,
+        ilus:'Se dibuja un segundo circuito detrás del apoyo, solo para ilustrar este caso. El manual lo cita al final de la lista de ejecución.'}
+    ];
+    var fin=[
+      {texto:'Comprobar que la tensión es la correcta.',pag:43,anim:{a:'pinza',fases:4},cam:'cabeza2',dur:4.5,ilus:'El punto de medida y el método no se detallan en el manual.'},
+      {texto:'Si es necesario, comprobar concordancia de fases.',pag:43,anim:'comprobador',cam:'cgp',dur:3.5,ilus:'El manual lista un «comprobador de secuencia de fases»; su aspecto y uso se dibujan de forma esquemática.'},
+      {texto:'Reponer fusibles en la caja general de protección o elemento equivalente.',pag:43,anim:{a:'cgpFus',inv:true},cam:'cgp'},
+      {texto:'Inspeccionar visualmente el conjunto de la instalación.',pag:43,anim:['inspeccion','descenso'],cam:'general',dur:5,ilus:'El descenso del trabajador por la escalera no figura en el manual; se anima para que el recorrido sea coherente.'},
+      {texto:'Cerrar y precintar la caja general de protección.',pag:43,anim:'cgpCierra',cam:'cgp'},
+      {texto:'Revisar, limpiar y guardar los equipos, herramientas y materiales empleados en el trabajo.',pag:43,anim:'guardar',cam:'lona',ilus:'Se recogen la escalera y los equipos de la lona; el manual no detalla el orden.'},
+      {texto:'Retirar la señalización y delimitación del lugar de trabajo.',pag:43,anim:[{a:'valla',inv:true},'quitaSenal'],cam:'general',ilus:'Se retiran las vallas y también los carteles de la caja general de protección.'},
+      {texto:'Retirar materiales de desecho.',pag:43,anim:'desecho',cam:'suelo2',dur:3.5,ilus:'La bolsa de desecho es representativa.'},
+      {texto:'Retirar el equipo de señalización vial, si ha sido colocado.',pag:43,anim:{a:'vial',inv:true},cam:'vial'}
+    ];
+    return {escena:{fin:false,acometida:true,desconexion:des},fases:[P.previas(42),{nombre:'Ejecución del trabajo',pasos:ejec},{nombre:'Operaciones finales',pasos:fin}]};
+  }
+});
+
+</script>
+</body>
+</html>

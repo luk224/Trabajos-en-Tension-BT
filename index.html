@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<script>try{var t=localStorage.getItem('tema');var q=location.search.match(/[?&]tema=(dark|light)/);if(q)t=q[1];if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Manual TETBT · Trabajos en tensión en baja tensión</title>
+<meta name="description" content="Formación visual sobre el Manual de Trabajos en Tensión en Baja Tensión: procedimientos de ejecución animados paso a paso.">
+<link rel="stylesheet" href="assets/tet.css">
+</head>
+<body>
+<header class="cab">
+  <div class="cab-in">
+    <nav class="migas" aria-label="Migas de pan"><span class="act">Manual TETBT</span></nav>
+    <button class="btn-tema" type="button" data-tema-btn aria-pressed="false"><span>Modo oscuro</span></button>
+  </div>
+</header>
+<main>
+  <section class="hero">
+    <h1>Trabajos en tensión en baja tensión, paso a paso</h1>
+    <p>Cada procedimiento de ejecución del manual se reproduce en 3D con el texto del paso sincronizado y su página de origen. Elige un procedimiento listo y pulsa «Reproducir».</p>
+  </section>
+
+  <ol class="mapa" aria-label="Secciones del manual">
+    <li class="sec"><header><span class="num">1</span><h2>Introducción</h2></header><p>Sin animaciones. Pendiente de incorporar.</p></li>
+    <li class="sec"><header><span class="num">2</span><h2>Estructuras y componentes de la red de BT</h2></header><p>Sin animaciones. Pendiente de incorporar.</p></li>
+    <li class="sec"><header><span class="num">3</span><h2>Prevención de riesgos eléctricos en la realización de trabajos en tensión en BT</h2></header><p>Sin animaciones. Pendiente de incorporar.</p></li>
+    <li class="sec"><header><span class="num">4</span><h2>Instrucción general de AMYS</h2></header><p>Sin animaciones. Pendiente de incorporar.</p></li>
+    <li class="sec quinta" id="s5">
+      <header><span class="num">5</span><h2>Procedimientos de ejecución</h2></header>
+      <p>Cada procedimiento incluye definición, riesgos, medios humanos y materiales, y la secuencia de operaciones previas, ejecución y finales.</p>
+
+      <div class="grupo" id="s5-a">
+        <h3><span class="l">A</span> Red aérea convencional</h3>
+        <ul class="procs">
+          <li class="listo"><span class="id">A.1</span><a href="procedimientos/a1_acometida_conductor_convencional.html"><span class="tx">Conexión o desconexión de acometidas de conductor convencional a red aérea convencional</span></a><span class="estado listo">Listo</span></li>
+          <li class="listo"><span class="id">A.2</span><a href="procedimientos/a2_sustitucion_aislador.html"><span class="tx">Sustitución de aislador en apoyo de alineación o de fin de línea en red aérea convencional</span></a><span class="estado listo">Listo</span></li>
+        </ul>
+      </div>
+      <div class="grupo" id="s5-b">
+        <h3><span class="l">B</span> Red aérea trenzada</h3>
+        <ul class="procs">
+          <li class="pend"><span class="id">B.1</span><span class="tx">Conexión y desconexión de acometida de cable trenzado sobre red aérea convencional</span><span class="estado pend">Pendiente</span></li>
+          <li class="pend"><span class="id">B.2</span><span class="tx">Conexión y desconexión de acometida de cable trenzado sobre red trenzada</span><span class="estado pend">Pendiente</span></li>
+          <li class="pend"><span class="id">B.3</span><span class="tx">Sustitución de red aérea convencional por red aérea trenzada</span><span class="estado pend">Pendiente</span></li>
+        </ul>
+      </div>
+      <div class="grupo" id="s5-c">
+        <h3><span class="l">C</span> Red subterránea</h3>
+        <ul class="procs">
+          <li class="pend"><span class="id">C.1</span><span class="tx">Conexión y derivación subterránea de cable unipolar de aluminio sobre cable unipolar de aluminio</span><span class="estado pend">Pendiente</span></li>
+          <li class="pend"><span class="id">C.2</span><span class="tx">Conexión y derivación subterránea de cable unipolar de aluminio sobre cable tetrapolar de cobre</span><span class="estado pend">Pendiente</span></li>
+          <li class="pend"><span class="id">C.3</span><span class="tx">Conexión de derivación subterránea de entrada y salida con cable unipolar de aluminio sobre cable unipolar de aluminio</span><span class="estado pend">Pendiente</span></li>
+        </ul>
+      </div>
+      <div class="grupo" id="s5-d">
+        <h3><span class="l">D</span> Centros de transformación</h3>
+        <ul class="procs">
+          <li class="pend"><span class="id">D.1</span><span class="tx">Instalar un módulo portafusibles en un cuadro de baja tensión de un centro de transformación</span><span class="estado pend">Pendiente</span></li>
+        </ul>
+      </div>
+      <div class="grupo" id="s5-e">
+        <h3><span class="l">E</span> Otras instalaciones</h3>
+        <ul class="procs">
+          <li class="pend"><span class="id">E.1</span><span class="tx">Sustitución de una caja de derivación en red aérea trenzada (y sustitución de bases de fusibles en una caja de derivación en red aérea trenzada)</span><span class="estado pend">Pendiente</span></li>
+        </ul>
+      </div>
+    </li>
+  </ol>
+</main>
+<footer class="pie"><small>Material de formación basado en el Manual de Trabajos en Tensión en Baja Tensión. Las animaciones son una ayuda visual; el texto de cada paso es el del manual. Modelos 3D parciales: NVIDIA SimReady, CC BY 4.0 (<a href="assets/modelos/CREDITOS.md">créditos</a>).</small></footer>
+<script src="assets/tet.js"></script>
+<script>TET.initTema();</script>
+</body>
+</html>
