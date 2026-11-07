@@ -13,7 +13,8 @@ Idioma: español. Es material de formación de seguridad: **fidelidad total al m
 
 ## Estructura
 ```
-index.html                      portada: mapa del manual (secciones 1-5), estado de cada procedimiento (clase listo/pend)
+index.html                      portada: cards con miniatura por procedimiento (secciones 1-5; clase card listo/pend)
+assets/miniaturas/<id>.webp     miniaturas 640×400 de cada procedimiento (captura 3D al ~55 % de los pasos, sin UI); regenerar con cdp.py si cambia una escena
 procedimientos/<id>_<slug>.html un HTML por procedimiento (a1…e2); escritos A MANO/por ediciones, sin generador
 assets/tet.js, tet.css          motor y estilo del reproductor de pasos COMPARTIDOS (API en la cabecera de tet.js)
 assets/escenas/corriente.js     módulo de puntos de corriente (TET.corriente; API y convención de sentido en su cabecera)
