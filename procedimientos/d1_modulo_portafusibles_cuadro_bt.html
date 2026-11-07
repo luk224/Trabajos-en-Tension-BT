@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>D.1 Módulo portafusibles en cuadro de BT · Manual TETBT</title>
+<meta name="description" content="Animación paso a paso del procedimiento D.1 del Manual de Trabajos en Tensión en Baja Tensión.">
+<link rel="stylesheet" href="../assets/tet.css">
+</head>
+<body>
+<a class="skip" href="#reproductor">Ir al reproductor de pasos</a>
+<header class="cab">
+  <div class="cab-in">
+    <nav class="migas" aria-label="Migas de pan">
+      <a href="../index.html">← Manual TETBT</a><span class="sep" aria-hidden="true">·</span>
+      <a href="../index.html#s5">5. Procedimientos</a><span class="sep" aria-hidden="true">·</span>
+      <a class="act" href="../index.html#s5-d" aria-current="page">D. Centros de transformación</a>
+    </nav>
+  </div>
+</header>
+<main>
+  <div class="titulo">
+    <span class="placa" aria-hidden="true">D.1</span>
+    <h1>Instalar un módulo portafusibles en un cuadro de baja tensión de un centro de transformación</h1>
+  </div>
+  <section aria-label="Reproductor de pasos"><div id="reproductor"><noscript><p>Para ver la animación paso a paso hace falta JavaScript. Las fichas de abajo no lo necesitan.</p></noscript></div></section>
+  <section class="fichas" id="fichas" aria-label="Fichas del procedimiento"></section>
+</main>
+<footer class="pie">
+  <div class="hermano">
+    <div><div class="lbl">Procedimiento anterior</div><strong>C.3 Conexión de derivación subterránea de entrada y salida con cable unipolar de aluminio sobre cable unipolar de aluminio</strong></div>
+    <a class="go" href="c3_derivacion_entrada_salida.html">Abrir C.3</a>
+  </div>
+  <small>Material de formación basado en el Manual de Trabajos en Tensión en Baja Tensión, apartado 5.D. Las animaciones son una ayuda visual: el texto de cada paso es el del manual y los gestos que el manual no detalla están marcados como ilustrativos. Modelos 3D de la bolsa, el casco, los guantes y la señal: NVIDIA SimReady, licencia CC BY 4.0 (<a href="../assets/modelos/CREDITOS.md">créditos</a>).</small>
+</footer>
+<script src="../assets/three/three.min.js"></script>
+<script src="../assets/three/OrbitControls.js"></script>
+<script src="../assets/three/GLTFLoader.js"></script>
+<script src="../assets/three/meshopt_decoder.js"></script>
+<script src="../assets/tet.js"></script>
+<script src="../assets/escenas/corriente.js"></script>
+<script src="../assets/escenas/cuadro-bt.js"></script>
+<script>
+var NOTA_EPI='Los equipos de protección individual deberán tener marcas de homologación o de certificación.';
+var NOTA_EPC='Los materiales aislantes individuales deberán tener marcas de homologación o certificación o disponer de certificados de ensayos.';
+var NOTA_MAT='Incluyen el material de señalización y delimitación, los dispositivos y accesorios para realizar el trabajo y los equipos de comprobación.';
+TET.montar({
+  id:'d1', escena:'cuadro-bt',
+  fichas:{
+    definicion:{pag:80,texto:'Instalar un módulo portafusibles en un cuadro de baja tensión en un centro de transformación interior.'},
+    riesgosPag:80, riesgos:['Contacto eléctrico','Arco eléctrico','Choques y golpes','Cortes','Atrapamientos'],
+    humanos:{pag:80,texto:'Dos trabajadores, uno habilitado para Trabajos en Tensión en Baja Tensión que actuará como Jefe de Trabajo y un ayudante para tareas auxiliares que, como mínimo, será un trabajador autorizado.'},
+    mediosPag:'80–81',
+    medios:{
+      epi:{nota:NOTA_EPI,items:['Casco de protección','Gafas inactínicas','Pantalla facial','Ropa de trabajo','Guantes aislantes','Guantes ignífugos','Guantes de protección mecánica','Calzado de seguridad'],pag:'80–81'},
+      epc:{nota:NOTA_EPC,items:['Tela aislante','Dedales aislantes','Alfombras aislantes'],pag:81},
+      herramientas:{items:['Herramientas manuales aisladas','Bolsa portaherramientas'],pag:81},
+      materiales:{nota:NOTA_MAT,items:['Equipo de señalización y delimitación del lugar de trabajo','Equipo de señalización vial','Lona (para herramientas, equipos y materiales)','Pinzas aislantes'],pag:81}
+    }
+  },
+  selector:{etiqueta:'Protección de los zócalos',param:'prot',defecto:'tela',opciones:[
+    {id:'tela',etiqueta:'Tela aislante',desc:'Protección de zócalo mediante tela aislante: la tela envuelve la columna de zócalos (Manual p. 83, figura inferior izquierda). El manual dibuja las dos formas de protegerlos; es una variante elegible.'},
+    {id:'rigido',etiqueta:'Protectores rígidos',desc:'Protectores rígidos de zócalos de material aislante: prismas que cubren la columna de zócalos (Manual p. 83, figuras inferiores de la derecha). El manual dibuja las dos formas de protegerlos; es una variante elegible.'}]},
+  construir:function(sel){
+    var tela=sel!=='rigido';
+    var protTxt=tela?'Detalle: protección de zócalo mediante tela aislante (Manual p. 83)':'Detalle: protectores rígidos de zócalos de material aislante (Manual p. 83)';
+    var ILUS_FIG='Las columnas de zócalos se dibujan como en la figura «Cuadro de B.T.» de la p. 83 (cuatro columnas de tres bases apiladas, con bornes abajo); el cuadro se representa sin puertas ni tapas para verlo por dentro. Las pletinas del embarrado, el bastidor y los tornillos no los dibuja el manual: su disposición es representativa (una pletina por fase R, S, T y el neutro N). La figura dibuja 2 bornes abajo de cada columna; aquí se dibujan 3 salidas R, S y T, representativas, solo para poder seguir cada fase.';
+    var previas=[
+      {texto:'Identificar la instalación dónde se va a realizar el trabajo.',pag:81,anim:'identificar',cam:'general',ilus:'El aro y la flecha solo marcan el cuadro de baja tensión; el manual no detalla cómo se identifica. El centro de transformación (transformador, celda de media tensión, cuadro) es un esquema representativo: el manual no dibuja el CT, solo el cuadro de B.T.'},
+      {texto:'Comprobar que las condiciones atmosféricas permiten el trabajo.',pag:81,anim:'clima',cam:'cielo',ilus:'El manual no fija qué condiciones son aceptables; el cielo despejado es solo un pictograma. El centro se dibuja sin techo para poder ver el interior.'},
+      {texto:'Colocar la señalización vial si fuera necesario.',pag:82,anim:'vial',cam:'vial',ilus:'El manual solo cita «equipo de señalización vial»; furgoneta, conos y señal son representativos y se colocan en la calle, frente a la puerta del centro de transformación.'},
+      {texto:'Inspeccionar la instalación donde se va a trabajar.',pag:82,anim:'inspeccion',cam:'cuadro',dur:5,ilus:'El aro recorre el cuadro de baja tensión; el manual no detalla qué se inspecciona (en este procedimiento no menciona el entibado).'},
+      {texto:'Delimitar y señalizar el lugar de trabajo.',pag:82,anim:{a:'delimitar'},cam:'general',ilus:'Cinta de balizamiento, postes y señal ante el cuadro son representativos: el manual solo cita «equipo de señalización y delimitación del lugar de trabajo». No se usan vallas de vía pública. La entrada en la zona es ilustrativa.'},
+      {texto:'Verificar el estado de los equipos de protección individual, equipos de protección colectiva y herramientas que se vayan a utilizar.',pag:82,anim:'verificar',cam:'lona',ilus:'Sobre la lona se muestran bolsa portaherramientas, tela aislante, alfombras, dedales, guantes, casco con pantalla, pinzas aislantes y el destornillador aislado como muestra de los equipos del manual; no detalla cómo se verifican.'},
+      {texto:'Desprenderse de los objetos metálicos el trabajador/es.',pag:82,anim:'metal',cam:'objetos',det:[{cam:'detObjetos',txt:'Detalle: objetos metálicos del trabajador (cadena, reloj, anillo, pulsera, hebilla, bolígrafo, navaja, llaves) que se quita (Manual p. 82)'},{cam:'detObjetosAy',txt:'Detalle: objetos metálicos del ayudante, que también se los quita (Manual p. 82)'},{cam:'detBandeja',txt:'Detalle: bandeja sobre la lona donde se dejan los objetos metálicos, lejos del cuadro (Manual p. 82)'}],ilus:'Cadena con colgante, reloj, anillo, pulsera, hebilla, bolígrafo, navaja y llaves son ejemplos de objetos metálicos; el manual no los enumera. Se dejan en una bandeja sobre la lona, lejos del cuadro.'},
+      {texto:'Utilizar los equipos de protección tanto individual como colectivos, necesarios en cada fase del trabajo.',pag:82,anim:'epi',cam:'suelo2',ilus:'Se dibujan la pantalla facial y los guantes; el resto de EPI de la ficha (casco, gafas inactínicas, ropa, guantes ignífugos y de protección mecánica, calzado) no se representa aparte. En este procedimiento el manual no lista cinturón de seguridad. En el ayudante solo se dibujan pantalla facial y guantes.'}
+    ];
+    var ejec=[
+      {texto:'Aislar las masas accesibles.',pag:82,anim:'aislarMasas',cam:'cuadro',dur:7,
+        nota:'El manual lista como EPC las <strong>alfombras aislantes</strong>, la <strong>tela aislante</strong> y los <strong>dedales aislantes</strong> (p. 81).',
+        ilus:'El manual no dice qué masas ni con qué se aíslan. Se cubren con alfombras el bastidor y la caja metálica del cuadro (montantes, largueros y travesaños) y el suelo ante él; es una interpretación propia. Los trabajadores entran en la zona y el ayudante se sitúa junto a la lona. '+ILUS_FIG},
+      {texto:'Colocar protecciones aislantes en la base fusible o zócalo del cuadro de baja tensión, no dejándolo ningún punto en tensión sin proteger.',pag:82,anim:'protZocalos',cam:'cuadro',dur:8,
+        det:[{cam:'detZocalos',txt:'Detalle: cuadro de B.T. con sus zócalos (Manual p. 83, figura «Cuadro de B.T.»)'},{cam:'detProt',txt:protTxt},{cam:'detDedales',txt:'Detalle: dedales aislantes en los extremos libres de las pletinas (EPC de la p. 81; gesto ilustrativo)'}],
+        nota:tela?'<strong>Variante «Tela aislante»:</strong> la figura de la p. 83 «Protección de zócalo mediante tela aislante» muestra una columna de zócalos envuelta por una tela.':'<strong>Variante «Protectores rígidos»:</strong> la figura de la p. 83 «Protectores rígidos de zócalos de material aislante» muestra prismas de material aislante del alto de una columna.',
+        ilus:'Se protegen las tres columnas de zócalos ya instaladas y todas las pletinas (tela aislante), de modo que no queda ningún punto en tensión al descubierto; los dedales sobre los extremos libres de las pletinas son un gesto propio (el manual solo los lista como EPC). La columna vacía es el sitio del módulo que se instala. '+ILUS_FIG},
+      {texto:'Cuando se sitúe el zócalo en las pletinas debe estar protegido.',pag:82,anim:'situaZocalo',cam:'carga',dur:8,det:{cam:'detModulo',txt:protTxt+' (el módulo que se instala va protegido)'},
+        nota:tela?'El módulo portafusibles se envuelve con la misma tela aislante (figura «Protección de zócalo mediante tela aislante», p. 83).':'El módulo portafusibles se cubre con los mismos protectores rígidos (figura «Protectores rígidos de zócalos de material aislante», p. 83).',
+        ilus:'El manual no describe cómo se transporta ni quién lo coloca: el ayudante lo recoge de un palé, se le pone la protección y lo lleva ante la columna vacía. El módulo se dibuja como una columna de tres zócalos, como en la figura de la p. 83.'},
+      {texto:'Presentar la base y sujetarla al bastidor del cuadro.',pag:82,anim:'presenta',cam:'trabajo',dur:9,det:{cam:'detBastidor',txt:'Detalle: módulo presentado y sujeto al bastidor del cuadro (ilustrativo: el manual no dibuja el bastidor)'},
+        ilus:'La forma de sujetar (dos tornillos a los travesaños del bastidor), el destornillador aislado y la ventana que se abre en la alfombra y en la protección del módulo en cada punto de fijación son ilustrativos; el manual solo dice «presentar la base y sujetarla al bastidor».'},
+      {texto:'Colocar secuencialmente los tornillos de conexión correspondientes a cada pletina del embarrado, manteniendo las pletinas protegidas.',pag:82,anim:'tornillos',cam:'trabajo',dur:12,det:{cam:'detTornillo',txt:'Detalle: tornillo de conexión de una fase con la ventana abierta solo en su pletina (ilustrativo)'},
+        nota:'«Secuencialmente» = uno detrás de otro: en cada momento solo está descubierta la pletina de la fase en curso; las demás siguen protegidas.',
+        ilus:'El manual no dice cuántas pletinas ni en qué orden; se representan tres (R, S y T) y el neutro N (que no se toca). Los tornillos entran por el orificio grande de cada zócalo y la ventana abierta en la protección de la pletina y del módulo es un gesto propio. En el módulo nuevo no se dibujan puntos de corriente: el manual no dice que se carguen fusibles ni salidas.'},
+      {texto:'Retirar protecciones aislantes.',pag:82,anim:'retiraProt',cam:'cuadro',dur:8,
+        nota:'Es un paso del manual: se retiran todas las protecciones aislantes colocadas durante la ejecución.',
+        ilus:'El orden en que se retiran (protección del módulo, tela de los demás zócalos y de las pletinas, dedales, alfombras) y el que el destornillador vuelva a la lona son ilustrativos.'}
+    ];
+    var fin=[
+      {texto:'Inspeccionar visualmente el conjunto de la instalación.',pag:82,anim:'inspFinal',cam:'cuadro',dur:5,ilus:'El aro recorre el cuadro; el manual no detalla qué se comprueba. El módulo queda instalado, con sus tornillos de conexión, junto a los demás.'},
+      {texto:'Revisar, limpiar y guardar los equipos, herramientas y materiales empleados en el trabajo.',pag:82,anim:'guardar',cam:'lona',dur:5,ilus:'Se recoge la lona con sus equipos; el manual no detalla el orden.'},
+      {texto:'Retirar la señalización y delimitación del lugar de trabajo.',pag:82,anim:{a:'delimitar',inv:true},cam:'general',ilus:'Se retiran la cinta, los postes y la señal.'},
+      {texto:'Retirar materiales de desecho.',pag:82,anim:'desecho',cam:'desecho',dur:5,ilus:'La bolsa de desecho es representativa.'},
+      {texto:'Retirar el equipo de señalización vial, si ha sido colocado.',pag:82,anim:{a:'vial',inv:true},cam:'vial'}
+    ];
+    return {escena:{prot:sel},fases:[{nombre:'Operaciones previas al trabajo',pasos:previas},{nombre:'Ejecución del trabajo',pasos:ejec},{nombre:'Operaciones finales',pasos:fin}]};
+  }
+});
+</script>
+</body>
+</html>

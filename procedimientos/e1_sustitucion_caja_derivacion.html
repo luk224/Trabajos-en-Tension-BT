@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>E.1 Sustitución de una caja de derivación en red trenzada · Manual TETBT</title>
+<meta name="description" content="Animación paso a paso del procedimiento E.1 del Manual de Trabajos en Tensión en Baja Tensión.">
+<link rel="stylesheet" href="../assets/tet.css">
+</head>
+<body>
+<a class="skip" href="#reproductor">Ir al reproductor de pasos</a>
+<header class="cab">
+  <div class="cab-in">
+    <nav class="migas" aria-label="Migas de pan">
+      <a href="../index.html">← Manual TETBT</a><span class="sep" aria-hidden="true">·</span>
+      <a href="../index.html#s5">5. Procedimientos</a><span class="sep" aria-hidden="true">·</span>
+      <a class="act" href="../index.html#s5-e" aria-current="page">E. Otras instalaciones</a>
+    </nav>
+  </div>
+</header>
+<main>
+  <div class="titulo">
+    <span class="placa" aria-hidden="true">E.1</span>
+    <h1>Sustitución de una caja de derivación en red trenzada</h1>
+  </div>
+  <section aria-label="Reproductor de pasos"><div id="reproductor"><noscript><p>Para ver la animación paso a paso hace falta JavaScript. Las fichas de abajo no lo necesitan.</p></noscript></div></section>
+  <section class="fichas" id="fichas" aria-label="Fichas del procedimiento"></section>
+</main>
+<footer class="pie">
+  <div class="hermano">
+    <div><div class="lbl">Procedimiento hermano</div><strong>E.2 Sustitución de bases de fusibles en una caja de derivación en red aérea trenzada</strong></div>
+    <a class="go" href="e2_sustitucion_bases_fusibles.html">Abrir E.2</a>
+  </div>
+  <small>Material de formación basado en el Manual de Trabajos en Tensión en Baja Tensión, apartado 5.E. Las animaciones son una ayuda visual: el texto de cada paso es el del manual y los gestos que el manual no detalla están marcados como ilustrativos. Modelos 3D de escalera, vallas, señal, cinta, bolsa, casco, gafas, guantes y pinza: NVIDIA SimReady, licencia CC BY 4.0 (<a href="../assets/modelos/CREDITOS.md">créditos</a>).</small>
+</footer>
+<script src="../assets/three/three.min.js"></script>
+<script src="../assets/three/OrbitControls.js"></script>
+<script src="../assets/three/GLTFLoader.js"></script>
+<script src="../assets/three/meshopt_decoder.js"></script>
+<script src="../assets/tet.js"></script>
+<script src="../assets/escenas/corriente.js"></script>
+<script src="../assets/escenas/apoyo-bt.js"></script>
+<script src="../assets/escenas/caja-derivacion-pasos.js"></script>
+<script src="../assets/escenas/caja-derivacion.js"></script>
+<script>
+var NOTA_EPI='Los equipos de protección individual deberán tener marcas de homologación o de certificación.';
+var NOTA_EPC='Los materiales aislantes individuales deberán tener marcas de homologación o certificación o disponer de certificados de ensayos.';
+var NOTA_HER='';
+var NOTA_MAT='Incluyen el material de señalización y delimitación, los dispositivos y accesorios para realizar el trabajo y los equipos de comprobación.';
+var RIESGOS=['Contacto eléctrico','Arco eléctrico','Caída de personas a distinto nivel','Caída de objetos','Choques y golpes','Cortes','Atrapamientos'];
+var HUMANOS='Dos trabajadores, uno habilitado para Trabajos en Tensión en Baja Tensión que actuará como Jefe de Trabajo y un ayudante para tareas auxiliares que, como mínimo, será un trabajador autorizado.';
+var EPI=['Casco de protección','Gafas inactínicas','Pantalla facial','Ropa de trabajo','Guantes aislantes','Guantes ignífugos','Guantes de protección mecánica','Calzado de seguridad','Cinturón de seguridad'];
+var P=TET.pasosCaja;
+var ILUS_ESC='Criterio general de trabajo en altura, no del manual (que solo cita la «escalera aislante» y el «cinturón de seguridad», y los dibuja en el esquema): escalera apoyada en la fachada a ~75°, correas inferiores y ayudante sujetándola, y cinturón amarrado a la escalera (RD 1215/1997, anexo II; confirmar con el procedimiento de prevención de la empresa). El manual no dice cuándo se sube: se anima aquí porque el esquema muestra al trabajador sobre la escalera.';
+
+TET.montar({
+  id:'e1', escena:'caja-derivacion',
+  fichas:{
+    definicion:{pag:84,texto:'Sustituir una caja de derivación en red trenzada. La caja será aislante, y estará colocada sobre fachada.'},
+    riesgosPag:84, riesgos:RIESGOS, humanos:{pag:84,texto:HUMANOS}, mediosPag:'84–86',
+    medios:{
+      epi:{nota:NOTA_EPI,items:EPI,pag:'84–85'},
+      epc:{nota:NOTA_EPC,items:['Tela aislante','Dedales aislantes','Alfombras aislantes'],pag:85},
+      herramientas:{items:['Herramientas manuales aisladas','Bolsa portaherramientas'],pag:85},
+      materiales:{nota:NOTA_MAT,items:['Equipo de señalización y delimitación del lugar de trabajo','Equipo de señalización vial','Cuerda aislante','Lona (para herramientas, equipos y materiales)','Escalera aislante','Pinzas aislantes','Maneta aislada','Pinza voltio-amperimétrica','Comprobador de secuencia de fases','Discriminador bipolar de tensión'],pag:'85–86'}
+    }
+  },
+  construir:function(){
+    var ejec=[
+      {texto:'Aislar la zona de trabajo en tensión mediante tela aislante.',pag:86,anim:{a:'seq',items:[{w:[0,0.55],anim:{a:'sube'}},{w:[0.5,1],anim:{a:'tela'}}]},cam:'ascenso',dur:9,
+        det:[{cam:'dEscalera',txt:'Detalle: pie de la escalera aislante con correas (Manual p. 88)'},{cam:'dCinturon',txt:'Detalle: cinturón de seguridad amarrado a la escalera aislante (Manual p. 88)'},{cam:'dTela',txt:'Detalle: pinza aislante y tela aislante de protección de la zona de trabajo (Manual p. 88)'}],
+        nota:'Como en el esquema de la p. 88: la tela aislante cuelga directamente de dos pinzas aislantes y deja libre solo la ventana de la caja.',
+        ilus:ILUS_ESC+' El tamaño de la tela, su ventana y el punto donde se sujetan las pinzas son ilustrativos.'},
+      {texto:'Abrir la caja; si se observan síntomas de posible deformación o fogueo de las bases de fusibles no ejecutar el trabajo en tensión',pag:86,anim:['abre','revisa'],cam:'caja',dur:5,ilus:'La caja se dibuja con tres bases de fusibles (R, S, T) y la barra de neutro; el manual no describe su interior. Las marcas de visto bueno indican que no hay deformación ni fogueo (se continúa el trabajo).'},
+      {texto:'Identificar y señalizar todos los conductores de fases, tanto de entrada como de salida, con cintas de colores.',pag:86,anim:'cintas',cam:'caja',dur:5.5,det:{cam:'dCintas',txt:'Detalle: cintas de colores en los conductores de entrada (ilustrativo)'},
+        ilus:'Las cintas de colores se dibujan como bandas en cada conductor de entrada y de salida, con su letra (N, R, S, T); los colores de las cintas son ilustrativos, el manual solo dice «cintas de colores».'},
+      {texto:'Proteger las bornas de entrada.',pag:86,anim:{a:'cubre',g:'I',q:[0,1,2,3]},cam:'caja',dur:4,det:{cam:'dFunda',txt:'Detalle: funda aislante sobre la borna de entrada (ilustrativo)'},ilus:'La protección de cada borna se dibuja con la funda ovalada translúcida; el manual no describe el tipo de protección.'},
+      {texto:'Desconectar y retirar los conductores de entrada uno a uno, protegiendo sus extremos antes de sacarlos de la caja; siempre que la configuración de la instalación lo permita, el último conductor en desconectarse deberá ser el neutro.',pag:86,anim:{a:'desc',g:'I',q:[1,2,3,0]},cam:'caja',dur:11,
+        det:{cam:'dDedales',txt:'Detalle: dedales aislantes en los extremos de los conductores de entrada (Manual p. 88)'},
+        nota:'Orden: R, S, T y el neutro el último. Cada conductor se afloja, se le pone el dedal aislante y solo entonces se saca de la caja; los demás siguen cubiertos. Los conductores de entrada siguen en tensión aunque estén desconectados.',
+        ilus:'La ventana que se abre en la funda de la borna tratada, la herramienta aislada y el orden R, S, T son ilustrativos (el manual solo fija el neutro al final).'},
+      {texto:'La misma operación se realiza con los conductores de salida.',pag:86,anim:{a:'seq',items:[{w:[0,0.2],anim:{a:'cubre',g:'O',q:[0,1,2,3]}},{w:[0.2,1],anim:{a:'desc',g:'O',q:[1,2,3,0]}}]},cam:'sal',dur:11,det:{cam:'dDedalesSal',txt:'Detalle: dedales aislantes en los extremos de los conductores de salida (Manual p. 88)'},
+        ilus:'El manual no cita las bornas de salida: se protegen igual que las de entrada para que solo quede descubierta la del conductor tratado. Las salidas dejan de recibir corriente al desconectarse la entrada.'},
+      {texto:'Sustituir la caja instalando la prevista',pag:86,anim:'swap',cam:'trabajo',dur:8,ilus:'La caja vieja se baja a la lona y la nueva sube desde ella; el manual no detalla cómo se retira ni cómo se coloca. La caja nueva se muestra sin fusibles y con la tapa abierta. Las protecciones de las bornas salen con la caja vieja y la caja nueva se cubre de nuevo (ilustrativo: el manual solo dice «Proteger las bornas de entrada» al principio). La caja vieja baja con los fusibles puestos (ilustrativo: el manual no habla de retirarlos).'},
+      {texto:'Comprobar que los conductores de salida no tienen tensión de retorno y conectarlos a base portafusibles.',pag:87,anim:{a:'con',g:'O',q:[0,1,2,3],test:true},cam:'sal',dur:11,
+        ilus:'El discriminador bipolar de tensión (lista de medios) se dibuja de forma esquemática; el orden de conexión de las salidas no lo indica el manual (aquí N, R, S, T). Los dedales se retiran solo de la punta que se conecta. Las bornas de la caja nueva llevan funda (ilustrativo) y solo se destapa la de la fase en curso.'},
+      {texto:'Conectar en primer lugar el neutro de entrada o de la cometida y protegerlo.',pag:87,anim:{a:'con',g:'I',q:[0],prot:true},cam:'caja',dur:5,det:{cam:'dFunda',txt:'Detalle: neutro conectado y protegido con funda aislante (ilustrativo)'},
+        nota:'El manual escribe «cometida»; se refiere a la acometida.',ilus:'La protección del neutro conectado se dibuja con la funda ovalada translúcida; las bornas de la caja nueva ya estaban cubiertas (ilustrativo) y se destapa solo la del neutro durante la conexión.'},
+      {texto:'Conectar el resto de los conductores uno a uno, procediendo de igual forma.',pag:87,anim:{a:'con',g:'I',q:[1,2,3],prot:true},cam:'caja',dur:8,ilus:'El orden R, S, T es ilustrativo; se destapa solo la borna en curso. Los conductores de entrada aún sin conectar conservan su dedal aislante.'},
+      {texto:'Retirar las protecciones de la zona de trabajo en tensión.',pag:87,anim:'quitaProt',cam:'trabajo',dur:6,ilus:'Se retiran la tela, sus pinzas y las fundas de las bornas, de modo que al terminar la ejecución no queda ninguna protección amarilla.'},
+      {texto:'Colocar los fusibles uno a uno comprobando que no existe cortocircuito, y que la tensión de salida es la correcta.',pag:87,anim:{a:'fusPon',box:'N',volt:true},cam:'caja',dur:11,ilus:'El discriminador y la pinza voltio-amperimétrica se dibujan de forma esquemática; los fusibles se colocan en el orden R, S, T (ilustrativo). Las salidas reciben corriente fase a fase al colocar cada fusible.'},
+      {texto:'Cerrar y precintar la caja de derivación.',pag:87,anim:{a:'cierra',seal:true},cam:'fachada',dur:4,ilus:'El precinto se dibuja como una esfera roja en el cierre.'}
+    ];
+    return {escena:{modo:'e1'},fases:[P.previas(86),{nombre:'Ejecución del trabajo',pasos:ejec},P.finales(87,'Retirar la señalización vial.','La caja vieja, ya sin uso, se retira como material de desecho (ilustrativo).')]};
+  }
+});
+
+</script>
+</body>
+</html>
