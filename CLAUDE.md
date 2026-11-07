@@ -44,3 +44,4 @@ herramientas/ocr.py           OCR del PDF (easyocr, .venv con uv)
 
 ## Decisiones del usuario (no revertir)
 - **Solo modo claro.** No hay modo oscuro: sin botón de tema, sin `localStorage 'tema'`, sin `prefers-color-scheme: dark`. Las comprobaciones visuales son solo en claro (escritorio y móvil).
+- **No regenerar las páginas de procedimientos desde scripts/generadores antiguos** (los de los agentes viven en su scratchpad y reintrodujeron el botón y el script del modo oscuro en B): editar las páginas con ediciones puntuales. Tras cualquier cambio, `grep -rIn -i -E "btn-tema|data-theme|prefers-color-scheme" procedimientos index.html assets` debe salir vacío.

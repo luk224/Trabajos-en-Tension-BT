@@ -124,17 +124,12 @@
     }
 
     function dedal(parent) { var g = grp(parent); mk(cylU(0.055, 10), Mt('aisl', 0.8), 0, -0.06, 0, g).scale.set(1, 0.12, 1); mk(sph(0.055, 10, 8), Mt('aisl', 0.8), 0, 0, 0, g); return g; }
-    function conector(r, len, parent) {
-      var g = grp(parent); mk(cylX(r, len, 12), MM('metal'), 0, 0, 0, g);
-      [-1, 1].forEach(function (k) { mk(box(0.03, 0.03, 0.03), MM('metal'), k * len * 0.25, r + 0.012, 0, g); mk(cylX(r * 1.15, 0.014, 12), MM('metal'), k * len * 0.5, 0, 0, g); });
-      return g;
+    function conector(r, len, parent) {   // conector discreto (cilindro metálico); la funda ovalada lo cubre al reponer el aislamiento
+      var g = grp(parent); mk(cylX(r, len, 12), MM('metal'), 0, 0, 0, g); return g;
     }
-    function cinta(parent) {
-      var g = grp(parent); mk(cylX(0.058, 0.22, 12), M('ropa2'), 0, 0, 0, g);
-      [-2, -1, 0, 1, 2].forEach(function (k) { mk(cylX(0.063, 0.014, 12), M('ropa2'), k * 0.045, 0, 0, g); });
-      return g;
+    function cinta(parent) {   // funda aislante ovalada translúcida (elipsoide alargado) sobre el punto de conexión
+      var g = grp(parent), e = mk(sph(1, 20, 12), Mt('aisl', 0.6), 0, 0, 0, g); e.scale.set(0.15, 0.072, 0.072); return g;
     }
-
     /* ---------- persona (con postura agachada para trabajar en la cala) ---------- */
     function persona(cascoK) {
       var g = new T.Group(), P = { g: g };
@@ -360,7 +355,7 @@
           var tl = tubo(12, 0.026, M(FA[i], { side: T.DoubleSide }), i === 2), tr = tubo(12, 0.026, M(FA[i], { side: T.DoubleSide }), i === 2); G.add(tl); G.add(tr);
           var ends = [dedal(G), dedal(G)], cn = [conector(0.04, 0.12, G), conector(0.04, 0.12, G)];
           cn[0].position.set(-XB, YC, ZP[i]); cn[1].position.set(XB, YC, ZP[i]); cn[0].visible = cn[1].visible = false;
-          var tp = [mk(cylX(0.05, 0.16, 8), M('ropa2'), -XB, YC, ZP[i], G), mk(cylX(0.05, 0.16, 8), M('ropa2'), XB, YC, ZP[i], G)]; tp[0].visible = tp[1].visible = false;
+          var tp = [cinta(G), cinta(G)]; tp[0].position.set(-XB, YC, ZP[i]); tp[1].position.set(XB, YC, ZP[i]); tp[0].visible = tp[1].visible = false;
           var kn = grp(G, 0, 0, ZP[i] - 0.12), bl = grp(kn, -0.14, 0, 0);   // interruptor de cuchilla: bornes y hoja articulada
           [-1, 1].forEach(function (sg) { mk(cylU(0.03, 10), MM('metal'), sg * 0.14, 0, 0, kn).scale.set(1, 0.09, 1); });
           mk(box(0.3, 0.03, 0.045), MM('halo'), 0.15, 0.0, 0, bl); mk(box(0.06, 0.05, 0.06), M('aisl'), 0.3, 0.0, 0, bl);
@@ -751,7 +746,8 @@
       metal: function (t) { st.metal = t; st.fc = ss(seg(t, 0, 0.2)); st.ay.ry = lerp(PI, 0, ss(seg(t, 0, 0.2))); },
       epi: function (t) { st.epi = t; st.fc = 1; st.ay.ry = 0; },
       desecho: function (t) { st.bolsaT = t; },
-      guardar: function (t) { st.arm = 0; st.lad = 1 - ss(t); st.guardar = t; st.alf = 1 - ss(t); st.cov = 1 - ss(t); st.entib = 1 - ss(t); },
+      retiraProt: function (t) { st.alf = Math.min(st.alf, 1 - ss(seg(t, 0.3, 1))); st.cov = Math.min(st.cov, 1 - ss(seg(t, 0.3, 1))); st.entib = Math.min(st.entib, 1 - ss(seg(t, 0.3, 1))); },
+      guardar: function (t) { st.arm = 0; st.lad = 1 - ss(t); st.guardar = t; st.alf = Math.min(st.alf, 1 - ss(t)); st.cov = Math.min(st.cov, 1 - ss(t)); st.entib = Math.min(st.entib, 1 - ss(t)); },
       ayVa: function (t, p) {
         var r = recorre(p.path, t); st.ay.x = r.x; st.ay.z = r.z; st.ay.ry = (t >= 1 && p.ry != null) ? p.ry : r.ry; st.ay.w = t < 1 ? t * 16 : 0;
       },

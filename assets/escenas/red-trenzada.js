@@ -58,6 +58,8 @@
     function sph(r, a, b) { return geo('s' + r + ',' + a, function () { return new T.SphereGeometry(r, a || 10, b || 8); }); }
     function mk(g, m, x, y, z, parent) { var o = new T.Mesh(g, m); o.position.set(x || 0, y || 0, z || 0); if (parent) parent.add(o); return o; }
     function grp(parent, x, y, z) { var g = new T.Group(); g.position.set(x || 0, y || 0, z || 0); if (parent) parent.add(g); return g; }
+    /* oculta o mientras fn() sea cierto (respeta los redibujos de apoyo-bt, que reescriben `visible`) */
+    function hideIf(o, fn) { if (!o) return; var v = o.visible; Object.defineProperty(o, 'visible', { get: function () { return v && !fn(); }, set: function (x) { v = x; }, configurable: true }); }
     function hide(o) { if (o) Object.defineProperty(o, 'visible', { get: function () { return false; }, set: function () {}, configurable: true }); }
 
     var _d = V(0, 0, 0), _q = new T.Quaternion();
@@ -157,6 +159,7 @@
       X = { b1: b1, b2: b2, b3: b3, ends: [] };
       /* piezas de A que aquí no proceden */
       (AO.cab || []).forEach(hide); (AO.dedal || []).forEach(hide); (AO.der || []).forEach(hide);
+      (AO.funda || []).forEach(hide);   // fundas en T de A: aquí solo se usa la funda ovalada propia
       (AO.labAc || []).forEach(hide);   // las etiquetas de la acometida de A se sustituyen por las propias (más pequeñas)
       if (b2) { AO.cond.forEach(hide); hide(AO.halo); AO.ais.forEach(hide); hide(AO.ret); hide(AO.cota); AO.lab.forEach(hide); }
       if (b3) {
@@ -257,6 +260,10 @@
         var eR = extremo({ J: Jr, free: 0.72 });
         X.labF = FA.map(function (f, q) { var s = etq(f, f, 0.5, 0.25); s.position.set(XF - 2.3, YF[q] - 0.02, 0.85); s.visible = false; G2.add(s); return s; });
       }
+      if (b1 && AO.c2p) {   // protecciones del 2.º circuito (B.1): se retiran al final de la ejecución (ilustrativo)
+        hideIf(AO.c2tela, function () { return st && st.c2off > 0.5; });
+        AO.c2p.forEach(function (q) { hideIf(q.cp, function () { return st && st.c2off > 0.5; }); q.pf.forEach(function (m) { hideIf(m, function () { return st && st.c2off > 0.5; }); }); });
+      }
       /* puntos de corriente (ilustrativo): se añaden sobre el mismo `cor` de apoyo-bt; A los limpia en cada configurar */
       cor = base.corriente || null;
       if (cor) {
@@ -296,7 +303,7 @@
 
     /* ---------- estado por defecto ---------- */
     function defaults() {
-      var des = opt.desconexion ? 1 : 0, o = { fus: 1, zs: 0, ci: 0, tela2: 0, lm: 0, la: 0, bun: X && X.b3 ? 0 : 1, hB: HB0, pF: [0, 0, 0, 0], openF: [0, 0, 0, 0], telaF: 0, ret3: 0, cut: 0, labF: 0, tr: null, ends: [] };
+      var des = opt.desconexion ? 1 : 0, o = { c2off: 0, fus: 1, zs: 0, ci: 0, tela2: 0, lm: 0, la: 0, bun: X && X.b3 ? 0 : 1, hB: HB0, pF: [0, 0, 0, 0], openF: [0, 0, 0, 0], telaF: 0, ret3: 0, cut: 0, labF: 0, tr: null, ends: [] };
       for (var e = 0; e < 2; e++) o.ends.push({ s: [des, des, des, des], d: [1 - des, 1 - des, 1 - des, 1 - des], chk: [0, 0, 0, 0] });
       return o;
     }
@@ -324,7 +331,7 @@
         var bv = e.bare[i]; bv.visible = vis && d < 0.9 && s < 0.65;
         if (bv.visible) place(bv, E.clone().addScaledVector(dir, -0.02), E.clone().addScaledVector(dir, 0.09));
         var cv = e.con[i], cs = ss(seg(s, 0.62, 0.75)); cv.visible = vis && cs > 0.01; cv.position.copy(J); cv.scale.setScalar(Math.max(0.001, cs));
-        var pv = e.pro[i], ps = ss(seg(s, 0.75, 1)); pv.visible = vis && ps > 0.01; pv.position.copy(J); pv.scale.set(Math.max(0.001, ps * 1.5), Math.max(0.001, ps), Math.max(0.001, ps));
+        var pv = e.pro[i], ps = ss(seg(s, 0.75, 1)); pv.visible = vis && ps > 0.01; pv.position.copy(J); pv.scale.set(Math.max(0.001, ps * 2.1), Math.max(0.001, ps * 0.85), Math.max(0.001, ps * 0.85));   // funda OVALADA alargada a lo largo del conductor
         var lb = e.labA[i]; lb.visible = X.b1 && st.lm > 0.5 && s < 0.1; lb.position.set(J.x + 0.55, J.y - 0.06, 0.9);
         var ck = e.chk[i]; ck.visible = vis && S.chk[i] > 0.5 && s < 0.99; ck.position.set(J.x, J.y + 0.3, J.z + 0.4);
       }
@@ -439,6 +446,7 @@
       quitarFar: function (t) { for (var k = 0; k < 4; k++) st.pF[k] = 1 - ss(seg(t, 0.2 + k * 0.17, 0.2 + k * 0.17 + 0.29)); st.telaF = 1 - ss(seg(t, 0, 0.22)); },
       corta: function (t) { st.labF = 0; st.ret3 = ss(seg(t, 0, 0.4)); st.cut = t > 0.55 ? 1 : 0; armReq = true; },
       etiquetas: function (t) { st.lm = t > 0.05 ? 1 : 0; fwd.push({ a: 'etiquetas' }); },
+      quitaDoble: function (t) { st.c2off = t > 0.4 ? 1 : 0; },
       ping: function (t, p, act) { if (act) st.tr = { a: 'ping', k: p.k, t: t }; }
     };
     function norm(anim) { return anim == null ? [] : Array.isArray(anim) ? anim.map(n1) : [n1(anim)]; }

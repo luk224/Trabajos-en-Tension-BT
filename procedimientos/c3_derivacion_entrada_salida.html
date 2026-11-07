@@ -91,7 +91,7 @@ TET.montar({
       {texto:'Abrir el interruptor del puente auxiliar desconectándole de la línea principal. Si es posible, desconectar en último lugar el conector neutro, y reponer aislamiento en los puntos de conexión.',pag:78,det:{cam:'detRepos',txt:'Detalle: reposición de aislamiento en los puntos de conexión del puente (Manual p. 79, figura 5)'},anim:'abrePuente',cam:'trabajoC3',dur:7,
         nota:'Corresponde a la figura 5 de la p. 79: puente retirado, «Reposición de aislamiento» en los puntos de conexión y caja de acometida con los contactos cerrados.'+(uni?' El manual describe este paso para el puente con interruptor; en la variante unipolar se anima igual la retirada de la fase en curso (interpretación propia).':''),
         ilus:'Se desconectan T, S y R y el neutro en último lugar, como indica el manual; el orden entre T, S y R es ilustrativo.'},
-      {texto:'Retirar puente auxiliar.',pag:78,anim:'quitaPuente',cam:'trabajoC3',dur:4}
+      {texto:'Retirar puente auxiliar.',pag:78,anim:['quitaPuente','retiraProt'],ilus:'Ilustrativo: al terminar la ejecución se retiran las protecciones (alfombras, tela aislante y entibado); el manual no describe este paso.',cam:'trabajoC3',dur:4}
     ]);
     var fin=[
       {texto:'Reponer fusibles en la caja de acometida o elemento equivalente.',pag:78,anim:{a:'cgpFus',inv:true},cam:'cgp'},

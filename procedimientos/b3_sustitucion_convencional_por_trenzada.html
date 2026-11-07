@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="color-scheme" content="light">
+<meta name="color-scheme" content="light dark">
 <title>B.3 Sustitución de red convencional por red trenzada · Manual TETBT</title>
 <meta name="description" content="Animación paso a paso del procedimiento B.3 del Manual de Trabajos en Tensión en Baja Tensión.">
 <link rel="stylesheet" href="../assets/tet.css">
@@ -96,13 +96,13 @@ TET.montar({
       {texto:'Si existen acometidas en línea a sustituir, las desconexiones y o conexiones de éstas se realizarán según el procedimiento correspondiente.',pag:63,anim:{a:'ping',k:'vano'},cam:'vano',dur:3.5,
         nota:'Aclaración propia (ilustrativo): el manual remite al «procedimiento correspondiente»; los de conexión y desconexión de acometidas de este mismo apartado son B.1 y B.2.',
         ilus:'Este paso no tiene gesto propio: el círculo solo marca «aquí iría una acometida». No se dibuja ninguna.'},
-      {texto:'La conexión de la red trenzada se puede realizar conductor a conductor en los dos extremos a todos los conductores en un extremo y después en el otro extremo.',pag:63,anim:{a:'ping',k:'ext'},cam:'vano',dur:3.5,
-        nota:'El manual deja libre el orden de la conexión: conductor a conductor en los dos extremos, o todos los conductores en un extremo y después en el otro. La animación de los pasos anteriores ha seguido la segunda opción.',
+      {texto:'La conexión de la red trenzada se puede realizar conductor a conductor en los dos extremos a todos los conductores en un extremo y después en el otro extremo.',pag:63,anim:{a:'seq',items:[{w:[0,0.6],anim:{a:'ping',k:'ext'}},{w:[0.6,1],anim:['quitarProt',{a:'quitarFar'}]}]},cam:'vano',dur:6,
+        nota:'El manual deja libre el orden de la conexión: conductor a conductor en los dos extremos, o todos los conductores en un extremo y después en el otro. La animación de los pasos anteriores ha seguido la segunda opción. Al final de este paso se retiran las protecciones (tela, perfiles y capuchones) y quedan las conexiones con su funda aislante (ilustrativo: el manual no indica cuándo se retiran).',
         ilus:'Los círculos marcan los dos extremos del tramo.'}
     ];
     var fin={nombre:'Operaciones finales',pasos:[
-      {texto:'Revisar, limpiar y guardar los equipos, herramientas y materiales empleados en el trabajo.',pag:63,anim:{a:'seq',items:[{w:[0,0.35],anim:['quitarProt',{a:'quitarFar'}]},{w:[0.35,0.65],anim:'descenso'},{w:[0.65,1],anim:'guardar'}]},cam:'general',dur:7,
-        ilus:'El manual no dice cuándo se retiran las protecciones aislantes; se recogen con los equipos antes de bajar y guardar la escalera, que también se anima.'},
+      {texto:'Revisar, limpiar y guardar los equipos, herramientas y materiales empleados en el trabajo.',pag:63,anim:{a:'seq',items:[{w:[0,0.5],anim:'descenso'},{w:[0.5,1],anim:'guardar'}]},cam:'general',dur:7,
+        ilus:'Se baja y se guarda la escalera; las protecciones ya se retiraron al final de la ejecución.'},
       {texto:'Retirar la señalización y delimitación del lugar de trabajo.',pag:63,anim:{a:'valla',inv:true},cam:'general'},
       {texto:'Retirar materiales de desecho.',pag:63,anim:'desecho',cam:'suelo2',dur:3.5,ilus:'La bolsa de desecho es representativa.'},
       {texto:'Retirar la señalización vial, si ha sido necesario colocarla.',pag:63,anim:{a:'vial',inv:true},cam:'vial'}

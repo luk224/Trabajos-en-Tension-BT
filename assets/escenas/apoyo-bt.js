@@ -164,15 +164,13 @@
       [-0.03, 0.03].forEach(function (x) { mk(geo('conTor', function () { return new T.CylinderGeometry(0.016, 0.016, 0.05, 6); }), MM('halo'), x, 0.05, 0, g); mk(box(0.04, 0.012, 0.012), MM('halo'), x, 0.078, 0, g); });
       return g;
     }
-    /* funda aislante sobre el conector («reponer aislamiento»): manguito coaxial con la línea (eje x) con aros en los extremos */
-    function funda() {
-      var g = new T.Group();
-      mk(geo('fundaCil', function () { var q = new T.CylinderGeometry(0.085, 0.085, 0.3, 16, 1, true); q.rotateZ(PI / 2); return q; }), Mt('aisl', 0.6), 0, -0.01, 0, g);
-      var rim = geo('fundaRim', function () { var q = new T.TorusGeometry(0.085, 0.012, 6, 16); q.rotateY(PI / 2); return q; });
-      mk(rim, M('aisl'), 0.15, -0.01, 0, g); mk(rim, M('aisl'), -0.15, -0.01, 0, g);
-      mk(geo('fundaRama', function () { return new T.CylinderGeometry(0.06, 0.06, 0.16, 12, 1, true); }), Mt('aisl', 0.6), 0, -0.1, 0.02, g);
-      return ro(g, 4);
-    }
+    /* FUNDA OVALADA (reutilizable): TET.fundaOvalada(THREE, material, largo, radio) → Mesh elipsoide alargado a lo largo del eje x local
+       (largo 0.4 m, radio 0.085 m por defecto). Colócala centrada sobre el punto de unión con la derivación; el conductor y el conector
+       metálico quedan dentro, discretos. Usa un material translúcido (Mt('aisl', .6): depthWrite:false) y renderOrder 4. */
+    window.TET.fundaOvalada = function (TH, mat, largo, radio) {
+      var m = new TH.Mesh(new TH.SphereGeometry(1, 20, 12), mat); m.scale.set((largo || 0.4) / 2, radio || 0.085, radio || 0.085); m.renderOrder = 4; return m;
+    };
+    function funda() { var g = new T.Group(); g.add(window.TET.fundaOvalada(T, Mt('aisl', 0.6), 0.4, 0.085)); return ro(g, 4); }
     /* dedal aislante: caperuza cilíndrica con extremo redondeado y borde */
     function dedal() {
       var g = new T.Group();
@@ -430,7 +428,7 @@
           var dd = ro(dedal(), 4); G.add(dd); dd.visible = false; O.dedal.push(dd);
           var cn = conector(); cn.position.set(O.J[i].x, O.J[i].y, O.J[i].z); G.add(cn); cn.visible = false; (O.conn = O.conn || []).push(cn);
           var fu = funda(); fu.position.set(O.J[i].x, O.J[i].y, O.J[i].z); G.add(fu); fu.visible = false; (O.funda = O.funda || []).push(fu);
-          var dv = mk(cylU(0.045, 8), Mt('aisl', 0.45), 0, 0, 0, G); dv.renderOrder = 2; dv.visible = false; O.der.push(dv);
+          var dv = tubo(4, 0.045, Mt('aisl', 0.45)); dv.renderOrder = 2; dv.visible = false; G.add(dv); O.der.push(dv);
         }
         /* CGP */
         O.cgp = grp(G, CG.x, CG.y, CG.z);
@@ -555,10 +553,6 @@
         pr.cap.visible = p > 0.01; pr.cap.scale.setScalar(Math.max(0.001, ss(seg(p, 0, 0.4))));
         var g = ss(seg(p, 0.25, 1));
         pr.pieces.forEach(function (q) { if (g < 0.01 || (q.win && s.open[i] > 0.5)) q.m.visible = false; else { _d.copy(q.b).sub(q.a).multiplyScalar(g).add(q.a); place(q.m, q.a, _d.clone()); } });
-        if (O.der[i]) {
-          var C = O.C[i], J = O.J[i], dv = O.der[i];
-          if (g < 0.01 || s.open[i] > 0.5) dv.visible = false; else place(dv, J, V(lerp(J.x, C.x, 0.22 * g), lerp(J.y, C.y, 0.22 * g), lerp(J.z, C.z, 0.22 * g)));
-        }
       }
       O.tela.visible = s.tela > 0.01; O.tela.scale.setScalar(Math.max(0.001, ss(s.tela)));
       /* circuito 2 */
@@ -569,7 +563,7 @@
         if (gp < 0.01) { q.pf[0].visible = q.pf[1].visible = false; }
         else { place(q.pf[0], a, V(lerp(a.x, b.x, gp), lerp(a.y, b.y, gp), -ZC)); place(q.pf[1], a2, V(lerp(a2.x, b2.x, gp), lerp(a2.y, b2.y, gp), -ZC)); }
       });
-      O.c2tela.visible = s.doblP > 0.01; O.c2tela.scale.setScalar(Math.max(0.001, ss(seg(s.doblP, 0, 0.3))));
+      O.c2tela.visible = false; O.c2tela.scale.setScalar(Math.max(0.001, ss(seg(s.doblP, 0, 0.3))));
       /* acometida */
       if (opt.acometida) {
         for (i = 0; i < 4; i++) {
@@ -586,6 +580,9 @@
             tuboSet(O.cab[i], pp);
             var dv0 = V(pp[0].x - pp[1].x, pp[0].y - pp[1].y, pp[0].z - pp[1].z).normalize(); alinea(O.dedal[i], V(pp[0].x, pp[0].y, pp[0].z).addScaledVector(dv0, 0.07), dv0);
           }
+          var gd = ss(seg(s.p[i], 0.25, 1)), dv = O.der[i];                 // tubo protector coaxial con el cable (sigue su polilínea)
+          if (gd < 0.01 || s.open[i] > 0.5) dv.visible = false;
+          else { dv.visible = true; var ppd = O.cabPts[i], pd = [], kd; for (kd = 0; kd < 4; kd++) { var xd = Math.min(ppd.length - 1.001, kd * 1.1 * gd), i0 = Math.floor(xd); pd.push(V(0, 0, 0).lerpVectors(ppd[i0], ppd[i0 + 1], xd - i0)); } tuboSet(dv, pd); }
           if (O.conn) O.conn[i].visible = s.s[i] > 0.95;
           var tipv = 1 - ss(seg(s.s[i], 0, 0.15)); O.dedal[i].visible = tipv > 0.01; O.dedal[i].scale.setScalar(Math.max(0.001, tipv));
           if (O.funda) { O.funda[i].visible = s.ded[i] > 0.01; O.funda[i].scale.setScalar(Math.max(0.001, ss(s.ded[i]))); }
@@ -769,6 +766,11 @@
         if (p.deriv !== false) { /* las derivaciones cuelgan de p[i] */ }
       },
       proteger: function (t, p) { (p.fases || []).forEach(function (f) { st.p[FA.indexOf(f)] = ss(t); }); st.arm = 0.6; },
+      protegerQuita: function (t) {   // A.2 apoyo (ilustrativo): protege la fase sustituida y retira todas las protecciones al terminar la ejecución
+        st.arm = 0.8;
+        for (var k = 0; k < 4; k++) { var w0 = 0.45 + k * 0.1; st.p[k] = t > 0.4 ? 1 - ss(seg(t, w0, w0 + 0.2)) : (k === IS ? ss(seg(t, 0, 0.35)) : 1); }
+        st.tela = 1 - ss(seg(t, 0.4, 0.6));
+      },
       quitarProt: function (t) {
         st.arm = 0.8; for (var k = 0; k < 4; k++) st.p[k] = 1 - ss(seg(t, 0.2 + k * 0.17, 0.2 + k * 0.17 + 0.29)); st.tela = 1 - ss(seg(t, 0, 0.22));
       },

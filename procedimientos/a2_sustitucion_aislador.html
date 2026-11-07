@@ -86,7 +86,7 @@ TET.montar({
       {texto:'Retirar el aislador viejo y colocar el nuevo.',pag:48,anim:'cambiaAislador',cam:'sust',dur:4.5,det:{cam:'dAislador',txt:'Detalle: aislador viejo (oscuro) y aislador nuevo (claro)'},ilus:'Solo queda al descubierto la fase S (punto de trabajo); el resto sigue cubierto.'},
       {texto:'Retencionar el conductor al aislador. El conductor se mantendrá sujeto con la cuerda en tanto no se realice la retención.',pag:48,anim:{a:'retencionar'},cam:'sust',dur:4.5},
       {texto:'Retirar el equipo para el tensado del conductor.',pag:48,anim:'quitaEquipo',cam:'poste',dur:3.5},
-      {texto:'Colocar protecciones aislantes sobre el aislador sustituido y conductor correspondiente.',pag:48,anim:{a:'proteger',fases:['S']},cam:'sust',dur:3.5,det:{cam:'dDedalS',txt:'Detalle: protección del aislador sustituido y dedal aislante (Manual p. 49)'}}
+      {texto:'Colocar protecciones aislantes sobre el aislador sustituido y conductor correspondiente.',pag:48,anim:{a:'protegerQuita'},cam:'sust',dur:6.5,det:{cam:'dDedalS',txt:'Detalle: protección del aislador sustituido y dedal aislante (Manual p. 49)'},ilus:'Ilustrativo: en esta variante el manual no incluye un paso de retirada de protecciones; aquí se retiran, de arriba hacia abajo, al terminar la ejecución y antes de las operaciones finales.'}
     ];
     var fl=[
       {texto:'Colocar la polea para situar el elemento de amarre del conductor a mover.',pag:48,anim:{a:'polea'},cam:'sust',dur:3.5,det:{cam:'dPoleaFin',txt:'Detalle: polea para el elemento de amarre (Manual p. 49)'},ilus:'Cuerda, polea y anclaje son ilustrativos. '+ILUS_S},
@@ -98,7 +98,7 @@ TET.montar({
       {texto:'Retirar protecciones aislantes procediendo de arriba hacia abajo.',pag:48,anim:'quitarProt',cam:'cabeza',dur:6}
     ];
     var fnl=[
-      {texto:'Inspeccionar visualmente el conjunto de la instalación.',pag:48,anim:['inspeccion','descenso'],cam:'general',dur:5,nota:fin?null:'El manual no incluye en esta variante un paso de retirada de protecciones; aquí quedan colocadas hasta el final.',ilus:'El descenso del trabajador por la escalera no figura en el manual; se anima para que el recorrido sea coherente.'},
+      {texto:'Inspeccionar visualmente el conjunto de la instalación.',pag:48,anim:['inspeccion','descenso'],cam:'general',dur:5,ilus:'El descenso del trabajador por la escalera no figura en el manual; se anima para que el recorrido sea coherente.'},
       {texto:'Revisar, limpiar y guardar los equipos, herramientas y materiales empleados en el trabajo.',pag:48,anim:'guardar',cam:'lona',ilus:'Se recogen la escalera y los equipos de la lona; el manual no detalla el orden.'},
       {texto:'Retirar la señalización y delimitación del lugar de trabajo.',pag:48,anim:{a:'valla',inv:true},cam:'general',ilus:'El tipo de vallas es representativo.'},
       {texto:'Retirar materiales de desecho.',pag:48,anim:'desecho',cam:'suelo2',dur:3.5,ilus:'La bolsa de desecho es representativa.'},

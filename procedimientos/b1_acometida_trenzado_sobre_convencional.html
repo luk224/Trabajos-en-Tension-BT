@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="color-scheme" content="light">
+<meta name="color-scheme" content="light dark">
 <title>B.1 Acometida de cable trenzado sobre red convencional · Manual TETBT</title>
 <meta name="description" content="Animación paso a paso del procedimiento B.1 del Manual de Trabajos en Tensión en Baja Tensión.">
 <link rel="stylesheet" href="../assets/tet.css">
@@ -101,7 +101,7 @@ TET.montar({
         nota:'Se retiran las protecciones aislantes de la zona de trabajo (tela, perfiles y capuchones). La protección aislante de cada conector se queda: es el aislamiento repuesto al conectar.'},
       {texto:'En caso de desconexión, el neutro sería el último conductor en desconectarse, si ello es posible.',pag:53,anim:'resaltaN',cam:'cabeza2',dur:3,
         nota:des?'Es lo que se ha hecho en esta variante: R, S y T primero, y el neutro al final.':'Este punto solo aplica a la desconexión. En la conexión, el neutro se conecta primero (paso anterior a la retirada del aislamiento). Cambia a «Desconexión» para ver el orden inverso.'},
-      {texto:'En casos de apoyo de doble circuito, el circuito de red convencional sobre el que no se va a trabajar debe estar aislado.',pag:53,anim:'doble',cam:'atras',dur:5,
+      {texto:'En casos de apoyo de doble circuito, el circuito de red convencional sobre el que no se va a trabajar debe estar aislado.',pag:53,anim:{a:'seq',items:[{w:[0,0.75],anim:'doble'},{w:[0.75,1],anim:{a:'quitaDoble'}}]},cam:'atras',dur:6,nota:'Al terminar la ejecución se retiran las protecciones amarillas del segundo circuito (ilustrativo: el manual no lo indica).',
         ilus:'Se dibuja un segundo circuito detrás del apoyo, solo para ilustrar este caso. El manual lo cita al final de la lista de ejecución.'}
     ];
     return {escena:{modo:'b1',desconexion:des},fases:[P.previas(52,['ident','clima','vial','insp','delim','verif','metal','epi'],'Delimitar y señalizar el lugar de trabajo.'),{nombre:'Ejecución del trabajo',pasos:ejec},P.finales9(53,'Reponer fusibles en la caja general.',false)]};
