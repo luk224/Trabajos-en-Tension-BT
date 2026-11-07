@@ -196,7 +196,7 @@
         var anchor = sp[1] === 'tor' ? P.tor : sp[1] === 'aL' ? P.aL : P.aR, att = buildItem(sp[0]), fr = buildItem(sp[0]);
         att.position.set(sp[2][0], sp[2][1], sp[2][2]); att.rotation.set(sp[3][0], sp[3][1], sp[3][2]); anchor.add(att);
         fr.visible = false; O.lona.add(fr);
-        O.mi.push({ att: att, fr: fr, kind: sp[0], t0: 0.22 + k * 0.06 + who * 0.03, slot: V(-0.2 + 0.1 * k, 0.07, who ? -0.44 : -0.31), rot0: sp[3] });
+        O.mi.push({ att: att, fr: fr, kind: sp[0], t0: 0.22 + k * 0.06 + who * 0.03, slot: V(-0.85 + 0.1 * k, 0.07, who ? 2.63 : 2.76), rot0: sp[3] });
       });
     }
 
@@ -377,8 +377,10 @@
       [-1, 1].forEach(function (sg) { var b = mk(cylX(0.012, 0.5, 6), MM('halo'), 0, 0, 0.012 * sg, pz); b.rotation.y = sg * 0.06; mk(cylX(0.02, 0.18, 8), M('aisl'), -0.3, 0, 0.02 * sg, pz); });
       O.pinzasLona = pz; O.items.push(pz);
       O.checks = O.items.map(function (m) { var s = etq('✓', 'ok', 0.34, 0.17); s.position.set(m.position.x, 0.55, m.position.z); s.visible = false; O.lona.add(s); return s; });
-      mk(box(0.95, 0.02, 0.34), M('ropa2'), 0.25, 0.035, -0.37, O.lona); mk(box(0.95, 0.05, 0.02), M('ropa2'), 0.25, 0.06, -0.54, O.lona); mk(box(0.95, 0.05, 0.02), M('ropa2'), 0.25, 0.06, -0.2, O.lona);
-      mk(box(0.02, 0.05, 0.34), M('ropa2'), -0.22, 0.06, -0.37, O.lona); mk(box(0.02, 0.05, 0.34), M('ropa2'), 0.72, 0.06, -0.37, O.lona);
+      /* bandeja de objetos metálicos: fuera de la zona delimitada (delante del hueco de entrada), sobre su propia lona */
+      mk(box(1.2, 0.02, 0.6), M('lona'), -0.4, 0.02, 2.7, O.lona);
+      mk(box(0.95, 0.02, 0.34), M('ropa2'), -0.4, 0.035, 2.7, O.lona); mk(box(0.95, 0.05, 0.02), M('ropa2'), -0.4, 0.06, 2.53, O.lona); mk(box(0.95, 0.05, 0.02), M('ropa2'), -0.4, 0.06, 2.87, O.lona);
+      mk(box(0.02, 0.05, 0.34), M('ropa2'), -0.87, 0.06, 2.7, O.lona); mk(box(0.02, 0.05, 0.34), M('ropa2'), 0.07, 0.06, 2.7, O.lona);
       O.mi = []; anclaMetal(O.w, 0); anclaMetal(O.ay, 1);
       O.bolsa = mk(sph(0.28, 8, 6), M('techo'), 0, 0, 0, G); O.bolsa.visible = false;
       /* efectos transitorios */
@@ -648,7 +650,7 @@
       suelo2: { p: [1.6, 2.0, 6.8], t: [1.6, 1.0, 2.3] },
       detObjetos: { p: [0.8, 1.3, 4.1], t: [0.8, 1.1, 2.3], fov: 36 },
       detObjetosAy: { p: [1.8, 1.3, 4.1], t: [1.8, 1.1, 2.3], fov: 36 },
-      detBandeja: { p: [2.4, 0.95, 1.5], t: [1.95, 0.08, 0.0], fov: 34 },
+      detBandeja: { p: [2.1, 1.0, 4.9], t: [1.3, 0.08, 3.05], fov: 34 },
       detZocalos: { p: [-1.0, 1.1, 1.0], t: [0.0, 1.0, -2.0], fov: 42 },
       detProt: { p: [-1.5, 1.3, 0.3], t: [-0.35, 0.95, -2.0], fov: 38 },
       detModulo: { p: [-1.0, 1.5, -0.2], t: [XS, 1.0, -1.35], fov: 40 },
