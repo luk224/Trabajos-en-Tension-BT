@@ -150,11 +150,28 @@
     /* capuchón o protector aislante de aislador: arco en U sobre el aislador con lengüetas (esquema p. 49) */
     function capuchon(opac) {
       var g = new T.Group(), ge = geo('capuchonArco', function () { var q = new T.CylinderGeometry(0.14, 0.14, 0.3, 14, 1, true, 0, PI); q.rotateZ(PI / 2); return q; });
-      var arco = new T.Mesh(ge, Mt('aisl', opac || 0.5)); g.add(arco);
+      var arco = new T.Mesh(ge, Mt('aisl', opac || 0.5)); g.add(arco); g.traverse(function (x) { x.renderOrder = 3; });
       mk(geo('capuchonTapa', function () { var q = new T.CircleGeometry(0.14, 14, 0, PI); q.rotateY(PI / 2); return q; }), Mt('aisl', opac || 0.5), 0.15, 0, 0, g);
       mk(geo('capuchonTapa', function () { var q = new T.CircleGeometry(0.14, 14, 0, PI); q.rotateY(PI / 2); return q; }), Mt('aisl', opac || 0.5), -0.15, 0, 0, g);
       for (var q = -1; q <= 1; q++) { mk(box(0.04, 0.075, 0.012), M('aisl'), q * 0.1, -0.035, 0.14, g); mk(box(0.04, 0.075, 0.012), M('aisl'), q * 0.1, -0.035, -0.14, g); }
+      return ro(g, 3);
+    }
+    function ro(o, n) { o.traverse(function (x) { x.renderOrder = n; }); return o; }
+    /* conector de derivación (grapa metálica con tornillería; el tipo exacto es ilustrativo) */
+    function conector() {
+      var g = new T.Group();
+      mk(box(0.12, 0.07, 0.085), MM('metal'), 0, 0, 0, g); mk(box(0.07, 0.075, 0.05), MM('halo'), 0, -0.06, 0.01, g);
+      [-0.03, 0.03].forEach(function (x) { mk(geo('conTor', function () { return new T.CylinderGeometry(0.016, 0.016, 0.05, 6); }), MM('halo'), x, 0.05, 0, g); mk(box(0.04, 0.012, 0.012), MM('halo'), x, 0.078, 0, g); });
       return g;
+    }
+    /* funda aislante sobre el conector («reponer aislamiento»): manguito coaxial con la línea (eje x) con aros en los extremos */
+    function funda() {
+      var g = new T.Group();
+      mk(geo('fundaCil', function () { var q = new T.CylinderGeometry(0.085, 0.085, 0.3, 16, 1, true); q.rotateZ(PI / 2); return q; }), Mt('aisl', 0.6), 0, -0.01, 0, g);
+      var rim = geo('fundaRim', function () { var q = new T.TorusGeometry(0.085, 0.012, 6, 16); q.rotateY(PI / 2); return q; });
+      mk(rim, M('aisl'), 0.15, -0.01, 0, g); mk(rim, M('aisl'), -0.15, -0.01, 0, g);
+      mk(geo('fundaRama', function () { return new T.CylinderGeometry(0.06, 0.06, 0.16, 12, 1, true); }), Mt('aisl', 0.6), 0, -0.1, 0.02, g);
+      return ro(g, 4);
     }
     /* dedal aislante: caperuza cilíndrica con extremo redondeado y borde */
     function dedal() {
@@ -170,7 +187,7 @@
       mk(geo('mangCil', function () { return new T.CylinderGeometry(0.05, 0.05, 0.24, 14, 1, true); }), Mt('aisl', 0.75), 0, 0, 0, g);
       var rim = geo('mangRim', function () { var q = new T.TorusGeometry(0.05, 0.01, 6, 14); q.rotateX(PI / 2); return q; });
       mk(rim, M('aisl'), 0, 0.12, 0, g); mk(rim, M('aisl'), 0, -0.12, 0, g);
-      return g;
+      return ro(g, 4);
     }
     var _qd = V(0, 0, 0);
     function alinea(g, pos, dir) { g.position.copy(pos); g.quaternion.setFromUnitVectors(UP, _qd.copy(dir).normalize()); } // eje local +y del grupo → dir
@@ -338,7 +355,7 @@
       }
       O.condH = [null, null, null, null];
       O.tip = []; if (opt.fin) for (i = 0; i < 4; i++) { var tp = dedal(); tp.visible = false; G.add(tp); O.tip.push(tp); }
-      O.halo = tubo(xs.length, 0.042, new T.MeshBasicMaterial({ color: pal('halo'), side: T.BackSide })); O.halo.material.userData.k = 'halo'; mats['Kh'] = O.halo.material; G.add(O.halo);
+      O.halo = tubo(xs.length, 0.042, new T.MeshBasicMaterial({ color: pal('halo'), side: T.DoubleSide, depthWrite: false })); O.halo.renderOrder = -10; O.halo.material.userData.k = 'halo'; mats['Kh'] = O.halo.material; G.add(O.halo);
       /* postes lejanos */
       [-LTOT, LTOT].forEach(function (x) { if (opt.fin && x < 0) return; mk(cylU(0.13, 8), M('poste'), x, POLE_H / 2, 0, G).scale.set(1, POLE_H, 1); });
       /* circuito 2 (doble circuito, detrás del apoyo) */
@@ -352,17 +369,17 @@
         var cp = capuchon(0.5); cp.position.set(0, YF[i], -ZC); O.c2.add(cp);
         O.c2p.push({ pf: pf, cp: cp, i: i });
       }
-      O.c2tela = mk(box(0.5, 1.9, 0.45), Mt('tela', 0.38), 0, 7.6, -0.02, O.c2);
+      O.c2tela = mk(box(0.5, 1.9, 0.45), Mt('tela', 0.38), 0, 7.6, -0.02, O.c2); O.c2tela.renderOrder = 1;
       /* protecciones del circuito 1 */
       O.pr = []; var segsD = opt.acometida ? [[0.3, XJ - 0.3], [XJ - 0.3, XJ + 0.3, 'w'], [XJ + 0.3, 3.0]] : [[0.3, 3.0]];
       for (i = 0; i < 4; i++) {
         var pr = { pieces: [], cap: null, ded: null, der: null };
         var lista = opt.fin ? segsD : [[-0.3, -3.0]].concat(segsD);
-        lista.forEach(function (s) { var m = mk(cylU(0.05, 8), Mt('aisl', 0.45), 0, 0, 0, G); m.visible = false; pr.pieces.push({ win: s[2] === 'w', m: m, a: V(s[0], yC(i, s[0], 0), ZC), b: V(s[1], yC(i, s[1], 0), ZC) }); });
+        lista.forEach(function (s) { var m = mk(cylU(0.05, 8), Mt('aisl', 0.45), 0, 0, 0, G); m.renderOrder = 2; m.visible = false; pr.pieces.push({ win: s[2] === 'w', m: m, a: V(s[0], yC(i, s[0], 0), ZC), b: V(s[1], yC(i, s[1], 0), ZC) }); });
         pr.cap = capuchon(0.5); pr.cap.position.set(0, YF[i], ZC); G.add(pr.cap); pr.cap.scale.set(0.001, 0.001, 0.001); pr.cap.visible = false;
         O.pr.push(pr);
       }
-      O.tela = mk(box(0.5, 1.9, 0.45), Mt('tela', 0.38), 0, 7.6, -0.02, G); O.tela.visible = false;
+      O.tela = mk(box(0.5, 1.9, 0.45), Mt('tela', 0.38), 0, 7.6, -0.02, G); O.tela.visible = false; O.tela.renderOrder = 1;
       /* retención, polea, cuerda, rana y aparejo */
       O.ret = mk(box(0.1, 0.1, 0.07), M('metal'), 0, YF[IS], ZC, G);
       O.dedS = manguito(); G.add(O.dedS); O.dedS.visible = false;
@@ -410,13 +427,14 @@
         mk(box(0.9, 2.0, 0.04), M('ropa2'), 7.2, 1.0, 2.02, G);
         for (i = 0; i < 4; i++) {
           var cb = tubo(14, 0.016, M(FA[i], { side: T.DoubleSide })); G.add(cb); O.cab.push(cb); O.cabPts.push(Array.apply(null, Array(14)).map(function (z, k) { return V(lerp(O.J[i].x, O.C[i].x, k / 13), lerp(O.J[i].y, O.C[i].y, k / 13), lerp(O.J[i].z, O.C[i].z, k / 13)); }));
-          var dd = dedal(); G.add(dd); dd.visible = false; O.dedal.push(dd);
-          var cn = mk(box(0.075, 0.05, 0.06), MM('metal'), O.J[i].x, O.J[i].y, O.J[i].z, G); cn.visible = false; (O.conn = O.conn || []).push(cn);
-          var dv = mk(cylU(0.045, 8), Mt('aisl', 0.45), 0, 0, 0, G); dv.visible = false; O.der.push(dv);
+          var dd = ro(dedal(), 4); G.add(dd); dd.visible = false; O.dedal.push(dd);
+          var cn = conector(); cn.position.set(O.J[i].x, O.J[i].y, O.J[i].z); G.add(cn); cn.visible = false; (O.conn = O.conn || []).push(cn);
+          var fu = funda(); fu.position.set(O.J[i].x, O.J[i].y, O.J[i].z); G.add(fu); fu.visible = false; (O.funda = O.funda || []).push(fu);
+          var dv = mk(cylU(0.045, 8), Mt('aisl', 0.45), 0, 0, 0, G); dv.renderOrder = 2; dv.visible = false; O.der.push(dv);
         }
         /* CGP */
         O.cgp = grp(G, CG.x, CG.y, CG.z);
-        mk(box(0.6, 0.84, 0.03), M('ropa2'), 0, 0, -0.085, O.cgp);
+        mk(box(0.58, 0.82, 0.03), M('ropa2'), 0, 0, -0.085, O.cgp);
         mk(box(0.03, 0.84, 0.2), M('cgp'), -0.285, 0, 0, O.cgp); mk(box(0.03, 0.84, 0.2), M('cgp'), 0.285, 0, 0, O.cgp);
         mk(box(0.6, 0.03, 0.2), M('cgp'), 0, 0.405, 0, O.cgp); mk(box(0.6, 0.03, 0.2), M('cgp'), 0, -0.405, 0, O.cgp);
         O.edifPts = [];
@@ -424,7 +442,7 @@
         O.fus = grp(O.cgp, 0, 0, -0.03);
         [-0.15, 0, 0.15].forEach(function (x, q) { mk(cylU(0.035, 8), M(FA[q + 1]), x, 0.03, 0, O.fus).scale.set(1, 0.3, 1); mk(box(0.07, 0.04, 0.04), M('metal'), x, 0.2, 0, O.fus); });
         mk(box(0.4, 0.05, 0.05), M(FA[0]), 0, -0.2, 0, O.fus);
-        O.plI = mk(geo('tri', function () { return new T.CircleGeometry(0.1, 3); }), MB('marca'), 0, 0.2, 0.115, O.cgp); O.plI.rotation.z = PI / 2; O.plI.visible = false;
+        O.plI = mk(geo('tri', function () { return new T.CircleGeometry(0.1, 3); }), MB('marca'), 0, 0.2, -0.06, O.cgp); O.plI.rotation.z = PI / 2; O.plI.visible = false;
         O.door = grp(O.cgp, -0.28, 0, 0.115); mk(box(0.56, 0.78, 0.03), M('cgp'), 0.28, 0, 0.01, O.door);
         O.plE = mk(geo('tri', function () { return new T.CircleGeometry(0.1, 3); }), MB('marca'), 0.28, 0.12, 0.04, O.door); O.plE.rotation.z = PI / 2; O.plE.visible = false;
         O.seal = mk(sph(0.03, 8, 6), MB('cota'), 0.52, -0.05, 0.05, O.door); O.seal.visible = false;
@@ -435,10 +453,10 @@
       /* vial */
       O.van = grp(G, -24, 0, 7.2);
       mk(box(3.4, 1.7, 1.8), M('furgo'), 0, 1.15, 0, O.van); mk(box(1.2, 1.2, 1.78), M('furgo'), 2.2, 0.95, 0, O.van);
-      mk(box(0.5, 0.5, 1.8), MB('texto'), 2.55, 1.3, 0, O.van).material = M('ropa2');
+      mk(box(0.04, 0.45, 1.5), M('ropa2'), 2.81, 1.2, 0, O.van);
       [[-1.1, 0.95], [1.1, 0.95], [-1.1, -0.95], [1.1, -0.95], [2.4, 0.95], [2.4, -0.95]].forEach(function (w, q) { if (q < 4 || true) mk(cylZ(0.36, 0.2, 10), M('texto'), w[0] + (q > 3 ? 0 : 0), 0.36, w[1], O.van); });
       O.van.children.slice(-6).forEach(function (m) { m.material = M('ropa2'); });
-      mk(box(0.5, 0.18, 0.3), M('cono'), 0.4, 2.1, 0, O.van); mk(box(3.4, 0.12, 1.84), M('cono'), 0, 0.55, 0, O.van);
+      mk(box(0.5, 0.18, 0.3), M('cono'), 0.4, 2.1, 0, O.van); mk(box(3.44, 0.12, 1.84), M('cono'), 0, 0.55, 0, O.van);
       O.van.visible = false;
       O.cones = []; for (i = 0; i < 4; i++) { var cn = mk(geo('cono', function () { return new T.ConeGeometry(0.17, 0.6, 8); }), M('cono'), -10.5 - i * 1.7, 0.3, 5.2 + i * 0.35, G); cn.visible = false; O.cones.push(cn); }
       O.sign = mk(geo('tri2', function () { return new T.CircleGeometry(0.6, 3); }), MB('marca'), -14.2, 1.4, 5.6, G); O.sign.rotation.z = PI / 2; O.sign.visible = false;
@@ -485,7 +503,7 @@
       O.hemi = new T.HemisphereLight(0xffffff, 0x8899aa, 0.62); G.add(O.hemi);
       O.sun = new T.DirectionalLight(0xffffff, 0.55); O.sun.position.set(-8, 14, 12); G.add(O.sun);
       if (cor) {
-        FA.forEach(function (f, i) { cor.addPath('lin-' + f, function () { return O.condPts[i]; }, f); if (O.c2pts) cor.addPath('lin2-' + f, O.c2pts[i], f); });
+        FA.forEach(function (f, i) { cor.addPath('lin-' + f, function () { return O.condPts[i]; }, f, { sentido: opt.fin ? -1 : 1 }); if (O.c2pts) cor.addPath('lin2-' + f, O.c2pts[i], f, { sentido: opt.fin ? -1 : 1 }); });
         if (opt.acometida) FA.forEach(function (f, i) { cor.addPath('aco-' + f, function () { return O.cabPts[i]; }, f); cor.addPath('edif-' + f, O.edifPts[i], f); });
       }
       aplicaTema();
@@ -494,7 +512,7 @@
       Object.keys(mats).forEach(function (k) { mats[k].color.set(pal(mats[k].userData.k)); });
       sprites.forEach(dibujaEtq);
       var f = pal('fondo'); scene.background = new T.Color(f); scene.fog = new T.Fog(new T.Color(f), 55, 130);
-      var d = document.documentElement.getAttribute('data-theme') === 'dark';
+      var d = false;   // solo modo claro
       if (O && O.hemi) { O.hemi.intensity = d ? 0.75 : 0.62; O.sun.intensity = d ? 0.45 : 0.55; O.hemi.groundColor.set(d ? 0x202a30 : 0x8899aa); }
     }
 
@@ -526,7 +544,7 @@
         var xa = q ? -2.0 : 0.75, xb = q ? -0.55 : 2.2; if (opt.fin && q) { r.visible = false; return; }
         r.visible = expu; if (expu) place(r, V(xa, yC(IS, xa, s.h), ZC), V(xb, yC(IS, xb, s.h), ZC));
       });
-      O.ret.visible = s.ret > 0.5; O.ret.position.set(0, YF[IS], ZC);
+      O.ret.visible = s.ret > 0.5 && !opt.acometida; O.ret.position.set(0, YF[IS], ZC);
       /* aislador viejo/nuevo */
       var ov = O.ais[IS], a0 = ss(seg(s.sust, 0, 0.5)), a1 = ss(seg(s.sust, 0.5, 1));
       ov.visible = a0 < 0.99; ov.position.set(0.5 * a0, YF[IS] - 0.7 * a0, 0.3 + 0.9 * a0); ov.scale.setScalar(Math.max(0.001, 1 - a0 * 0.6));
@@ -557,13 +575,20 @@
         for (i = 0; i < 4; i++) {
           var sv = s.s[i];
           if (chg('a' + i, sv)) {
-            var J2 = O.J[i], C2 = O.C[i], f0 = 0.15 * (1 - sv);
-            var E = V(lerp(J2.x, C2.x, f0) + 0.25 * (1 - sv), lerp(J2.y, C2.y, f0) - 0.75 * (1 - sv), lerp(J2.z, C2.z, f0) + 0.15 * (1 - sv)), pp = O.cabPts[i];
-            for (k = 0; k < pp.length; k++) { var u = k / (pp.length - 1); pp[k].set(lerp(E.x, C2.x, u), lerp(E.y, C2.y, u) - 0.3 * 4 * u * (1 - u), lerp(E.z, C2.z, u)); }
+            /* haz de 4 cables paralelos (sin cruces): base común + desfase que va de la separación en la línea a la separación en la CGP */
+            var J0 = O.J[0], C0 = O.C[0], Ji = O.J[i], Ci = O.C[i], pp = O.cabPts[i], u0 = 0.15 * (1 - sv), n1 = pp.length - 1;
+            for (k = 0; k <= n1; k++) {
+              var kk = k / n1, u = u0 + (1 - u0) * kk, wd = (1 - sv) * (1 - kk) * (1 - kk), sg = 0.32 * 4 * u * (1 - u);
+              pp[k].set(lerp(J0.x, C0.x, u) + (Ji.x - J0.x) * (1 - u) + (Ci.x - C0.x) * u + 0.25 * wd,
+                        lerp(J0.y, C0.y, u) - sg + (Ji.y - J0.y) * (1 - u) + (Ci.y - C0.y) * u - 0.75 * wd,
+                        lerp(J0.z, C0.z, u) + (Ji.z - J0.z) * (1 - u) + (Ci.z - C0.z) * u + 0.15 * wd);
+            }
             tuboSet(O.cab[i], pp);
             var dv0 = V(pp[0].x - pp[1].x, pp[0].y - pp[1].y, pp[0].z - pp[1].z).normalize(); alinea(O.dedal[i], V(pp[0].x, pp[0].y, pp[0].z).addScaledVector(dv0, 0.07), dv0);
           }
-          if (O.conn) O.conn[i].visible = s.s[i] > 0.95; O.dedal[i].visible = s.ded[i] > 0.01; O.dedal[i].scale.setScalar(Math.max(0.001, ss(s.ded[i])));
+          if (O.conn) O.conn[i].visible = s.s[i] > 0.95;
+          var tipv = 1 - ss(seg(s.s[i], 0, 0.15)); O.dedal[i].visible = tipv > 0.01; O.dedal[i].scale.setScalar(Math.max(0.001, tipv));
+          if (O.funda) { O.funda[i].visible = s.ded[i] > 0.01; O.funda[i].scale.setScalar(Math.max(0.001, ss(s.ded[i]))); }
           O.labAc[i].visible = s.labAc > 0.01; O.labAc[i].scale.set(0.5 * ss(s.labAc), 0.25 * ss(s.labAc), 1);
         }
         var c = s.cgp; O.door.rotation.y = -c.door * 1.9;

@@ -2,9 +2,8 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<script>try{var t=localStorage.getItem('tema');var q=location.search.match(/[?&]tema=(dark|light)/);if(q)t=q[1];if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="color-scheme" content="light dark">
+<meta name="color-scheme" content="light">
 <title>C.1 Derivación subterránea unipolar sobre unipolar · Manual TETBT</title>
 <meta name="description" content="Animación paso a paso del procedimiento C.1 del Manual de Trabajos en Tensión en Baja Tensión.">
 <link rel="stylesheet" href="../assets/tet.css">
@@ -18,7 +17,6 @@
       <a href="../index.html#s5">5. Procedimientos</a><span class="sep" aria-hidden="true">·</span>
       <a class="act" href="../index.html#s5-c" aria-current="page">C. Red subterránea</a>
     </nav>
-    <button class="btn-tema" type="button" data-tema-btn aria-pressed="false"><span>Modo oscuro</span></button>
   </div>
 </header>
 <main>
@@ -73,7 +71,7 @@ TET.montar({
         nota:'El manual lista como EPC las <strong>alfombras aislantes</strong> y los <strong>dedales aislantes</strong> y los dibuja en el esquema de la p. 69: alfombra o protección aislante en las paredes de la cala y dedales en los extremos de los conductores de la acometida.',
         ilus:'La tela/alfombra sobre los demás conductores es ilustrativa; el manual solo dice “aislar la zona de trabajo en tensión” y lista tela, dedales y alfombras como EPC. El trabajador baja a la cala en este paso por la escalera, pero el manual no dice cómo. La escalera aislante (medios materiales) se dibuja con inclinación ≈75°, sobresaliendo ≈1 m del apoyo, con correa de cincha con trinquete a un anclaje, calzo al pie y el cinturón de seguridad del trabajador amarrado a un anclaje: todo ello es ilustrativo (criterio general de escaleras de mano en trabajos en altura, RD 1215/1997 anexo II modificado por RD 2177/2004; confirmar con el procedimiento de prevención de la empresa). El manual solo lista «escalera aislante» y «cinturón de seguridad».'},
       {texto:'Comprobar, antes de conectar, la inexistencia de diferencia de potencial entre el conductor principal y el de la acometida.',pag:67,anim:{a:'pinza',fases:4},cam:'trabajo',dur:5,ilus:'La pinza se muestra sobre cada conductor; el manual no detalla el método de medida.'},
-      {texto:'Realizar la conexión empezando por el conductor neutro.',pag:67,det:{cam:'detEmpalme',txt:'Detalle: conexión realizada con el conductor neutro, que se encinta (Manual p. 69, esquema 2)'},anim:{a:'conecta',fases:['N']},cam:'trabajo',dur:4,ilus:'El conector metálico y el movimiento del conductor derivado son ilustrativos; el manual no describe el tipo de conexión.'},
+      {texto:'Realizar la conexión empezando por el conductor neutro.',pag:67,det:{cam:'detEmpalme',txt:'Detalle: conexión realizada con conector sobre el conductor neutro, que después se encinta (Manual p. 69, esquema 2)'},anim:{a:'conecta',fases:['N']},cam:'trabajo',dur:4,ilus:'El conector metálico y el movimiento del conductor derivado son ilustrativos; el manual no describe el tipo de conexión.'},
       {texto:'Reponer el aislamiento.',pag:68,det:{cam:'detEmpalme',txt:'Detalle: empalme realizado debidamente encintado, conductor neutro (Manual p. 69, esquema 2)'},anim:{a:'aislamiento',fases:['N']},cam:'trabajo',dur:3.5,nota:'El esquema de la p. 69 indica «Conexión realizada (encintar)» y «Empalme realizado debidamente encintado (conductor neutro)».',ilus:'El encintado se dibuja como un manguito oscuro; el manual no describe el material.'},
       {texto:'Repetir el proceso para los otros conductores.',pag:68,anim:{a:'faseUni',fases:['R','S','T'],soloConecta:true},cam:'trabajo',dur:8,ilus:'El orden R, S, T es ilustrativo.'},
       {texto:'La conexión de la red trenzada se puede realizar conductor a conductor en los dos extremos a todos los conductores en un extremo y después en el otro extremo.',pag:68,anim:null,cam:'cala',dur:3,

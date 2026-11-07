@@ -1,5 +1,5 @@
 /* ============================================================
-   Manual TETBT — motor compartido: tema claro/oscuro, fichas y
+   Manual TETBT — motor compartido: fichas y
    «reproductor de pasos» (three.js r147 global, sin módulos ni CDN).
 
    Un procedimiento se declara como datos (ver procedimientos/*.html):
@@ -76,32 +76,15 @@
   }
   function cita(pag) { return h('span', { class: 'cita', text: 'Manual p. ' + pag }); }
 
-  /* ---------- tema claro / oscuro ---------- */
+  /* ---------- paleta (solo modo claro) ---------- */
   var palCache = {};
   TET.pal = function (k) {
     if (palCache[k]) return palCache[k];
     var v = getComputedStyle(document.documentElement).getPropertyValue('--e-' + k).trim();
     return (palCache[k] = v || '#ff00ff');
   };
-  TET.initTema = function () {
-    var btns = document.querySelectorAll('[data-tema-btn]');
-    function oscuro() { return document.documentElement.getAttribute('data-theme') === 'dark'; }
-    function pinta() {
-      btns.forEach(function (b) {
-        b.setAttribute('aria-pressed', oscuro() ? 'true' : 'false');
-        b.innerHTML = ICON.sol + '<span>' + (oscuro() ? 'Modo claro' : 'Modo oscuro') + '</span>';
-      });
-    }
-    btns.forEach(function (b) {
-      b.addEventListener('click', function () {
-        var d = !oscuro();
-        document.documentElement.setAttribute('data-theme', d ? 'dark' : 'light');
-        try { localStorage.setItem('tema', d ? 'dark' : 'light'); } catch (e) {}
-        palCache = {}; pinta();
-        window.dispatchEvent(new Event('tet-tema'));
-      });
-    });
-    pinta();
+  TET.initTema = function () {   // solo modo claro: se descarta cualquier preferencia oscura guardada antes
+    try { localStorage.removeItem('tema'); } catch (e) {}
   };
 
   /* ---------- fichas ---------- */
@@ -153,7 +136,6 @@
     me.init3d();
     var sel = def.selector ? me.selInicial() : null;
     me.cargar(sel, true);
-    window.addEventListener('tet-tema', function () { if (me.escena && me.escena.tema) me.escena.tema(); if (me.scene) me.scene.background = new THREE.Color(TET.pal('fondo')); me.pedir(); });
     document.addEventListener('keydown', function (e) { me.tecla(e); });
   }
   var P = Reproductor.prototype;
@@ -178,13 +160,13 @@
     me.pista = h('div', { class: 'pista', 'aria-hidden': 'true', text: 'Desliza en horizontal para girar · pellizca para zoom' });
     stage.appendChild(me.canvas); stage.appendChild(me.pista); stage.appendChild(me.tag); stage.appendChild(me.btnCam); stage.appendChild(me.sin3d); stage.appendChild(me.carga);
     me.detBox = h('div', { class: 'detbox', role: 'group', 'aria-label': 'Plano de detalle' });
-    me.detCap = h('div', { class: 'detcap' });
-    me.detTxt = h('span', { class: 'dettxt', 'aria-live': 'polite' });
-    me.detNext = h('button', { class: 'detb', type: 'button', 'aria-label': 'Siguiente detalle', text: '›' });
-    me.detHide = h('button', { class: 'detb', type: 'button', 'aria-label': 'Ocultar el plano de detalle', text: '×' });
     me.detView = h('div', { class: 'detview' });
-    me.detCap.appendChild(me.detTxt); me.detCap.appendChild(me.detNext); me.detCap.appendChild(me.detHide);
-    me.detBox.appendChild(me.detCap); me.detBox.appendChild(me.detView);
+    me.detBtns = h('div', { class: 'detbtns' });
+    me.detPrev = h('button', { class: 'detb', type: 'button', 'aria-label': 'Detalle anterior', text: '‹' });
+    me.detNext = h('button', { class: 'detb', type: 'button', 'aria-label': 'Siguiente detalle', text: '›' });
+    me.detHide = h('button', { class: 'detb', type: 'button', 'aria-label': 'Cerrar el plano de detalle', text: '×' });
+    me.detBtns.appendChild(me.detPrev); me.detBtns.appendChild(me.detNext); me.detBtns.appendChild(me.detHide);
+    me.detView.appendChild(me.detBtns); me.detBox.appendChild(me.detView);
     me.detShow = h('button', { class: 'detshow', type: 'button', text: 'Ver detalle' });
     stage.appendChild(me.detBox); stage.appendChild(me.detShow);
     me.detBox.style.display = 'none'; me.detShow.style.display = 'none';
@@ -192,6 +174,7 @@
     me.detHide.addEventListener('click', function () { me.detOn = false; me.pintaDet(); me.pedir(); });
     me.detShow.addEventListener('click', function () { me.detOn = true; me.pintaDet(); me.pedir(); });
     me.detNext.addEventListener('click', function () { me.detIdx = (me.detIdx + 1) % me.det.length; me.pintaDet(); me.pedir(); });
+    me.detPrev.addEventListener('click', function () { me.detIdx = (me.detIdx + me.det.length - 1) % me.det.length; me.pintaDet(); me.pedir(); });
     me.stage = stage;
 
     var panel = h('div', { class: 'panel' });
@@ -282,15 +265,15 @@
     this.stage.classList.toggle('has-det', ok && this.detOn);
     if (!ok) { this.detBox.style.display = 'none'; this.detShow.style.display = 'none'; return; }
     this.detBox.style.display = this.detOn ? '' : 'none'; this.detShow.style.display = this.detOn ? 'none' : '';
-    this.detTxt.textContent = d[this.detIdx].txt || 'Detalle';
-    this.detNext.style.display = d.length > 1 ? '' : 'none';
+    var tx = d[this.detIdx].txt || 'Detalle'; this.detBox.setAttribute('aria-label', tx); this.detBox.title = tx; this.detShow.title = tx;
+    this.detNext.style.display = this.detPrev.style.display = d.length > 1 ? '' : 'none';
   };
   P.setDet = function (det) {
     var me = this, arr = !det ? null : (Array.isArray(det) ? det : [det]);
     if (arr) arr = arr.filter(function (x) { return x && me.escena && me.escena.camaras && me.escena.camaras[x.cam]; });
     me.det = arr && arr.length ? arr : null; me.detIdx = 0;
     if (me.det) {
-      me.camDet = me.camDet || new THREE.PerspectiveCamera(28, 1, 0.05, 220);
+      me.camDet = me.camDet || new THREE.PerspectiveCamera(28, 1, 0.1, 150);
     }
     me.pintaDet();
   };
@@ -326,7 +309,7 @@
     var r = me.renderer;
     r.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     me.scene = new THREE.Scene(); me.scene.background = new THREE.Color(TET.pal('fondo'));
-    me.camera = new THREE.PerspectiveCamera(38, 1, 0.1, 220);
+    me.camera = new THREE.PerspectiveCamera(38, 1, 0.25, 150);
     me.camera.position.set(8, 6, 20);
     me.controls = new THREE.OrbitControls(me.camera, me.canvas);
     me.controls.touches = { ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN }; me.ajustaToque();
@@ -462,7 +445,7 @@
     var nts = [], nch = 0;
     if (p.nota) { nts.push(h('p', { class: 'paso-nota', html: p.nota })); nch += p.nota.length; }
     if (typeof p.ilus === 'string') { nts.push(h('p', { class: 'paso-nota', html: '<strong>Ilustrativo.</strong> ' + p.ilus })); nch += p.ilus.length + 12; }
-    var detT = p.det && !me.ok3d ? [].concat(p.det).map(function (d) { return d && d.txt; }).filter(Boolean) : [];
+    var detT = p.det ? [].concat(p.det).map(function (d) { return d && d.txt; }).filter(Boolean) : [];
     detT.forEach(function (t) { nts.push(h('p', { class: 'paso-nota', text: t })); nch += t.length; });
     if (nts.length) {
       var dn = h('details', { class: 'notas' }); dn.open = p.texto.length <= 120 && nch <= 220;

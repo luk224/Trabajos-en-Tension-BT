@@ -2,9 +2,8 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<script>try{var t=localStorage.getItem('tema');var q=location.search.match(/[?&]tema=(dark|light)/);if(q)t=q[1];if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="color-scheme" content="light dark">
+<meta name="color-scheme" content="light">
 <title>C.3 Derivación de entrada y salida · Manual TETBT</title>
 <meta name="description" content="Animación paso a paso del procedimiento C.3 del Manual de Trabajos en Tensión en Baja Tensión.">
 <link rel="stylesheet" href="../assets/tet.css">
@@ -18,7 +17,6 @@
       <a href="../index.html#s5">5. Procedimientos</a><span class="sep" aria-hidden="true">·</span>
       <a class="act" href="../index.html#s5-c" aria-current="page">C. Red subterránea</a>
     </nav>
-    <button class="btn-tema" type="button" data-tema-btn aria-pressed="false"><span>Modo oscuro</span></button>
   </div>
 </header>
 <main>
@@ -86,7 +84,7 @@ TET.montar({
       {texto:'El puente auxiliar provisto de interruptor se puede sustituir por un puente unipolar sin interruptor utilizándolo fase a fase, verificando la correcta concordancia de fases.',pag:78,anim:null,cam:'trabajoC3',dur:3,
         nota:uni?'Esta es la variante que estás viendo: un puente unipolar sin interruptor que se usa fase a fase.':'Este punto describe una alternativa; cambia a «Puente unipolar» para ver la secuencia con puente sin interruptor. No se anima ningún gesto aquí.'},
       {texto:'Cortar el conductor más favorable de la línea principal y comprobar la inexistencia de diferencia de potencial entre conductores derivado y principal.',pag:78,det:{cam:'detCorte',txt:'Detalle: conductor de la línea principal cortado entre los dos extremos del puente (Manual p. 79, figura 3)'},anim:{a:'cortaCheck',fases:['N']},cam:'trabajoC3',dur:5,nota:'Con el puente conectado (y su interruptor cerrado, si lo tiene) y la línea cortada, la línea se alimenta por el puente: las flechas amarillas indican el sentido de la corriente (ilustrativo, figura 3 de la p. 79).',ilus:'El manual dice «el más favorable»; se anima el neutro, que es el primero que se conecta. El corte se dibuja como un tramo de cable que se retira; su posición entre los dos extremos del puente es representativa.'},
-      {texto:'Conectar el cable de entrada y salida al cable principal seccionado y reponer el aislamiento. Siempre que la configuración de la instalación lo permita se conectará en primer lugar el conductor neutro.',pag:78,det:{cam:'detConex',txt:'Detalle: conexión definitiva de cada extremo cortado con el cable de entrada o de salida (Manual p. 79, figura 4)'},anim:{a:'faseUni',fases:['N'],soloConecta:true},cam:'trabajoC3',dur:5,nota:'Corresponde a la figura 4 de la p. 79: conectores («Conexión definitiva») entre los conductores de entrada y salida y los extremos del cable principal seccionado. Ilustrativo: en el manual las «conexiones definitivas» se dibujan como manguitos intermedios en los conductores de entrada y salida; aquí se muestran en los extremos cortados.',ilus:'Cada extremo cortado se une a su conductor de entrada o de salida de la caja. Conectores y encintado son representativos; el manual no describe el tipo de conexión.'},
+      {texto:'Conectar el cable de entrada y salida al cable principal seccionado y reponer el aislamiento. Siempre que la configuración de la instalación lo permita se conectará en primer lugar el conductor neutro.',pag:78,det:{cam:'detConex',txt:'Detalle: conexión definitiva, con conector y aislamiento repuesto, de cada extremo cortado con el cable de entrada o de salida (Manual p. 79, figura 4)'},anim:{a:'faseUni',fases:['N'],soloConecta:true},cam:'trabajoC3',dur:5,nota:'Corresponde a la figura 4 de la p. 79: conectores («Conexión definitiva») entre los conductores de entrada y salida y los extremos del cable principal seccionado. Ilustrativo: en el manual las «conexiones definitivas» se dibujan como manguitos intermedios en los conductores de entrada y salida; aquí se muestran en los extremos cortados.',ilus:'Cada extremo cortado se une a su conductor de entrada o de salida de la caja. Conectores y encintado son representativos; el manual no describe el tipo de conexión.'},
       {texto:'Repetir el proceso para los otros conductores.',pag:78,anim:{a:'faseUni',fases:['R','S','T']},cam:'trabajoC3',dur:9,ilus:'Para cada fase se anima corte, conexión y encintado; el orden R, S, T es ilustrativo.'+(uni?' Con puente unipolar, el puente salta de fase en fase (se retira, cambia de fase y se vuelve a conectar) y queda conectado a la última (T) hasta «Abrir el interruptor del puente…»; es una interpretación propia, ilustrativa.':'')},
       {texto:'Comprobar la tensión y concordancia en el seccionamiento de la caja de acometida.',pag:78,anim:'cajaComp',cam:'cgp',dur:5,ilus:'El manual lista un «comprobador de secuencia de fases»; su aspecto y uso son esquemáticos.'},
       {texto:'Colocar cuchillas seccionadoras y precintar la caja de acometida.',pag:78,det:{cam:'detCuchillas',txt:'Detalle: cuchillas seccionadoras de la caja de acometida (Manual p. 79, figura 4)'},anim:'cuchillas',cam:'cgp',dur:5,ilus:'Las cuchillas se dibujan como dos pletinas metálicas.'},

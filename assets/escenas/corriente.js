@@ -21,10 +21,18 @@
      puntos  array de THREE.Vector3 (polilínea) o función () → array (se evalúa en cada fotograma de corriente, por lo que
              sirve para cables que se deforman o elevan).
      color   clave de la paleta CSS ('N' azul, 'R' marrón, 'S' negro con halo claro, 'T' gris, …) o color CSS '#rrggbb'.
-     opts    {dens: puntos por metro (3), size: tamaño en metros (0.13), speed: m/s (1.1), max: puntos máx. (90),
+     SENTIDO: los puntos avanzan del PRIMERO al ÚLTIMO punto de la polilínea (el orden de `puntos` es el sentido de la corriente).
+             Con opts.sentido = -1 avanzan del último al primero (útil si la polilínea se construyó en el otro orden).
+     opts    {sentido: 1|-1, dens: puntos por metro (3), size: tamaño en metros (0.13), speed: m/s (1.1), max: puntos máx. (90),
               halo: borde claro (por defecto true: así se ve el punto sobre un cable de su mismo color)}.
    El MOTOR (tet.js) anima a ≤30 fps solo mientras haya algún live>0, el lienzo esté en pantalla, la pestaña visible y el
    botón «Ver corriente» activo; con prefers-reduced-motion los puntos quedan quietos y espaciados.
+
+   CONVENCIÓN «AGUAS ABAJO» (ilustrativa): la corriente sale de la línea principal y va hacia el consumo.
+     Línea principal: de izquierda a derecha (−x → +x) en todos los pasos y fases; en A.2 «fin de línea» (la línea llega
+     por la derecha y acaba en el aislador) va de derecha a izquierda (sentido:-1) hacia el final de línea.
+     Acometida: desde el punto de conexión en la línea HACIA la CGP (polilínea ordenada línea→CGP).
+     Salida de la CGP: de la CGP hacia el interior del edificio (hacia abajo por la fachada). Segundo circuito: como la línea.
 
    IDS DE CAMINO usados por apoyo-bt.js (A.1, A.2 y escenas que lo reutilizan):
      'lin-N','lin-R','lin-S','lin-T'   línea principal (ambos vanos), siempre en tensión.
@@ -66,13 +74,14 @@
           for (i = 1; i < pts.length; i++) L += pts[i].distanceTo(pts[i - 1]);
           var n = Math.max(4, Math.min(o.max || 90, Math.ceil((L || 4) * (o.dens || 3))));
           var size = o.size || 0.13, halo = o.halo == null ? true : o.halo;
-          var p = { id: id, fn: fn, color: color, n: n, live: 0, speed: o.speed || 1.1, size: size };
+          var p = { id: id, fn: fn, color: color, n: n, live: 0, speed: o.speed || 1.1, size: size, sentido: o.sentido < 0 ? -1 : 1 };
           if (halo) p.halo = mkPoints(n, size * 1.7, css('halo'), 28);
           p.pts = mkPoints(n, size, css(color), 29);
           if (halo) p.pts.material.color.set(css(color));
           paths[id] = p; ids.push(id); return p;
         },
         has: function (id) { return !!paths[id]; },
+        posiciones: function (id) { return paths[id] ? paths[id].pts.geometry.attributes.position.array : null; },   // depuración/verificación
         setLive: function (id, v) {
           var p = paths[id]; if (!p) return; v = cl(v);
           if (Math.abs(v - p.live) < 0.002) return;
@@ -103,7 +112,7 @@
         if (L < 1e-3) return;
         var n = p.n, sp = L / n, off = (phase * p.speed) % L, seg = 1, a = p.pts.geometry.attributes.position.array, h = p.halo ? p.halo.geometry.attributes.position.array : null;
         for (var k = 0; k < n; k++) {
-          var s = (off + k * sp) % L; if (s < 0) s += L;
+          var s = (off + k * sp) % L; if (s < 0) s += L; if (p.sentido < 0) s = L - s;
           seg = 1; while (seg < m - 1 && cum[seg] < s) seg++;
           var u = (s - cum[seg - 1]) / ((cum[seg] - cum[seg - 1]) || 1);
           _p.lerpVectors(pts[seg - 1], pts[seg], u);

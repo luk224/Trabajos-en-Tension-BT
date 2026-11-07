@@ -2,9 +2,8 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<script>try{var t=localStorage.getItem('tema');var q=location.search.match(/[?&]tema=(dark|light)/);if(q)t=q[1];if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="color-scheme" content="light dark">
+<meta name="color-scheme" content="light">
 <title>A.1 Conexión o desconexión de acometidas · Manual TETBT</title>
 <meta name="description" content="Animación paso a paso del procedimiento A.1 del Manual de Trabajos en Tensión en Baja Tensión.">
 <link rel="stylesheet" href="../assets/tet.css">
@@ -18,7 +17,6 @@
       <a href="../index.html#s5">5. Procedimientos</a><span class="sep" aria-hidden="true">·</span>
       <a class="act" href="../index.html#s5-a" aria-current="page">A. Red aérea convencional</a>
     </nav>
-    <button class="btn-tema" type="button" data-tema-btn aria-pressed="false"><span>Modo oscuro</span></button>
   </div>
 </header>
 <main>
@@ -77,8 +75,8 @@ TET.montar({
       c2.anim={a:'conecta',fases:['R','S','T'],inv:true}; c2.nota='<strong>Desconexión:</strong> este paso se hace primero, desconectando las fases R, S y T.';
       c1.anim={a:'conecta',fases:['N'],inv:true}; c1.nota='<strong>Desconexión:</strong> el neutro se desconecta el último, tras R, S y T. Se invierte el orden de estos dos pasos porque el manual lo indica así (paso «En caso de desconexión…»).';
     } else { c1.anim={a:'conecta',fases:['N']}; c2.anim={a:'conecta',fases:['R','S','T']}; }
-    c1.det={cam:'dDedal',txt:'Detalle: dedal aislante de la unión (ilustrativo)'}; c2.det={cam:'dDedal2',txt:'Detalle: dedal aislante en cada unión (ilustrativo)'};
-    c1.ilus=c2.ilus='El dedal aislante representa «reponer aislamiento»; el orden entre fases R, S, T es ilustrativo. La ventana que se abre en la protección de la fase tratada es ilustrativa (el manual no la describe); las demás fases siguen cubiertas.';
+    c1.det={cam:'dDedal',txt:'Detalle: conector de derivación y aislamiento repuesto sobre él (ilustrativo)'}; c2.det={cam:'dDedal2',txt:'Detalle: conector y aislamiento repuesto en cada fase (ilustrativo)'};
+    c1.ilus=c2.ilus='La unión se dibuja como un conector metálico de derivación con tornillería y «reponer aislamiento» como una funda aislante sobre él; el tipo exacto de conector es ilustrativo (el manual no lo describe), igual que el orden entre fases R, S, T. Los dedales solo se dibujan en las puntas libres de los cables aún sin conectar. La ventana que se abre en la protección de la fase tratada es ilustrativa (el manual no la describe); las demás fases siguen cubiertas.';
     var ejec=[
       {texto:'Revisar la caja general de protección de la acometida.',pag:42,anim:'cgpAbre',cam:'cgp',ilus:'El manual no dice quién la revisa; se anima al ayudante.'},
       {texto:'Retirar fusibles de la caja general de protección.',pag:42,anim:{a:'cgpFus'},cam:'cgp',ilus:'El manual no dice quién lo hace; fusibles y barra de neutro son esquemáticos.'},
