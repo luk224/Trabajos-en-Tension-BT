@@ -251,30 +251,26 @@
       h('span', { class: 'hum-cuenta-t', text: variable ? 'trabajadores: 1 Jefe de Trabajo y el resto de la cuadrilla (n según la longitud del tramo a sustituir)' : 'trabajadores: un Jefe de Trabajo y un ayudante' })]);
     raiz.appendChild(cuenta);
     var roles = h('div', { class: 'hum-roles' });
-    function rol(clase, figura, titulo, nivel, desc) {
+    function rol(clase, figura, titulo, nivel, desc, defs) {
       var a = h('article', { class: 'hum-rol ' + clase });
       var fig = h('div', { class: 'hum-fig' }); fig.innerHTML = figura;
       a.appendChild(fig);
-      a.appendChild(h('div', { class: 'hum-txt' }, [h('h4', { text: titulo }), h('p', { class: 'hum-nivel', text: nivel }), h('p', { class: 'hum-desc', text: desc })]));
+      var dl = h('dl', { class: 'hum-defs' });
+      defs.forEach(function (d) { dl.appendChild(h('dt', { text: d[0] })); dl.appendChild(h('dd', { text: d[1] })); });
+      a.appendChild(h('div', { class: 'hum-txt' }, [h('h4', { text: titulo }), h('p', { class: 'hum-nivel', text: nivel }), h('p', { class: 'hum-desc', text: desc }),
+        dl, h('p', { class: 'hum-aviso', text: 'Definiciones orientativas (RD 614/2001); no figuran en el manual.' })]));
       return a;
     }
     roles.appendChild(rol('jefe', figuraTrabajador('jefe'), 'Jefe de Trabajo', 'Habilitado para Trabajos en Tensión en BT',
-      variable ? 'Al menos uno de los trabajadores está habilitado y actúa como Jefe del Trabajo.' : 'Uno de los dos trabajadores está habilitado para TET en BT y actúa como Jefe de Trabajo.'));
+      variable ? 'Al menos uno de los trabajadores está habilitado y actúa como Jefe del Trabajo.' : 'Uno de los dos trabajadores está habilitado para TET en BT y actúa como Jefe de Trabajo.',
+      [['Habilitado para TET en BT', 'Formación específica y habilitación para realizar trabajos en tensión en baja tensión.'],
+       ['Jefe de Trabajo', 'Trabajador habilitado que asume la responsabilidad efectiva de los trabajos y los dirige.']]));
     var ay = rol('ayu', figuraTrabajador('ayu'), variable ? 'Resto de trabajadores' : 'Ayudante', 'Trabajador autorizado, como mínimo',
-      variable ? 'El resto de los trabajadores deben ser, al menos, trabajadores autorizados.' : 'Realiza las tareas auxiliares; como mínimo, es un trabajador autorizado.');
+      variable ? 'El resto de los trabajadores deben ser, al menos, trabajadores autorizados.' : 'Realiza las tareas auxiliares; como mínimo, es un trabajador autorizado.',
+      [['Trabajador autorizado', 'Designado por la empresa para trabajos con riesgo eléctrico, con formación e información.']]);
     if (variable) { var mas = h('span', { class: 'hum-mas', 'aria-hidden': 'true', text: '+ n' }); ay.querySelector('.hum-fig').appendChild(mas); }
     roles.appendChild(ay);
     raiz.appendChild(roles);
-    var esc = h('ol', { class: 'hum-escala', 'aria-label': 'Escala de capacitación (orientativa)' });
-    [['Trabajador autorizado', 'Designado por la empresa para trabajos con riesgo eléctrico, con formación e información.', 'ayu'],
-     ['Habilitado para TET en BT', 'Formación específica y habilitación para realizar trabajos en tensión en baja tensión.', 'jefe'],
-     ['Jefe de Trabajo', 'Trabajador habilitado que asume la responsabilidad efectiva de los trabajos y los dirige.', 'jefe']
-    ].forEach(function (x, i) {
-      esc.appendChild(h('li', { class: 'hum-nivel-' + x[2] }, [h('span', { class: 'hum-paso', text: String(i + 1) }),
-        h('strong', { text: x[0] }), h('span', { text: x[1] })]));
-    });
-    raiz.appendChild(esc);
-    raiz.appendChild(h('p', { class: 'hum-aviso', text: 'Definiciones orientativas de la escala (RD 614/2001); no figuran en el manual.' }));
     raiz.appendChild(h('blockquote', { class: 'hum-manual', text: texto }));
     return raiz;
   }

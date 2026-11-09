@@ -25,7 +25,7 @@ assets/escenas/cuadro-bt.js     D: centro de transformación y cuadro de BT (esc
 assets/escenas/caja-derivacion.js (+ -pasos) E: envuelve a apoyo-bt vía _dbg() (lista blanca de piezas)
 assets/modelos/*.glb            modelos NVIDIA SimReady (CC BY 4.0; créditos en CREDITOS.md; el pie de cada página enlaza)
 assets/epis/*.webp              fotos de EPI, EPC, herramientas y materiales (32 tarjetas de «Medios materiales»; borde naranja EPI, azul EPC, verde herramientas, gris materiales; créditos en assets/epis/CREDITOS.md). Catálogo `TET.CATALOGO_EPP` (+ `TET.ALIAS_EPP`) en tet.js: texto exacto del ítem → {img, norma orientativa}; clic en la tarjeta = lightbox. Ítem sin catálogo → chip de texto
-Medios humanos                  infografía generada por `infoHumanos()` en tet.js (figuras SVG, escala de capacitación orientativa RD 614/2001, cita literal del manual; variante «1 + n» si el texto empieza por «El número de trabajadores», caso B.3)
+Medios humanos                  infografía generada por `infoHumanos()` en tet.js (figuras SVG, definiciones orientativas dentro de cada caja de rol (RD 614/2001), cita literal del manual; variante «1 + n» si el texto empieza por «El número de trabajadores», caso B.3)
 assets/three/                   three.js r147 local + OrbitControls + GLTFLoader + meshopt_decoder (sin CDN, sin build)
 fuentes/*_procedimientos.md     transcripción fiel de cada apartado (A…E) con páginas impresas; FUENTE DE VERDAD de los textos
 fuentes/Manual_TETBT.pdf        el manual original (ignorado por git)
