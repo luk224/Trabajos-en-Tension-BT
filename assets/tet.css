@@ -278,6 +278,8 @@ footer.pie{max-width:1400px;margin:0 auto;padding:1.4rem max(16px,env(safe-area-
   background:var(--panel);border:2px solid var(--ac);border-radius:10px;box-shadow:var(--sombra);-webkit-tap-highlight-color:transparent;touch-action:manipulation;transition:transform .12s ease,box-shadow .12s ease}
 .epp.epi .epp-tarj{--ac:var(--aviso)}
 .epp.epc .epp-tarj{--ac:var(--foco)}
+.epp.herramientas .epp-tarj{--ac:var(--ok)}
+.epp.materiales .epp-tarj{--ac:var(--mut)}
 .epp-tarj:hover{transform:translateY(-2px)}
 .epp-tarj.sin-img{cursor:default}.epp-tarj.sin-img:hover{transform:none}
 .epp-marco{display:flex;align-items:center;justify-content:center;aspect-ratio:4/3;background:#f4f5f6;border-bottom:3px solid var(--ac);overflow:hidden}

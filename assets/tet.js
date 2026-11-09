@@ -97,11 +97,10 @@
       var sec = h('div', { class: 'medio' });
       sec.appendChild(h('h4', null, [g[1], d.pag ? cita(d.pag) : null]));
       if (d.nota) sec.appendChild(h('p', { class: 'nota', text: d.nota }));
-      var tarj = g[0] === 'epi' || g[0] === 'epc';
-      var ul = h('ul', { class: tarj ? 'epp ' + g[0] : 'chips' });
+      var ul = h('ul', { class: 'epp ' + g[0] });
       d.items.forEach(function (i) {
-        var ent = tarj && TET.CATALOGO_EPP[claveEPP(i)];
-        if (!ent) { if (tarj) ul.className = 'epp ' + g[0]; ul.appendChild(h('li', tarj ? { class: 'chip-txt', text: i } : { text: i })); return; }
+        var ent = TET.CATALOGO_EPP[claveEPP(i)];
+        if (!ent) { ul.appendChild(h('li', { class: 'chip-txt', text: i })); return; }
         ul.appendChild(h('li', null, [tarjetaEPP(i, ent, g[0])]));
       });
       sec.appendChild(ul); cont.appendChild(sec);
@@ -131,9 +130,30 @@
     'Perfiles aislantes': { img: 'epis/perfiles_aislantes.webp', norma: 'UNE-EN 61229 / UNE-EN 61479 (cubiertas)' },
     'Protectores aislantes para aisladores': { img: 'epis/protectores_aisladores.webp', norma: 'UNE-EN 61229 (cubiertas protectoras)' },
     'Dedales aislantes': { img: 'epis/dedales_aislantes.webp', norma: 'UNE-EN 61229 (cubiertas protectoras)' },
-    'Alfombra aislante': { img: 'epis/alfombra_aislante.webp', norma: 'UNE-EN 61111 (alfombras aislantes)' }
+    'Alfombra aislante': { img: 'epis/alfombra_aislante.webp', norma: 'UNE-EN 61111 (alfombras aislantes)' },
+    /* Herramientas */
+    'Herramientas manuales aisladas': { img: 'epis/herramientas_aisladas.webp', norma: 'UNE-EN IEC 60900 (herramientas manuales para trabajos en tensión; hasta 1000 V CA / 1500 V CC)' },
+    'Bolsa portaherramientas': { img: 'epis/bolsa_portaherramientas.webp', norma: '' },
+    /* Materiales */
+    'Equipo de señalización y delimitación del lugar de trabajo': { img: 'epis/senalizacion_delimitacion.webp', norma: '' },
+    'Equipo de señalización vial': { img: 'epis/senalizacion_vial.webp', norma: 'Norma 8.3-IC (señalización de obras fijas fuera de poblado)' },
+    'Poleas y cuerdas aislantes': { img: 'epis/poleas_cuerdas_aislantes.webp', norma: '' },
+    'Cepillo aislado': { img: 'epis/cepillo_aislado.webp', norma: 'UNE-EN IEC 60900 (herramientas para trabajos en tensión)' },
+    'Arriostrador de postes': { img: 'epis/arriostrador_postes.webp', norma: '' },
+    'Lona (para herramientas, equipos y materiales)': { img: 'epis/lona.webp', norma: '' },
+    'Trepadores (para trabajos en apoyos de madera)': { img: 'epis/trepadores.webp', norma: '' },
+    'Escalera aislante': { img: 'epis/escalera_aislante.webp', norma: '' },
+    'Pinzas aislantes': { img: 'epis/pinzas_aislantes.webp', norma: 'UNE-EN IEC 60900 (hasta 1000 V CA / 1500 V CC)' },
+    'Pinza voltio-amperimétrica': { img: 'epis/pinza_voltiamperimetrica.webp', norma: '' },
+    'Comprobador de secuencia de fases': { img: 'epis/comprobador_secuencia_fases.webp', norma: '' },
+    'Cuñas aislantes': { img: 'epis/cunas_aislantes.webp', norma: 'UNE-EN IEC 60900 (herramientas para trabajos en tensión)' },
+    'Equipo para el tensado': { img: 'epis/equipo_tensado.webp', norma: '' },
+    'Puente unipolar': { img: 'epis/puente_unipolar.webp', norma: '' },
+    'Maneta aislada': { img: 'epis/maneta_aislada.webp', norma: '' },
+    'Discriminador bipolar de tensión': { img: 'epis/discriminador_bipolar.webp', norma: '' }
   };
-  TET.ALIAS_EPP = { 'Alfombras aislantes': 'Alfombra aislante' };
+  TET.ALIAS_EPP = { 'Alfombras aislantes': 'Alfombra aislante', 'Bolsas portaherramientas': 'Bolsa portaherramientas',
+    'Polea y cuerdas aislantes': 'Poleas y cuerdas aislantes', 'Cuerda aislante': 'Poleas y cuerdas aislantes' };
   function claveEPP(t) { return TET.ALIAS_EPP[t] || t; }
   var EPP_FALLBACK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l9 16H3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 9v5M12 16.5v.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
   var lb = null;
@@ -148,7 +168,7 @@
     lb.i = grupo.indexOf(btn);
     var d = btn._epp;
     lb.img.src = d.url; lb.img.alt = d.nombre;
-    lb.tit.textContent = d.nombre; lb.norma.textContent = d.norma;
+    lb.tit.textContent = d.nombre; lb.norma.textContent = d.norma || ''; lb.et.hidden = lb.norma.hidden = !d.norma;
     lb.prev.hidden = lb.next.hidden = grupo.length < 2;
   }
   function lbCrear() {
@@ -159,11 +179,12 @@
     var x = h('button', { type: 'button', class: 'lb-x', 'aria-label': 'Cerrar imagen', html: '&#10005;' });
     var prev = h('button', { type: 'button', class: 'lb-nav lb-prev', 'aria-label': 'Anterior', html: ICON.prev });
     var next = h('button', { type: 'button', class: 'lb-nav lb-next', 'aria-label': 'Siguiente', html: ICON.next });
-    var pie = h('div', { class: 'lb-pie' }, [tit, h('p', { class: 'lb-et', text: 'Norma orientativa (no figura en el manual)' }), norma]);
+    var et = h('p', { class: 'lb-et', text: 'Norma orientativa (no figura en el manual)' });
+    var pie = h('div', { class: 'lb-pie' }, [tit, et, norma]);
     el.appendChild(h('div', { class: 'lb-fig' }, [img])); el.appendChild(pie);
     [x, prev, next].forEach(function (b) { el.appendChild(b); });
     document.body.appendChild(el);
-    lb = { el: el, img: img, tit: tit, norma: norma, prev: prev, next: next, foco: null, grupo: [], i: 0 };
+    lb = { el: el, img: img, tit: tit, et: et, norma: norma, prev: prev, next: next, foco: null, grupo: [], i: 0 };
     function ir(dlt) {
       var n = lb.grupo.length; if (n < 2) return;
       lbMostrar(lb.grupo[(lb.i + dlt + n) % n]);

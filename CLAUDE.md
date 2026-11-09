@@ -24,7 +24,7 @@ assets/escenas/red-subterranea.js (+ -pasos) C: cala, cables pasantes, puente au
 assets/escenas/cuadro-bt.js     D: centro de transformación y cuadro de BT (escena propia)
 assets/escenas/caja-derivacion.js (+ -pasos) E: envuelve a apoyo-bt vía _dbg() (lista blanca de piezas)
 assets/modelos/*.glb            modelos NVIDIA SimReady (CC BY 4.0; créditos en CREDITOS.md; el pie de cada página enlaza)
-assets/epis/*.webp              fotos de EPI y EPC (tarjetas de «Medios materiales»; créditos en assets/epis/CREDITOS.md). Catálogo `TET.CATALOGO_EPP` (+ `TET.ALIAS_EPP`) en tet.js: texto exacto del ítem → {img, norma orientativa}; clic en la tarjeta = lightbox. Ítem sin catálogo → chip de texto
+assets/epis/*.webp              fotos de EPI, EPC, herramientas y materiales (32 tarjetas de «Medios materiales»; borde naranja EPI, azul EPC, verde herramientas, gris materiales; créditos en assets/epis/CREDITOS.md). Catálogo `TET.CATALOGO_EPP` (+ `TET.ALIAS_EPP`) en tet.js: texto exacto del ítem → {img, norma orientativa}; clic en la tarjeta = lightbox. Ítem sin catálogo → chip de texto
 assets/three/                   three.js r147 local + OrbitControls + GLTFLoader + meshopt_decoder (sin CDN, sin build)
 fuentes/*_procedimientos.md     transcripción fiel de cada apartado (A…E) con páginas impresas; FUENTE DE VERDAD de los textos
 fuentes/Manual_TETBT.pdf        el manual original (ignorado por git)
