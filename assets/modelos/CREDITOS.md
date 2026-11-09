@@ -18,3 +18,6 @@ Modelos de **NVIDIA SimReady**, licencia **CC BY 4.0**, tomados del dataset http
 | cadena_metalica.glb | engineComponent_timing_chain_a01 (lod3) — usada como cadena/colgante de los objetos metálicos |
 | boligrafo_metal.glb | stationery_pen_metal_a01 |
 | navaja.glb | handTool_knife_foldingUtility_a01 |
+
+## Imágenes de EPI y protecciones colectivas
+Ver [assets/epis/CREDITOS.md](../epis/CREDITOS.md).

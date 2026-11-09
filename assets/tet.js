@@ -97,11 +97,113 @@
       var sec = h('div', { class: 'medio' });
       sec.appendChild(h('h4', null, [g[1], d.pag ? cita(d.pag) : null]));
       if (d.nota) sec.appendChild(h('p', { class: 'nota', text: d.nota }));
-      var ul = h('ul', { class: 'chips' + (g[0] === 'epi' ? ' epi' : '') });
-      d.items.forEach(function (i) { ul.appendChild(h('li', { text: i })); });
+      var tarj = g[0] === 'epi' || g[0] === 'epc';
+      var ul = h('ul', { class: tarj ? 'epp ' + g[0] : 'chips' });
+      d.items.forEach(function (i) {
+        var ent = tarj && TET.CATALOGO_EPP[claveEPP(i)];
+        if (!ent) { if (tarj) ul.className = 'epp ' + g[0]; ul.appendChild(h('li', tarj ? { class: 'chip-txt', text: i } : { text: i })); return; }
+        ul.appendChild(h('li', null, [tarjetaEPP(i, ent, g[0])]));
+      });
       sec.appendChild(ul); cont.appendChild(sec);
     });
     return cont;
+  }
+
+  /* ---------- EPI / EPC como tarjetas con imagen + lightbox ----------
+     Añadir un ítem: TET.CATALOGO_EPP['Texto exacto del ítem'] = {img:'epis/slug.webp', norma:'UNE-EN …'};
+     (img es relativo a assets/; variantes del mismo texto: TET.ALIAS_EPP['Alfombras aislantes'] = 'Alfombra aislante').
+     Si el ítem no está en el catálogo se pinta como chip de texto; si la imagen no carga, tarjeta con icono y sin lightbox. */
+  var BASE_ASSETS = (function () {
+    var sc = document.currentScript, src = sc && sc.src;
+    return src ? src.replace(/[^\/]*$/, '') : '../assets/';
+  })();
+  TET.CATALOGO_EPP = {
+    'Casco de protección': { img: 'epis/casco.webp', norma: 'UNE-EN 397; aislante eléctrico: EN 50365 (1000 V)' },
+    'Gafas inactínicas': { img: 'epis/gafas_inactinicas.webp', norma: 'UNE-EN 166 + UNE-EN 170 (filtro UV)' },
+    'Pantalla facial': { img: 'epis/pantalla_facial.webp', norma: 'UNE-EN 166, campo de uso 8 (arco eléctrico de cortocircuito)' },
+    'Ropa de trabajo': { img: 'epis/ropa_trabajo.webp', norma: 'Ropa antiarco: UNE-EN 61482-2; ignífuga: UNE-EN ISO 11612' },
+    'Guantes aislantes': { img: 'epis/guantes_aislantes.webp', norma: 'UNE-EN 60903, clase 00/0 (clase 0: hasta 1000 V CA)' },
+    'Guantes ignífugos': { img: 'epis/guantes_ignifugos.webp', norma: 'UNE-EN 407 (calor y llama)' },
+    'Guantes de protección mecánica': { img: 'epis/guantes_mecanicos.webp', norma: 'UNE-EN 388 (riesgos mecánicos); sobreguante del guante aislante' },
+    'Calzado de seguridad': { img: 'epis/calzado.webp', norma: 'UNE-EN ISO 20345; aislante: UNE-EN 50321-1' },
+    'Cinturón de seguridad': { img: 'epis/cinturon_seguridad.webp', norma: 'UNE-EN 358 (posicionamiento) / UNE-EN 361 (arnés anticaídas)' },
+    'Tela aislante': { img: 'epis/tela_aislante.webp', norma: 'UNE-EN 61112 (mantas aislantes)' },
+    'Perfiles aislantes': { img: 'epis/perfiles_aislantes.webp', norma: 'UNE-EN 61229 / UNE-EN 61479 (cubiertas)' },
+    'Protectores aislantes para aisladores': { img: 'epis/protectores_aisladores.webp', norma: 'UNE-EN 61229 (cubiertas protectoras)' },
+    'Dedales aislantes': { img: 'epis/dedales_aislantes.webp', norma: 'UNE-EN 61229 (cubiertas protectoras)' },
+    'Alfombra aislante': { img: 'epis/alfombra_aislante.webp', norma: 'UNE-EN 61111 (alfombras aislantes)' }
+  };
+  TET.ALIAS_EPP = { 'Alfombras aislantes': 'Alfombra aislante' };
+  function claveEPP(t) { return TET.ALIAS_EPP[t] || t; }
+  var EPP_FALLBACK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l9 16H3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 9v5M12 16.5v.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+  var lb = null;
+  function lbCerrar() {
+    if (!lb || lb.el.hidden) return;
+    lb.el.hidden = true; document.documentElement.classList.remove('lb-abierto');
+    var f = lb.foco; lb.foco = null; if (f && f.focus) f.focus();
+  }
+  function lbMostrar(btn) {
+    var grupo = lb.grupo = Array.prototype.filter.call(
+      btn.closest('ul').querySelectorAll('button.epp-tarj'), function (b) { return !b.classList.contains('sin-img'); });
+    lb.i = grupo.indexOf(btn);
+    var d = btn._epp;
+    lb.img.src = d.url; lb.img.alt = d.nombre;
+    lb.tit.textContent = d.nombre; lb.norma.textContent = d.norma;
+    lb.prev.hidden = lb.next.hidden = grupo.length < 2;
+  }
+  function lbCrear() {
+    var el = h('div', { class: 'lb', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'lb-tit', hidden: true });
+    var img = h('img', { alt: '' });
+    var tit = h('h3', { id: 'lb-tit' });
+    var norma = h('p', { class: 'lb-norma' });
+    var x = h('button', { type: 'button', class: 'lb-x', 'aria-label': 'Cerrar imagen', html: '&#10005;' });
+    var prev = h('button', { type: 'button', class: 'lb-nav lb-prev', 'aria-label': 'Anterior', html: ICON.prev });
+    var next = h('button', { type: 'button', class: 'lb-nav lb-next', 'aria-label': 'Siguiente', html: ICON.next });
+    var pie = h('div', { class: 'lb-pie' }, [tit, h('p', { class: 'lb-et', text: 'Norma orientativa (no figura en el manual)' }), norma]);
+    el.appendChild(h('div', { class: 'lb-fig' }, [img])); el.appendChild(pie);
+    [x, prev, next].forEach(function (b) { el.appendChild(b); });
+    document.body.appendChild(el);
+    lb = { el: el, img: img, tit: tit, norma: norma, prev: prev, next: next, foco: null, grupo: [], i: 0 };
+    function ir(dlt) {
+      var n = lb.grupo.length; if (n < 2) return;
+      lbMostrar(lb.grupo[(lb.i + dlt + n) % n]);
+    }
+    x.addEventListener('click', lbCerrar);
+    prev.addEventListener('click', function () { ir(-1); });
+    next.addEventListener('click', function () { ir(1); });
+    el.addEventListener('click', function (e) { if (e.target === el || e.target.classList.contains('lb-fig')) lbCerrar(); });
+    document.addEventListener('keydown', function (e) {
+      if (el.hidden) return;
+      if (e.key === 'Escape') { e.preventDefault(); lbCerrar(); }
+      else if (e.key === 'ArrowLeft') ir(-1);
+      else if (e.key === 'ArrowRight') ir(1);
+      else if (e.key === 'Tab') {   // trampa de foco sencilla
+        var fs = [x, prev, next].filter(function (b) { return !b.hidden; });
+        var k = fs.indexOf(document.activeElement);
+        e.preventDefault(); fs[(k + (e.shiftKey ? -1 : 1) + fs.length) % fs.length].focus();
+      }
+    });
+  }
+  function tarjetaEPP(nombre, ent, grupo) {
+    var url = BASE_ASSETS + ent.img;
+    var b = h('button', { type: 'button', class: 'epp-tarj', 'aria-label': 'Ampliar imagen: ' + nombre });
+    b._epp = { nombre: nombre, norma: ent.norma, url: url };
+    var marco = h('span', { class: 'epp-marco' });
+    var img = h('img', { src: url, alt: nombre + ' (imagen ilustrativa)', loading: 'lazy', decoding: 'async' });
+    img.addEventListener('error', function () {
+      marco.innerHTML = EPP_FALLBACK; marco.classList.add('falta');
+      b.classList.add('sin-img'); b.setAttribute('aria-label', nombre + ' (sin imagen)');
+    });
+    marco.appendChild(img);
+    b.appendChild(marco); b.appendChild(h('span', { class: 'epp-nom', text: nombre }));
+    b.addEventListener('click', function () {
+      if (b.classList.contains('sin-img')) return;
+      if (!lb) lbCrear();
+      lb.foco = b; lbMostrar(b);
+      lb.el.hidden = false; document.documentElement.classList.add('lb-abierto');
+      lb.el.querySelector('.lb-x').focus();
+    });
+    return b;
   }
   function renderFichas(def, el) {
     var f = def.fichas; el.innerHTML = '';
