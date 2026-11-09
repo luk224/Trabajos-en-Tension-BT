@@ -310,3 +310,32 @@ html.lb-abierto,html.lb-abierto body{overflow:hidden}
   .lb-fig{flex:1 1 55%;height:100%}
   .lb-pie{flex:0 1 40%;text-align:left;padding-top:0}
 }
+
+/* ---- medios humanos: infografía ---- */
+.hum-info{display:grid;gap:.9rem}
+.hum-cuenta{display:flex;align-items:center;gap:.8rem}
+.hum-num{flex:none;min-width:3.4rem;padding:.1rem .7rem;border-radius:12px;background:var(--carbon);color:var(--carbon-ink);font:800 2.2rem/1.25 var(--f-tit);text-align:center}
+.hum-cuenta-t{font:700 1rem/1.3 var(--f-tit);max-width:46ch}
+.hum-roles{display:grid;gap:.7rem;grid-template-columns:1fr}
+@media (min-width:640px){.hum-roles{grid-template-columns:1fr 1fr}}
+.hum-rol{display:flex;gap:.8rem;align-items:center;padding:.8rem;border:2px solid var(--bd);border-radius:12px;background:var(--panel2);min-width:0}
+.hum-rol.jefe{border-color:var(--aviso);background:color-mix(in srgb,var(--aviso) 14%,var(--panel))}
+.hum-rol.ayu{border-color:var(--foco);background:color-mix(in srgb,var(--foco) 8%,var(--panel))}
+.hum-fig{flex:none;position:relative;width:84px}
+.hum-fig svg{display:block;width:100%;height:auto}
+.hum-mas{position:absolute;right:-6px;top:0;padding:.05rem .4rem;border-radius:999px;background:var(--foco);color:#fff;font:800 .8rem var(--f-tit)}
+.hum-txt{min-width:0}
+.hum-txt h4{margin:0;font:800 1.15rem var(--f-tit)}
+.hum-nivel{margin:.15rem 0 .3rem;font:700 .82rem/1.25 var(--f-txt);display:inline-block;padding:.15rem .55rem;border-radius:8px;background:var(--carbon);color:var(--carbon-ink)}
+p.hum-nivel{margin:.2rem 0 .35rem}
+.hum-desc{margin:0;font-size:.9rem;line-height:1.35}
+.hum-escala{list-style:none;margin:0;padding:0;display:grid;gap:.4rem;counter-reset:n}
+.hum-escala li{display:grid;grid-template-columns:auto 1fr;column-gap:.6rem;align-items:center;padding:.5rem .7rem;border-left:5px solid var(--bd);background:var(--panel2);border-radius:6px;font-size:.88rem;line-height:1.3}
+.hum-escala li strong{grid-column:2;font:800 .98rem var(--f-tit)}
+.hum-escala li span:last-child{grid-column:2}
+.hum-escala .hum-paso{grid-row:1/3;display:grid;place-items:center;width:1.7rem;height:1.7rem;border-radius:50%;background:var(--carbon);color:var(--carbon-ink);font:800 .85rem var(--f-tit)}
+.hum-escala .hum-nivel-ayu{border-left-color:var(--foco)}
+.hum-escala .hum-nivel-jefe{border-left-color:var(--aviso)}
+@media (min-width:900px){.hum-escala{grid-template-columns:repeat(3,1fr)}.hum-escala li{align-items:start}}
+.hum-aviso{margin:0;font-size:.78rem;color:var(--mut)}
+.hum-manual{margin:0;padding:.55rem .8rem;border-left:4px solid var(--carbon);background:var(--panel2);border-radius:0 6px 6px 0;font-size:.9rem;line-height:1.4}

@@ -226,6 +226,59 @@
     });
     return b;
   }
+  /* ---------- Medios humanos: infografía ----------
+     Roles y mínimos de capacitación = texto del manual. Las definiciones de la escala son orientativas (RD 614/2001), no figuran en el manual.
+     Variante «número variable» (B.3): el texto empieza por «El número de trabajadores». */
+  function figuraTrabajador(rol) {
+    var jefe = rol === 'jefe';
+    var casco = jefe ? 'var(--e-casco)' : 'var(--e-casco2)';
+    var acc = jefe
+      ? '<rect x="62" y="70" width="22" height="28" rx="3" fill="var(--panel)" stroke="var(--ink)" stroke-width="2"/><path d="M67 80h12M67 86h12M67 92h8" stroke="var(--mut)" stroke-width="2" stroke-linecap="round"/><path d="M72 66h6v6h-6z" fill="var(--ink)"/>'
+      : '<path d="M60 86h26l-3 14H63z" fill="var(--carbon)"/><path d="M66 86v-6h14v6" fill="none" stroke="var(--carbon)" stroke-width="3"/><path d="M68 88v8M78 88v8" stroke="var(--aviso)" stroke-width="2"/>';
+    return '<svg viewBox="0 0 96 120" role="img" aria-label="' + (jefe ? 'Jefe de Trabajo con casco blanco y tablilla' : 'Ayudante con casco amarillo y bolsa de herramientas') + '">' +
+      '<path d="M18 118c0-26 8-46 30-46s30 20 30 46z" fill="var(--e-ropa)" stroke="var(--ink)" stroke-width="2.5" stroke-linejoin="round"/>' +
+      '<path d="M26 104h44M24 92h48" stroke="var(--e-casco)" stroke-width="5" opacity=".9"/>' +
+      '<circle cx="48" cy="46" r="15" fill="var(--e-piel)" stroke="var(--ink)" stroke-width="2.5"/>' +
+      '<path d="M31 44c0-14 7-22 17-22s17 8 17 22z" fill="' + casco + '" stroke="var(--ink)" stroke-width="2.5" stroke-linejoin="round"/>' +
+      '<path d="M27 44h42" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/><path d="M48 22v10" stroke="var(--ink)" stroke-width="2" opacity=".5"/>' +
+      acc + '</svg>';
+  }
+  function infoHumanos(texto) {
+    var variable = /^El n[uú]mero de trabajadores/i.test(texto);
+    var raiz = h('div', { class: 'hum-info' });
+    var cuenta = h('div', { class: 'hum-cuenta' }, [
+      h('span', { class: 'hum-num', text: variable ? '1 + n' : '2' }),
+      h('span', { class: 'hum-cuenta-t', text: variable ? 'trabajadores: 1 Jefe de Trabajo y el resto de la cuadrilla (n según la longitud del tramo a sustituir)' : 'trabajadores: un Jefe de Trabajo y un ayudante' })]);
+    raiz.appendChild(cuenta);
+    var roles = h('div', { class: 'hum-roles' });
+    function rol(clase, figura, titulo, nivel, desc) {
+      var a = h('article', { class: 'hum-rol ' + clase });
+      var fig = h('div', { class: 'hum-fig' }); fig.innerHTML = figura;
+      a.appendChild(fig);
+      a.appendChild(h('div', { class: 'hum-txt' }, [h('h4', { text: titulo }), h('p', { class: 'hum-nivel', text: nivel }), h('p', { class: 'hum-desc', text: desc })]));
+      return a;
+    }
+    roles.appendChild(rol('jefe', figuraTrabajador('jefe'), 'Jefe de Trabajo', 'Habilitado para Trabajos en Tensión en BT',
+      variable ? 'Al menos uno de los trabajadores está habilitado y actúa como Jefe del Trabajo.' : 'Uno de los dos trabajadores está habilitado para TET en BT y actúa como Jefe de Trabajo.'));
+    var ay = rol('ayu', figuraTrabajador('ayu'), variable ? 'Resto de trabajadores' : 'Ayudante', 'Trabajador autorizado, como mínimo',
+      variable ? 'El resto de los trabajadores deben ser, al menos, trabajadores autorizados.' : 'Realiza las tareas auxiliares; como mínimo, es un trabajador autorizado.');
+    if (variable) { var mas = h('span', { class: 'hum-mas', 'aria-hidden': 'true', text: '+ n' }); ay.querySelector('.hum-fig').appendChild(mas); }
+    roles.appendChild(ay);
+    raiz.appendChild(roles);
+    var esc = h('ol', { class: 'hum-escala', 'aria-label': 'Escala de capacitación (orientativa)' });
+    [['Trabajador autorizado', 'Designado por la empresa para trabajos con riesgo eléctrico, con formación e información.', 'ayu'],
+     ['Habilitado para TET en BT', 'Formación específica y habilitación para realizar trabajos en tensión en baja tensión.', 'jefe'],
+     ['Jefe de Trabajo', 'Trabajador habilitado que asume la responsabilidad efectiva de los trabajos y los dirige.', 'jefe']
+    ].forEach(function (x, i) {
+      esc.appendChild(h('li', { class: 'hum-nivel-' + x[2] }, [h('span', { class: 'hum-paso', text: String(i + 1) }),
+        h('strong', { text: x[0] }), h('span', { text: x[1] })]));
+    });
+    raiz.appendChild(esc);
+    raiz.appendChild(h('p', { class: 'hum-aviso', text: 'Definiciones orientativas de la escala (RD 614/2001); no figuran en el manual.' }));
+    raiz.appendChild(h('blockquote', { class: 'hum-manual', text: texto }));
+    return raiz;
+  }
+
   function renderFichas(def, el) {
     var f = def.fichas; el.innerHTML = '';
     el.appendChild(h('h2', { text: 'Antes de empezar' }));
@@ -240,8 +293,7 @@
     });
     g.appendChild(h('section', { class: 'ficha ancha', 'aria-labelledby': 'f-rie' }, [
       h('h3', { id: 'f-rie' }, ['Identificación de riesgos', cita(f.riesgosPag || f.definicion.pag)]), ul]));
-    var hum = h('div', { class: 'humano' }); hum.innerHTML = ICON.persona;
-    hum.appendChild(h('p', { text: f.humanos.texto }));
+    var hum = infoHumanos(f.humanos.texto);
     g.appendChild(h('section', { class: 'ficha ancha', 'aria-labelledby': 'f-hum' }, [
       h('h3', { id: 'f-hum' }, ['Medios humanos', cita(f.humanos.pag)]), hum]));
     g.appendChild(h('section', { class: 'ficha ancha', 'aria-labelledby': 'f-mat' }, [
